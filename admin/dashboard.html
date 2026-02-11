@@ -703,7 +703,7 @@
             <p>Drag and drop your photo here</p>
             <p>or <span class="highlight">click to browse</span></p>
           </div>
-          <input type="file" id="fileInput" accept="image/*" style="display: none;">
+          <input type="file" id="fileInput" accept="image/*,.heic,.HEIC,.dng,.DNG,.cr2,.CR2,.nef,.NEF,.arw,.ARW,.tif,.tiff,.TIF,.TIFF" style="display: none;">
 
           <img id="previewImage" class="preview-image">
 
@@ -1026,14 +1026,12 @@
     }
 
     function handleFileDrop(files) {
-      if (files.length === 0) return;
+      if (!files || files.length === 0) return;
 
       const file = files[0];
-      if (!file.type.startsWith('image/')) {
-        showError('errorMessage', '❌ Please upload an image file.');
-        return;
-      }
 
+      // Allow professional / camera formats even if the browser
+      // does not report a standard image/* MIME type.
       if (file.size > 50 * 1024 * 1024) {
         showError('errorMessage', '❌ File is too large. Max 50MB.');
         return;
