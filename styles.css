@@ -5,12 +5,17 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Body styling */
 body {
   background-color: #0f0f0f;
   color: #f0f0f0;
-  font-family: Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
   line-height: 1.6;
+  transition: all 0.2s ease-in-out;
 }
 
 /* Container */
@@ -48,10 +53,17 @@ header .logo {
   text-decoration: none;
   color: #f0f0f0;
   font-size: 1rem;
-  transition: color 0.3s;
+  transition: color 0.3s ease-in-out;
+  position: relative;
 }
 .nav-links li a:hover {
-  color: #bbbbbb;
+  color: #e74c3c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-links li a {
+    transition: none;
+  }
 }
 
 /* Hero Section with Background Image & Profile Picture */
@@ -102,15 +114,26 @@ header .logo {
   color: #fff;
   text-decoration: none;
   border-radius: 4px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+  cursor: pointer;
 }
 #hero .btn:hover {
   background-color: #c0392b;
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hero .btn {
+    transition: background-color 0.3s ease-in-out;
+  }
+  #hero .btn:hover {
+    transform: none;
+  }
 }
 
 /* Content Sections */
 .content-section {
-  padding: 60px 0;
+  padding: 80px 0;
   text-align: center;
 }
 .content-section h2 {
@@ -174,10 +197,21 @@ header .logo {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  opacity: 1;
 }
 .portfolio-item:hover img {
-  transform: scale(1.1);
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-item img {
+    transition: opacity 0.3s ease-in-out;
+  }
+  .portfolio-item:hover img {
+    transform: none;
+  }
 }
 .portfolio-item .overlay {
   position: absolute;
@@ -217,10 +251,21 @@ header .logo {
   color: #fff;
   text-decoration: none;
   border-radius: 4px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+  cursor: pointer;
 }
 .social-btn:hover {
   background-color: #c0392b;
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .social-btn {
+    transition: background-color 0.3s ease-in-out;
+  }
+  .social-btn:hover {
+    transform: none;
+  }
 }
 
 /* Connect Button */
@@ -231,11 +276,22 @@ header .logo {
   color: #fff;
   text-decoration: none;
   border-radius: 4px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
   font-size: 1rem;
+  cursor: pointer;
 }
 .connect-btn:hover {
   background-color: #c0392b;
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .connect-btn {
+    transition: background-color 0.3s ease-in-out;
+  }
+  .connect-btn:hover {
+    transform: none;
+  }
 }
 
 /* Footer */
