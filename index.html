@@ -32,11 +32,11 @@
       <div class="logo">Dominic Martinez</div>
       <nav>
         <ul class="nav-links">
-          <li><a href="#about">About</a></li>
-          <li><a href="#experience">Experience</a></li>
-          <li><a href="#skills">Skills</a></li>
+          <li><a href="about/index.html">About</a></li>
+          <li><a href="experience/index.html">Experience</a></li>
+          <li><a href="skills/index.html">Skills</a></li>
           <li><a href="portfolio/feed.html">Portfolio</a></li>
-          <li><a href="#connect">Connect</a></li>
+          <li><a href="connect/index.html">Connect</a></li>
         </ul>
       </nav>
     </div>
@@ -49,7 +49,7 @@
       <img src="image/Headshot.jpg" alt="Profile Picture" class="profile-pic" />
       <h1>Capturing Moments, Creating Stories</h1>
       <p>Photography & Cinematography by Dominic Martinez</p>
-      <a class="btn" href="#portfolio">View Portfolio</a>
+      <a class="btn" href="portfolio/feed.html">View Portfolio</a>
     </div>
   </section>
 
@@ -177,16 +177,52 @@
     </div>
   </section>
 
-  <!-- Connect Section with Social Buttons -->
-  <section id="connect" class="content-section">
+  <!-- Quick Links Section -->
+  <section class="content-section" style="background: linear-gradient(135deg, rgba(27, 22, 168, 0.05) 0%, rgba(15, 10, 26, 0.9) 100%);">
     <div class="container">
-      <h2>Connect</h2>
-      <p>If you're interested in collaborating or booking a session, please get in touch through any of the platforms below.</p>
-      <div class="social-buttons">
-        <a class="btn social-btn" href="mailto:itwasdom@gmail.com"><i class="fas fa-envelope"></i> Email</a>
-        <a class="btn social-btn" href="https://instagram.com/itwasdom/" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
-        <a class="btn social-btn" href="https://www.youtube.com/@itwasdom" target="_blank"><i class="fab fa-youtube"></i> Youtube</a>
+      <h2 style="text-align: center; margin-bottom: 50px; background: linear-gradient(135deg, #1B16A8 0%, #7C3AED 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Learn More</h2>
+      <div class="quick-links-grid">
+        <a href="about/index.html" class="quick-link-card">
+          <div class="link-icon">
+            <i class="fas fa-user"></i>
+          </div>
+          <h3>About Me</h3>
+          <p>Learn about my background, passion for photography, and creative approach to visual storytelling.</p>
+        </a>
+
+        <a href="experience/index.html" class="quick-link-card">
+          <div class="link-icon">
+            <i class="fas fa-briefcase"></i>
+          </div>
+          <h3>Experience</h3>
+          <p>Explore my professional background, work history, and education in digital cinematography.</p>
+        </a>
+
+        <a href="skills/index.html" class="quick-link-card">
+          <div class="link-icon">
+            <i class="fas fa-wand-magic-sparkles"></i>
+          </div>
+          <h3>Skills</h3>
+          <p>Discover my technical expertise in photography, videography, editing, and creative software.</p>
+        </a>
+
+        <a href="connect/index.html" class="quick-link-card">
+          <div class="link-icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h3>Connect</h3>
+          <p>Get in touch for collaborations, bookings, or to discuss your next creative project.</p>
+        </a>
       </div>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="content-section" style="text-align: center; padding: 80px 0;">
+    <div class="container">
+      <h2>Ready to Create Something Amazing?</h2>
+      <p style="margin-bottom: 40px; color: #bbb; font-size: 1.1rem;">Let's bring your vision to life with professional photography and cinematography.</p>
+      <a href="connect/index.html" class="connect-btn">Get in Touch</a>
     </div>
   </section>
 
@@ -226,5 +262,73 @@
     ]
   }
   </script>
+
+  <style>
+    .quick-links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 30px;
+      margin: 60px 0;
+    }
+
+    .quick-link-card {
+      background: linear-gradient(135deg, rgba(27, 22, 168, 0.15) 0%, rgba(124, 58, 237, 0.05) 100%);
+      border: 1px solid rgba(27, 22, 168, 0.2);
+      border-radius: 16px;
+      padding: 40px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: fadeInScale 0.8s ease-out;
+    }
+
+    .quick-link-card:hover {
+      border-color: rgba(27, 22, 168, 0.5);
+      box-shadow: 0 15px 50px rgba(27, 22, 168, 0.2);
+      transform: translateY(-10px);
+    }
+
+    .link-icon {
+      font-size: 3rem;
+      color: #1B16A8;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .quick-link-card:hover .link-icon {
+      transform: scale(1.15) rotate(5deg);
+      color: #7C3AED;
+    }
+
+    .quick-link-card h3 {
+      font-size: 1.3rem;
+      color: #1B16A8;
+      margin: 15px 0;
+      font-weight: 700;
+    }
+
+    .quick-link-card p {
+      color: #aaa;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin: 0;
+      flex-grow: 1;
+    }
+
+    @media (max-width: 768px) {
+      .quick-links-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .quick-link-card {
+        padding: 30px;
+      }
+    }
+  </style>
 </body>
 </html>
