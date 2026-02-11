@@ -365,6 +365,12 @@
       display: none;
     }
 
+    .file-info {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-bottom: 16px;
+    }
+
     .button-group {
       display: flex;
       gap: 12px;
@@ -706,6 +712,7 @@
           <input type="file" id="fileInput" accept="image/*,.heic,.HEIC,.dng,.DNG,.cr2,.CR2,.nef,.NEF,.arw,.ARW,.tif,.tiff,.TIF,.TIFF" style="display: none;">
 
           <img id="previewImage" class="preview-image">
+          <div id="fileInfo" class="file-info"></div>
 
           <form id="uploadForm">
             <div class="form-group">
@@ -1029,6 +1036,11 @@
       if (!files || files.length === 0) return;
 
       const file = files[0];
+      console.log('Selected file:', file && {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
 
       // Allow professional / camera formats even if the browser
       // does not report a standard image/* MIME type.
@@ -1039,6 +1051,13 @@
 
       selectedFile = file;
 
+      // Always show basic file info, even if preview cannot render
+      const info = document.getElementById('fileInfo');
+      if (info) {
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        info.textContent = `Selected: ${file.name} (${sizeMb} MB)`;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const preview = document.getElementById('previewImage');
@@ -1046,6 +1065,10 @@
           preview.src = e.target.result;
           preview.style.display = 'block';
         }
+      };
+      reader.onerror = (err) => {
+        console.error('FileReader error:', err);
+        showError('errorMessage', '❌ Could not generate a preview for this file, but it can still be uploaded.');
       };
       reader.readAsDataURL(file);
     }
