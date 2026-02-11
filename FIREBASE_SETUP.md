@@ -152,6 +152,10 @@ Example document:
 - Regular users should not be allowed to write to `profile/dominic` directly.
 - Follow/unfollow should be processed via Cloud Functions (callable) so `followers` is updated server-side.
 
+## Notes
+
+- The public portfolio page is `portfolio/index.html`.
+
 ✅ **Email Notifications**
 - Notification when photo is liked
 - Notification when new follower
@@ -193,7 +197,7 @@ Example document:
 - [ ] Firebase project created
 - [ ] Authentication enabled
 - [ ] Firestore database created and rules set
-- [ ] Config added to feed.html
+- [ ] Config added to assets/js/firebase-config.js
 - [ ] Cloud Functions created and deployed
 - [ ] Email credentials configured
 - [ ] Database collections created

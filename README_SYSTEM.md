@@ -15,8 +15,7 @@ You now have a **complete, production-ready system** for:
 itwasdom.github.io/
 ├── portfolio/
 │   ├── index.html             ← Public portfolio (live likes + follow)
-│   ├── feed-new.html          ← Legacy (now redirects to index.html)
-│   └── feed.html              ← Legacy (now redirects to index.html)
+│   └── feed.html              ← Legacy alias (redirects to index.html)
 ├── functions/
 │   ├── index.js               ← Cloud Functions (email notifications)
 │   ├── package.json           ← Dependencies

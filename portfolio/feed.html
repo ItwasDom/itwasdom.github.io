@@ -2,82 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com;">
   <meta http-equiv="refresh" content="0; url=index.html">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dominic Martinez - Portfolio</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
-  <link rel="stylesheet" href="../styles.css">
+  <title>Redirecting…</title>
+  <link rel="canonical" href="index.html">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-      color: #f0f0f0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-      letter-spacing: 0.3px;
-    }
-
-    header {
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-      padding: 15px 0;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-      position: fixed;
-      width: 100%;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(52, 152, 219, 0.2);
-    }
-
-    header .container {
-      width: 90%;
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    header .logo {
-      font-size: 1.8rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      background: linear-gradient(135deg, #1B16A8 0%, #7C3AED 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-transform: uppercase;
-    }
-
-    .nav-links {
-      list-style: none;
-      display: flex;
-      gap: 20px;
-    }
-
-    .nav-links li a {
-      text-decoration: none;
-      color: #f0f0f0;
-      font-size: 1rem;
-      font-weight: 500;
-      transition: all 0.3s ease-in-out;
-      position: relative;
-      padding: 8px 12px;
-      border-radius: 4px;
-    }
-
-    .nav-links li a::after {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 2px;
-      bottom: 0;
-      left: 50%;
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 24px; }
+    a { color: inherit; }
+  </style>
+</head>
+<body>
+  <p>Portfolio moved to <a href="index.html">/portfolio/</a>.</p>
+  <script>
+    // JS redirect for browsers that ignore meta refresh.
+    window.location.replace('index.html');
+  </script>
+</body>
+</html>
       background-color: #1B16A8;
       transition: all 0.3s ease-in-out;
       transform: translateX(-50%);

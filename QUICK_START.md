@@ -176,8 +176,8 @@ Portfolio items live in the `portfolio` collection and are managed by the admin 
 - Ensure ADMIN_EMAIL is set
 
 **Portfolio items not loading**
-- Check image paths are correct
-- Verify portfolio array in feed.html matches image names
+- Verify you have portfolio documents in Firestore (`portfolio` collection)
+- Check browser console for Firestore permission errors
 
 ## Next Future Features
 
