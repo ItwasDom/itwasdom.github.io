@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Dashboard</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="../styles.css">
   <style>
     body {
       background: linear-gradient(135deg, #020212 0%, #0f0a1a 100%);
@@ -181,17 +181,19 @@
     </form>
     <div class="message" id="settingsMsg"></div>
   </div>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script>
-    // Firebase setup (add your config here)
-    // <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    // <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    // <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-
+    // Firebase setup (same project as the main site)
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      // ...other config
+      apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
+      authDomain: "dominic-martinez-portfolio.firebaseapp.com",
+      projectId: "dominic-martinez-portfolio",
+      storageBucket: "dominic-martinez-portfolio.appspot.com",
+      messagingSenderId: "339938102474",
+      appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
+      measurementId: "G-MSKQYN75ML"
     };
     if (!window.firebase?.apps?.length) {
       firebase.initializeApp(firebaseConfig);
@@ -224,7 +226,7 @@
     document.getElementById('logoutBtn').addEventListener('click', async (e) => {
       e.preventDefault();
       await auth.signOut();
-      window.location.href = '/';
+      window.location.href = '../index.html';
     });
 
     // Show/hide password
@@ -270,7 +272,7 @@
         document.getElementById('email').value = user.email || '';
         document.getElementById('password').value = '••••••••';
       } else {
-        window.location.href = '/login.html';
+        window.location.href = 'login.html';
       }
     });
   </script>
