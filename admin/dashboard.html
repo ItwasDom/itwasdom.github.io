@@ -1207,6 +1207,18 @@
 
         snapshot.forEach(doc => {
           const photo = doc.data();
+
+          let createdAtLabel = '';
+          try {
+            if (photo.createdAt && typeof photo.createdAt.toDate === 'function') {
+              createdAtLabel = new Date(photo.createdAt.toDate()).toLocaleDateString();
+            } else if (photo.createdAt instanceof Date) {
+              createdAtLabel = photo.createdAt.toLocaleDateString();
+            }
+          } catch (e) {
+            console.warn('Bad createdAt field for doc', doc.id, e);
+            createdAtLabel = '';
+          }
           const photoItem = document.createElement('div');
           photoItem.className = 'photo-item';
           photoItem.innerHTML = `
@@ -1217,7 +1229,7 @@
               <p>${photo.description || 'No description'}</p>
               <div class="photo-stats">
                 <span>❤️ ${photo.likeCount || 0} likes</span>
-                <span>${new Date(photo.createdAt.toDate()).toLocaleDateString()}</span>
+                <span>${createdAtLabel}</span>
               </div>
             </div>
             <div class="photo-actions">
