@@ -720,12 +720,14 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM Loaded - Setting up admin panel');
       checkAdminStatus();
       setupEventListeners();
     });
 
     function checkAdminStatus() {
       const adminToken = sessionStorage.getItem('adminLoggedIn');
+      console.log('Admin token:', adminToken);
       if (adminToken === 'true') {
         showDashboard();
       } else {
@@ -735,7 +737,13 @@
 
     function setupEventListeners() {
       // Login form
-      document.getElementById('loginForm').addEventListener('submit', handleLogin);
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+        console.log('Login form listener attached');
+      } else {
+        console.error('Login form not found!');
+      }
 
       // Upload area
       const uploadArea = document.getElementById('uploadArea');
@@ -761,21 +769,32 @@
 
     function handleLogin(e) {
       e.preventDefault();
+      console.log('Login attempt...');
+      
       const password = document.getElementById('adminPassword').value;
       const loginBox = document.getElementById('loginBox');
       const errorDiv = document.getElementById('loginError');
 
+      console.log('Password entered:', password ? 'Yes' : 'No');
+      console.log('Expected password:', ADMIN_PASSWORD);
+
       if (!password) {
-        showLoginError('Please enter your password');
+        console.log('No password entered');
+        showLoginError('❌ Please enter your password');
         shakeElement(loginBox);
         return;
       }
 
+      console.log('Comparing:', password, '===', ADMIN_PASSWORD, '?', password === ADMIN_PASSWORD);
+
       if (password === ADMIN_PASSWORD) {
+        console.log('✓ Password correct!');
         sessionStorage.setItem('adminLoggedIn', 'true');
+        console.log('Session storage set, redirecting...');
         showDashboard();
         loadPhotos();
       } else {
+        console.log('✗ Password incorrect');
         showLoginError('❌ Incorrect password. Please try again.');
         shakeElement(loginBox);
         document.getElementById('adminPassword').value = '';
@@ -950,14 +969,34 @@
     }
 
     function showDashboard() {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('dashboardContainer').style.display = 'block';
+      console.log('Showing dashboard...');
+      const loginScreen = document.getElementById('loginScreen');
+      const dashboardContainer = document.getElementById('dashboardContainer');
+      
+      if (loginScreen) {
+        loginScreen.style.display = 'none';
+        console.log('Login screen hidden');
+      }
+      if (dashboardContainer) {
+        dashboardContainer.style.display = 'block';
+        console.log('Dashboard shown');
+      }
       loadPhotos();
     }
 
     function showLogin() {
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('dashboardContainer').style.display = 'none';
+      console.log('Showing login...');
+      const loginScreen = document.getElementById('loginScreen');
+      const dashboardContainer = document.getElementById('dashboardContainer');
+      
+      if (loginScreen) {
+        loginScreen.style.display = 'flex';
+        console.log('Login screen shown');
+      }
+      if (dashboardContainer) {
+        dashboardContainer.style.display = 'none';
+        console.log('Dashboard hidden');
+      }
     }
 
     function logout() {
