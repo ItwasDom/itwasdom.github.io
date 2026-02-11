@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gorgeous Cat - Portfolio</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .portfolio-post-container {
+      max-width: 1000px;
+      margin: 120px auto 60px;
+      padding: 0 20px;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #e74c3c;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 40px;
+      transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+      transform: translateX(-5px);
+    }
+
+    .portfolio-post-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .portfolio-post-header h1 {
+      font-size: 2.8rem;
+      background: linear-gradient(135deg, #e74c3c 0%, #ec7063 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+      font-weight: 800;
+    }
+
+    .portfolio-meta {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      color: #999;
+      font-size: 0.95rem;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .portfolio-meta span {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .portfolio-image {
+      width: 100%;
+      max-height: 600px;
+      object-fit: cover;
+      border-radius: 16px;
+      margin-bottom: 50px;
+      box-shadow: 0 20px 60px rgba(231, 76, 60, 0.2);
+    }
+
+    .portfolio-description {
+      background: linear-gradient(135deg, rgba(15, 15, 15, 0.95) 0%, rgba(26, 26, 26, 0.95) 100%);
+      border: 1px solid rgba(231, 76, 60, 0.2);
+      border-radius: 16px;
+      padding: 50px 40px;
+      margin-bottom: 50px;
+    }
+
+    .portfolio-description h2 {
+      font-size: 1.8rem;
+      color: #e74c3c;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .portfolio-description p {
+      font-size: 1.1rem;
+      color: #ddd;
+      line-height: 1.9;
+      margin-bottom: 20px;
+    }
+
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .tech-stack span {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+
+    .portfolio-navigator {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin-top: 60px;
+    }
+
+    .portfolio-next {
+      background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(52, 152, 219, 0.05) 100%);
+      border: 1px solid rgba(231, 76, 60, 0.2);
+      border-radius: 12px;
+      padding: 25px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s ease;
+    }
+
+    .portfolio-next:hover {
+      border-color: rgba(231, 76, 60, 0.5);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(231, 76, 60, 0.15);
+    }
+
+    .portfolio-next h3 {
+      color: #e74c3c;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .portfolio-next p {
+      font-size: 0.9rem;
+      color: #999;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .portfolio-post-container {
+        margin-top: 100px;
+      }
+
+      .portfolio-post-header h1 {
+        font-size: 2rem;
+      }
+
+      .portfolio-description {
+        padding: 30px 20px;
+      }
+
+      .portfolio-meta {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo">Dominic Martinez</div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="https://itwasdom.github.io/#portfolio">Portfolio</a></li>
+          <li><a href="https://itwasdom.github.io/#about">About</a></li>
+          <li><a href="https://itwasdom.github.io/#connect">Connect</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="portfolio-post-container">
+    <a href="../index.html#portfolio" class="back-button">
+      <i class="fas fa-arrow-left"></i>
+      Back to Portfolio
+    </a>
+
+    <div class="portfolio-post-header">
+      <h1>Gorgeous Cat</h1>
+      <div class="portfolio-meta">
+        <span><i class="fas fa-calendar"></i>Professional Photography</span>
+        <span><i class="fas fa-camera"></i>Portrait Work</span>
+      </div>
+    </div>
+
+    <img src="../image/Gorgeous-Cat.jpg" alt="Professional Cat Photography" class="portfolio-image">
+
+    <div class="portfolio-description">
+      <h2>About This Project</h2>
+      <p>
+        This stunning portrait captures the essence of professional animal photography. Through careful composition, lighting, and technical precision, the subject comes to life in vivid detail. This image showcases the depth and emotion that can be achieved through portrait photography.
+      </p>
+      <p>
+        The photograph demonstrates mastery of lighting techniques, color grading, and subject posing. Every element was carefully considered to create a compelling visual narrative that engages the viewer.
+      </p>
+      
+      <h2 style="margin-top: 30px;">Techniques Used</h2>
+      <div class="tech-stack">
+        <span>Portrait Photography</span>
+        <span>Professional Lighting</span>
+        <span>Color Grading</span>
+        <span>Adobe Lightroom</span>
+      </div>
+    </div>
+
+    <h2 style="text-align: center; margin: 50px 0 30px; color: #e74c3c;">Explore More</h2>
+    
+    <div class="portfolio-navigator">
+      <a href="project-2.html" class="portfolio-next">
+        <h3>La Antorcha</h3>
+        <p>Cinematography & Video Production</p>
+      </a>
+      <a href="project-3.html" class="portfolio-next">
+        <h3>Smiling Boy</h3>
+        <p>Portrait Photography</p>
+      </a>
+      <a href="../index.html#portfolio" class="portfolio-next">
+        <h3>View All Work</h3>
+        <p>Back to Portfolio</p>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      &copy; 2026 Dominic Martinez. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>
