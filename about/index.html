@@ -17,7 +17,7 @@
       <div class="logo"><a href="../index.html" style="text-decoration: none; color: inherit;">Dominic Martinez</a></div>
       <nav>
         <ul class="nav-links">
-          <li><a href="../about/index.html">About</a></li>
+          <li><a href="./index.html">About</a></li>
           <li><a href="../experience/index.html">Experience</a></li>
           <li><a href="../skills/index.html">Skills</a></li>
           <li><a href="../portfolio/feed.html">Portfolio</a></li>
@@ -146,25 +146,33 @@
     }
 
     @media (max-width: 768px) {
+      .page-hero {
+        padding: 50px 15px;
+        margin-top: 80px;
+      }
+
       .page-hero-content h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
+        margin-bottom: 10px;
       }
 
       .page-hero-content p {
-        font-size: 1rem;
+        font-size: 0.95rem;
       }
 
       .about-content {
         grid-template-columns: 1fr;
-        gap: 30px;
+        gap: 25px;
+        margin: 40px 0;
       }
 
       .about-image {
         max-width: 100%;
+        margin-bottom: 20px;
       }
 
       .about-text h2 {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
       }
     }
   </style>

@@ -18,7 +18,7 @@
       <nav>
         <ul class="nav-links">
           <li><a href="../about/index.html">About</a></li>
-          <li><a href="../experience/index.html">Experience</a></li>
+          <li><a href="./index.html">Experience</a></li>
           <li><a href="../skills/index.html">Skills</a></li>
           <li><a href="../portfolio/feed.html">Portfolio</a></li>
           <li><a href="../connect/index.html">Connect</a></li>
@@ -280,13 +280,24 @@
     }
 
     @media (max-width: 768px) {
+      .page-hero {
+        padding: 50px 15px;
+        margin-top: 80px;
+      }
+
       .page-hero-content h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+      }
+
+      .page-hero-content p {
+        font-size: 0.95rem;
       }
 
       .experience-grid {
         grid-template-columns: 1fr;
         gap: 25px;
+        margin: 40px 0;
       }
 
       .experience-panel {
