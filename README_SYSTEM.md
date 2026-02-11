@@ -14,9 +14,9 @@ You now have a **complete, production-ready system** for:
 ```
 itwasdom.github.io/
 ├── portfolio/
-│   ├── feed-new.html          ← NEW: Complete portfolio with auth & likes
-│   ├── feed-backup.html       ← OLD: Backup of original (after step on migration)
-│   └── feed.html              ← REPLACE with feed-new.html
+│   ├── index.html             ← Public portfolio (live likes + follow)
+│   ├── feed-new.html          ← Legacy (now redirects to index.html)
+│   └── feed.html              ← Legacy (now redirects to index.html)
 ├── functions/
 │   ├── index.js               ← Cloud Functions (email notifications)
 │   ├── package.json           ← Dependencies
@@ -24,6 +24,7 @@ itwasdom.github.io/
 ├── FIREBASE_SETUP.md          ← Detailed setup instructions
 ├── QUICK_START.md             ← Fast setup guide (READ THIS FIRST!)
 ├── FIREBASE_CONFIG_TEMPLATE.js ← Config helper
+├── assets/js/firebase-config.js ← Central Firebase web config
 ├── README.md                  ← This file
 └── ...existing files
 ```
@@ -40,7 +41,7 @@ itwasdom.github.io/
 In Firebase Console:
 - Go to **Authentication** → Enable "Email/Password"
 - Go to **Firestore Database** → Create database (test mode)
-- Copy config into `portfolio/feed-new.html` (lines 459-466)
+- Copy config into `assets/js/firebase-config.js` (update `window.__FIREBASE_CONFIG`)
 
 ### 3️⃣ Create Database Collections (5 min)
 In Firestore Console, create these:
@@ -107,16 +108,15 @@ firebase deploy --only functions
 ```
 
 ### 6️⃣ Update Your Website (1 min)
-1. Rename `portfolio/feed.html` → `portfolio/feed-backup.html`
-2. Rename `portfolio/feed-new.html` → `portfolio/feed.html`
+No file renames needed. The public portfolio lives at `/portfolio/index.html`.
 
 ### 7️⃣ Test (5 min)
-1. Open your deployed site at `/portfolio/feed.html` (for example: `https://<your-domain>/portfolio/feed.html`)
+1. Open your deployed site at `/portfolio/index.html` (for example: `https://<your-domain>/portfolio/index.html`)
 2. Click "Sign In" → "Sign Up"
 3. Create test account (enable notifications)
 4. Hover over portfolio items (like count shows 0)
 5. Click heart button to like
-6. Button turns red ❤️
+6. Button shows liked state
 7. Like count increments live! ✨
 8. Check your email for notification 📧
 
@@ -369,12 +369,10 @@ Expected: All user data loads correctly
 All styled elements use the purple theme (#1B16A8, #7C3AED):
 - Buttons and CTAs
 - Links and hover effects
-- Modal dialogs
-- Like button (turns red #e74c3c when liked)
 - Form inputs
 
 To customize:
-- Edit `portfolio/feed-new.html` lines 11-500 (CSS section)
+- Edit `portfolio/index.html` (CSS section)
 - Search for `#1B16A8` or `#7C3AED` to find color references
 - Update email templates in `functions/index.js` (HTML email markup)
 
@@ -389,7 +387,7 @@ To customize:
 - `FIREBASE_SETUP.md` - Step-by-step setup
 - `QUICK_START.md` - Fast version of setup
 - `functions/index.js` - Cloud Functions code with comments
-- `portfolio/feed-new.html` - Frontend code (well commented)
+- `portfolio/index.html` - Public portfolio (live likes/follow)
 
 ## ⚙️ Advanced Configuration
 

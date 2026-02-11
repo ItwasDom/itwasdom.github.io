@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com https://*.cloudfunctions.net;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portfolio - Dominic Martinez</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
@@ -18,7 +18,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      color: #e74c3c;
+      color: #7C3AED;
       text-decoration: none;
       font-weight: 600;
       margin-bottom: 40px;
@@ -32,7 +32,7 @@
     .portfolio-title {
       font-size: 2.8rem;
       text-align: center;
-      background: linear-gradient(135deg, #e74c3c 0%, #ec7063 100%);
+      background: linear-gradient(135deg, #1B16A8 0%, #7C3AED 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -51,13 +51,13 @@
     }
 
     .portfolio-feed-item {
-      background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);
+      background: linear-gradient(135deg, rgba(27, 22, 168, 0.12) 0%, rgba(124, 58, 237, 0.12) 100%);
       border-radius: 18px;
       overflow: hidden;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
       transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       cursor: pointer;
-      border: 1px solid rgba(231, 76, 60, 0.2);
+      border: 1px solid rgba(124, 58, 237, 0.28);
       text-decoration: none;
       color: inherit;
       display: flex;
@@ -69,8 +69,8 @@
 
     .portfolio-feed-item:hover {
       transform: translateY(-12px) scale(1.02);
-      box-shadow: 0 20px 50px rgba(231, 76, 60, 0.3);
-      border-color: rgba(231, 76, 60, 0.5);
+      box-shadow: 0 20px 50px rgba(124, 58, 237, 0.3);
+      border-color: rgba(124, 58, 237, 0.55);
     }
 
     .portfolio-feed-item img {
@@ -104,7 +104,7 @@
 
     .portfolio-feed-content h3 {
       font-size: 1.1rem;
-      color: #e74c3c;
+      color: #7C3AED;
       margin: 0;
       font-weight: 700;
     }
@@ -124,19 +124,19 @@
     }
 
     .portfolio-feed-tags span {
-      background: rgba(231, 76, 60, 0.2);
-      color: #e74c3c;
+      background: rgba(124, 58, 237, 0.2);
+      color: #7C3AED;
       padding: 6px 12px;
       border-radius: 20px;
       font-size: 0.8rem;
       font-weight: 600;
-      border: 1px solid rgba(231, 76, 60, 0.3);
+      border: 1px solid rgba(124, 58, 237, 0.3);
       transition: all 0.3s ease-in-out;
     }
 
     .portfolio-feed-tags span:hover {
-      background: rgba(231, 76, 60, 0.35);
-      border-color: rgba(231, 76, 60, 0.6);
+      background: rgba(124, 58, 237, 0.35);
+      border-color: rgba(124, 58, 237, 0.6);
     }
 
     .portfolio-footer-message {
@@ -144,8 +144,70 @@
       color: #999;
       font-size: 1.1rem;
       padding: 40px 20px;
-      border-top: 1px solid rgba(231, 76, 60, 0.2);
+      border-top: 1px solid rgba(124, 58, 237, 0.22);
       margin-top: 40px;
+    }
+
+    .portfolio-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      margin: -25px 0 35px;
+      flex-wrap: wrap;
+    }
+
+    .follow-btn {
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 2px solid #7C3AED;
+      background: transparent;
+      color: #7C3AED;
+      cursor: pointer;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .follow-btn.following {
+      background: rgba(124, 58, 237, 0.16);
+    }
+
+    .followers-count {
+      color: #aaa;
+      font-size: 0.95rem;
+    }
+
+    .like-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .like-count {
+      color: #aaa;
+      font-size: 0.85rem;
+    }
+
+    .like-btn {
+      border: 2px solid rgba(124, 58, 237, 0.55);
+      background: transparent;
+      color: #7C3AED;
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .like-btn.liked {
+      background: rgba(124, 58, 237, 0.18);
     }
 
     @media (max-width: 768px) {
@@ -219,58 +281,20 @@
 
     <h1 class="portfolio-title">My Work</h1>
 
-    <div class="portfolio-feed-grid">
-      <a href="project-1.html" class="portfolio-feed-item">
-        <img src="../image/Gorgeous-Cat.jpg" alt="Professional Cat Photography" loading="lazy">
-        <div class="portfolio-feed-content">
-          <h3>Gorgeous Cat</h3>
-          <p>Professional portrait photography capturing stunning details and emotion.</p>
-          <div class="portfolio-feed-tags">
-            <span>Portrait</span>
-            <span>Photography</span>
-          </div>
-        </div>
-      </a>
-
-      <a href="project-2.html" class="portfolio-feed-item">
-        <img src="../image/La-Antorcha.jpg" alt="Cinematography Project" loading="lazy">
-        <div class="portfolio-feed-content">
-          <h3>La Antorcha</h3>
-          <p>Dynamic cinematography project showcasing visual storytelling and technical excellence.</p>
-          <div class="portfolio-feed-tags">
-            <span>Cinematography</span>
-            <span>Video</span>
-          </div>
-        </div>
-      </a>
-
-      <a href="project-3.html" class="portfolio-feed-item">
-        <img src="../image/Smiling-Boy.jpg" alt="Portrait Photography" loading="lazy">
-        <div class="portfolio-feed-content">
-          <h3>Smiling Boy</h3>
-          <p>Candid portrait photography capturing authentic moments and genuine expressions.</p>
-          <div class="portfolio-feed-tags">
-            <span>Portrait</span>
-            <span>Candid</span>
-          </div>
-        </div>
-      </a>
-
-      <a href="project-4.html" class="portfolio-feed-item">
-        <img src="../image/The-Alamo.jpg" alt="Architecture Photography" loading="lazy">
-        <div class="portfolio-feed-content">
-          <h3>The Alamo</h3>
-          <p>Architectural photography highlighting composition and cultural landmark documentation.</p>
-          <div class="portfolio-feed-tags">
-            <span>Architecture</span>
-            <span>Landmark</span>
-          </div>
-        </div>
-      </a>
+    <div class="portfolio-actions">
+      <button id="followBtn" class="follow-btn" type="button">
+        <i class="fas fa-user-plus"></i>
+        <span id="followBtnText">Follow</span>
+      </button>
+      <span id="followersCount" class="followers-count"></span>
     </div>
 
+    <div class="portfolio-feed-grid" id="portfolioGrid" aria-live="polite"></div>
+
+    <div class="portfolio-footer-message" id="portfolioStatus">Loading portfolio…</div>
+
     <div class="portfolio-footer-message">
-      <p>Interested in a project? <a href="../index.html#connect" style="color: #e74c3c; text-decoration: none; font-weight: 600;">Get in touch</a></p>
+      <p>Interested in a project? <a href="../index.html#connect" style="color: #7C3AED; text-decoration: none; font-weight: 600;">Get in touch</a></p>
     </div>
   </div>
 
@@ -283,8 +307,281 @@
   <!-- Firebase (for auth-aware nav) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-functions-compat.js"></script>
   <script src="/assets/js/firebase-config.js"></script>
   <script src="/assets/js/firebase-init-compat.js"></script>
   <script src="/assets/js/auth-nav.js"></script>
+
+  <script>
+    (function () {
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      const fns = firebase.functions();
+      const toggleLikeCallable = fns.httpsCallable('togglePortfolioLike');
+      const setFollowingCallable = fns.httpsCallable('setFollowingDominic');
+      const sendLikeNotificationCallable = fns.httpsCallable('sendLikeNotification');
+      const sendFollowNotificationCallable = fns.httpsCallable('sendFollowNotification');
+
+      let currentUser = null;
+      let userLikes = {};
+      let isFollowing = false;
+      let portfolioItems = [];
+
+      function normalizeHttpUrl(url) {
+        if (typeof url !== 'string') return null;
+        try {
+          const u = new URL(url, window.location.href);
+          if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+          return u.href;
+        } catch {
+          return null;
+        }
+      }
+
+      function clearElement(el) {
+        if (!el) return;
+        while (el.firstChild) el.removeChild(el.firstChild);
+      }
+
+      function setStatus(text) {
+        const statusEl = document.getElementById('portfolioStatus');
+        if (statusEl) statusEl.textContent = text;
+      }
+
+      function setFollowersCount(n) {
+        const el = document.getElementById('followersCount');
+        if (!el) return;
+        const num = Number.isFinite(Number(n)) ? Number(n) : 0;
+        el.textContent = `${num.toLocaleString()} follower${num === 1 ? '' : 's'}`;
+      }
+
+      function setFollowButtonState() {
+        const btn = document.getElementById('followBtn');
+        const text = document.getElementById('followBtnText');
+        if (!btn || !text) return;
+
+        if (!currentUser) {
+          btn.classList.remove('following');
+          text.textContent = 'Follow';
+          return;
+        }
+
+        if (isFollowing) {
+          btn.classList.add('following');
+          text.textContent = 'Following';
+        } else {
+          btn.classList.remove('following');
+          text.textContent = 'Follow';
+        }
+      }
+
+      function createCard(item) {
+        const imageUrl = normalizeHttpUrl(item && item.imageUrl);
+        const title = (item && typeof item.title === 'string' && item.title.trim()) ? item.title.trim() : 'Untitled';
+        const description = (item && typeof item.description === 'string' && item.description.trim()) ? item.description.trim() : '';
+        const category = (item && typeof item.category === 'string' && item.category.trim()) ? item.category.trim() : '';
+        const id = (item && typeof item.id === 'string' && item.id.trim()) ? item.id.trim() : '';
+        const likeCountRaw = item && item.likeCount;
+        const likeCount = Number.isFinite(Number(likeCountRaw)) ? Number(likeCountRaw) : 0;
+        const liked = !!(id && userLikes && userLikes[id] === true);
+
+        const a = document.createElement('a');
+        a.className = 'portfolio-feed-item';
+        a.setAttribute('aria-label', title);
+
+        if (imageUrl) {
+          a.href = imageUrl;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+        } else {
+          a.href = '#';
+          a.addEventListener('click', (e) => e.preventDefault());
+        }
+
+        const img = document.createElement('img');
+        img.loading = 'lazy';
+        img.alt = title;
+        if (imageUrl) img.src = imageUrl;
+        a.appendChild(img);
+
+        const content = document.createElement('div');
+        content.className = 'portfolio-feed-content';
+
+        const h3 = document.createElement('h3');
+        h3.textContent = title;
+        content.appendChild(h3);
+
+        if (description) {
+          const p = document.createElement('p');
+          p.textContent = description;
+          content.appendChild(p);
+        }
+
+        if (category) {
+          const tags = document.createElement('div');
+          tags.className = 'portfolio-feed-tags';
+          const span = document.createElement('span');
+          span.textContent = category;
+          tags.appendChild(span);
+          content.appendChild(tags);
+        }
+
+        const likeRow = document.createElement('div');
+        likeRow.className = 'like-row';
+
+        const count = document.createElement('span');
+        count.className = 'like-count';
+        count.textContent = `${likeCount.toLocaleString()} like${likeCount === 1 ? '' : 's'}`;
+        likeRow.appendChild(count);
+
+        const btn = document.createElement('button');
+        btn.className = 'like-btn' + (liked ? ' liked' : '');
+        btn.type = 'button';
+        btn.innerHTML = '<i class="fas fa-heart"></i> Like';
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (!id) return;
+          if (!currentUser) {
+            window.location.href = '../user/login.html';
+            return;
+          }
+
+          btn.disabled = true;
+          try {
+            const res = await toggleLikeCallable({ photoId: id });
+            const data = res && res.data ? res.data : {};
+            const nextLiked = data.liked === true;
+            const prevLiked = !!(userLikes && userLikes[id] === true);
+            userLikes = { ...(userLikes || {}), [id]: nextLiked };
+            btn.classList.toggle('liked', nextLiked);
+            if (Number.isFinite(Number(data.likeCount))) {
+              const n = Number(data.likeCount);
+              count.textContent = `${n.toLocaleString()} like${n === 1 ? '' : 's'}`;
+            }
+
+            // Notify admin only on a new like (not on unlike).
+            if (!prevLiked && nextLiked) {
+              sendLikeNotificationCallable({ photoId: id }).catch((err) => {
+                console.warn('Like notification failed:', err);
+              });
+            }
+          } catch (err) {
+            console.error('Like toggle failed:', err);
+          } finally {
+            btn.disabled = false;
+          }
+        });
+        likeRow.appendChild(btn);
+        content.appendChild(likeRow);
+
+        a.appendChild(content);
+        return a;
+      }
+
+      function renderPortfolio() {
+        const grid = document.getElementById('portfolioGrid');
+        if (!grid) return;
+        clearElement(grid);
+        for (const item of portfolioItems) grid.appendChild(createCard(item));
+      }
+
+      function wireFollowButton() {
+        const btn = document.getElementById('followBtn');
+        if (!btn) return;
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          if (!currentUser) {
+            window.location.href = '../user/login.html';
+            return;
+          }
+
+          const prevFollowing = isFollowing;
+          btn.disabled = true;
+          try {
+            const res = await setFollowingCallable({ following: !isFollowing });
+            const data = res && res.data ? res.data : {};
+            isFollowing = data.following === true;
+            setFollowButtonState();
+            if (Number.isFinite(Number(data.followers))) setFollowersCount(Number(data.followers));
+
+            // Notify admin only on a new follow (not on unfollow).
+            if (!prevFollowing && isFollowing) {
+              sendFollowNotificationCallable({}).catch((err) => {
+                console.warn('Follow notification failed:', err);
+              });
+            }
+          } catch (err) {
+            console.error('Follow toggle failed:', err);
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      }
+
+      function subscribePortfolio() {
+        setStatus('Loading portfolio…');
+        db.collection('portfolio').orderBy('createdAt', 'desc').onSnapshot((snap) => {
+          portfolioItems = [];
+          snap.forEach((doc) => portfolioItems.push({ id: doc.id, ...doc.data() }));
+          if (portfolioItems.length === 0) {
+            setStatus('No portfolio items yet.');
+          } else {
+            setStatus('');
+          }
+          renderPortfolio();
+        }, (err) => {
+          console.error('Portfolio subscription error:', err);
+          setStatus('Could not load portfolio right now.');
+        });
+      }
+
+      function subscribeProfile() {
+        db.collection('profile').doc('dominic').onSnapshot((doc) => {
+          const data = doc.exists ? doc.data() : {};
+          setFollowersCount(data && data.followers);
+        });
+      }
+
+      function subscribeCurrentUserDoc(uid) {
+        return db.collection('users').doc(uid).onSnapshot((doc) => {
+          const data = doc.exists ? doc.data() : {};
+          userLikes = (data && typeof data.likes === 'object' && data.likes) ? data.likes : {};
+          isFollowing = data && data.isFollowingDominic === true;
+          setFollowButtonState();
+          renderPortfolio();
+        }, (err) => {
+          console.error('User doc subscription error:', err);
+        });
+      }
+
+      window.addEventListener('load', () => {
+        wireFollowButton();
+        subscribeProfile();
+        subscribePortfolio();
+
+        let unsubscribeUser = null;
+        auth.onAuthStateChanged((user) => {
+          currentUser = user || null;
+          userLikes = {};
+          isFollowing = false;
+          setFollowButtonState();
+
+          if (unsubscribeUser) {
+            try { unsubscribeUser(); } catch { /* noop */ }
+            unsubscribeUser = null;
+          }
+
+          if (currentUser) {
+            unsubscribeUser = subscribeCurrentUserDoc(currentUser.uid);
+          } else {
+            renderPortfolio();
+          }
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

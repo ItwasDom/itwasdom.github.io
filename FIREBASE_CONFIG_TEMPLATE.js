@@ -32,7 +32,5 @@ const firebaseConfig = {
 };
 
 // Usage:
-// Add this to your feed.html file around line 459
-// Simply replace the firebaseConfig object in feed.html with these values
-// Do NOT commit this to version control with real credentials!
-// Use environment variables or Firebase remote config in production
+// Update `assets/js/firebase-config.js` to set `window.__FIREBASE_CONFIG`.
+// This web config is used by the client and is not a server secret.

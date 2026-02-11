@@ -76,7 +76,7 @@ service cloud.firestore {
 | File | Purpose |
 |------|---------|
 | `admin/index.html` | Admin dashboard (upload/manage photos) |
-| `portfolio/feed-new.html` | Portfolio page (with likes & follows) |
+| `portfolio/index.html` | Portfolio page (live likes & follows) |
 | `ADMIN_SETUP.md` | Detailed admin guide |
 | `FIREBASE_SETUP.md` | Firebase configuration guide |
 | `QUICK_START.md` | Quick start checklist |
@@ -103,7 +103,7 @@ service cloud.firestore {
 
 ## 🔒 Security
 
-- ✅ Only you can upload photos (password protected admin)
+- ✅ Only the admin UID can create/update/delete portfolio posts
 - ✅ Users can only like/follow (no destructive access)
 - ✅ Firebase rules prevent unauthorized database access
 - ✅ All data encrypted in transit

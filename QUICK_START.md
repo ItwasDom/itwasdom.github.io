@@ -2,9 +2,9 @@
 
 ## Files Created
 
-1. **portfolio/feed-new.html** - New portfolio page with Firebase authentication, likes, and follow system
+1. **portfolio/index.html** - Public portfolio page with live likes and follow
 2. **FIREBASE_SETUP.md** - Complete Firebase setup guide
-3. **functions/index.js** - Cloud Functions for email notifications
+3. **functions/index.js** - Cloud Functions (email notifications + secure like/follow)
 4. **functions/package.json** - Cloud Functions dependencies
 
 ## What's Ready
@@ -45,7 +45,7 @@
 2. Create new project: "dominic-martinez-portfolio"
 3. Create web app
 4. Copy the config object
-5. Paste into `portfolio/feed-new.html` lines 459-466
+5. Paste into `assets/js/firebase-config.js` (update `window.__FIREBASE_CONFIG`)
 
 ### Step 2: Enable Services (5 minutes)
 Go to Firebase Console:
@@ -77,15 +77,12 @@ service cloud.firestore {
 
 ### Step 4: Create Collections in Firestore (2 minutes)
 
-**Create manually:**
-1. Go to **Firestore Database**
-2. Click "Start collection"
-3. Create collection: `profile`
-4. Add document with ID: `dominic`
-5. Add field: `followers: 0` (type: number)
-6. Create collection: `photos`
-7. Add 4 documents (IDs: project-1, project-2, project-3, project-4)
-8. Each with field: `likeCount: 0` (type: number)
+**Optional (recommended):**
+1. Create collection: `profile`
+2. Add document with ID: `dominic`
+3. Add field: `followers: 0` (type: number)
+
+Portfolio items live in the `portfolio` collection and are managed by the admin dashboard.
 
 ### Step 5: Deploy Cloud Functions (10 minutes)
 
@@ -109,15 +106,11 @@ service cloud.firestore {
    - `GMAIL_PASSWORD`: Gmail app password (NOT your regular password!)
    - `ADMIN_EMAIL`: dominic's email
 
-### Step 6: Replace Old Feed File (1 minute)
-1. Rename `portfolio/feed.html` → `portfolio/feed-backup.html`
-2. Rename `portfolio/feed-new.html` → `portfolio/feed.html`
-
 ### Step 7: Test Everything (5 minutes)
 1. Go to website
 2. Click "Sign In" button
 3. Create account with notifications enabled
-4. Hover over portfolio items to see likes (should be 0)
+4. Open `/portfolio/index.html`
 5. Click heart button to like
 6. Follower count should update
 7. Check email for notifications
@@ -125,14 +118,14 @@ service cloud.firestore {
 ## Architecture
 
 ```
-├── portfolio/feed.html          ← Updated with auth & real-time updates
+├── portfolio/index.html         ← Public portfolio (live likes/follow)
 ├── functions/
 │   ├── index.js               ← Email notification serverless functions
 │   └── package.json          ← Cloud Function dependencies
 ├── FIREBASE_SETUP.md          ← Full setup documentation
 └── Firestore Collections:
     ├── users/{userId}        ← User profiles & preferences
-    ├── photos/{photoId}      ← Like counts per photo
+  ├── portfolio/{photoId}   ← Admin-managed posts (likeCount updated server-side)
     └── profile/dominic       ← Follower count
 ```
 
@@ -152,7 +145,7 @@ service cloud.firestore {
 
 - [ ] Firebase project created
 - [ ] Web app added to Firebase
-- [ ] Config pasted into feed.html
+- [ ] Config pasted into assets/js/firebase-config.js
 - [ ] Email/Password authentication enabled
 - [ ] Firestore database created
 - [ ] Firestore rules applied

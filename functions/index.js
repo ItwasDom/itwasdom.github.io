@@ -240,7 +240,10 @@ exports.sendLikeNotification = functions.https.onCall(async (data, context) => {
     );
   }
 
-  const { userEmail, userName, photoId } = data;
+  const photoId = typeof data?.photoId === 'string' ? data.photoId.trim() : '';
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(photoId)) {
+    throw new functions.https.HttpsError('invalid-argument', 'Valid photoId is required');
+  }
 
   try {
     // Get user's email preferences from Firestore
@@ -255,6 +258,11 @@ exports.sendLikeNotification = functions.https.onCall(async (data, context) => {
       return { success: false, reason: "Notifications disabled" };
     }
 
+    // Derive identity server-side to prevent spoofing.
+    const authedUser = await admin.auth().getUser(context.auth.uid);
+    const safeEmail = authedUser.email || '(no email)';
+    const safeName = authedUser.displayName || userDoc.data().displayName || safeEmail;
+
     // Send email to Dominic
     const mailOptions = {
       from: process.env.GMAIL_EMAIL,
@@ -268,7 +276,7 @@ exports.sendLikeNotification = functions.https.onCall(async (data, context) => {
 
           <div style="background: rgba(27, 22, 168, 0.1); border: 1px solid rgba(27, 22, 168, 0.2); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <p style="margin: 0 0 15px 0; line-height: 1.6;">
-              <strong>${userName}</strong> (<em>${userEmail}</em>) just liked your photo!
+              <strong>${safeName}</strong> (<em>${safeEmail}</em>) just liked your photo!
             </p>
             <p style="margin: 0; color: #aaa; font-size: 0.9em;">
               Photo ID: <strong>${photoId}</strong>
@@ -278,7 +286,7 @@ exports.sendLikeNotification = functions.https.onCall(async (data, context) => {
           <div style="background: rgba(27, 22, 168, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             <p style="margin: 0; color: #bbb; text-align: center;">
               Keep creating amazing content!<br>
-              <a href="${SITE_BASE_URL}/portfolio/feed.html" style="color: #1B16A8; text-decoration: none; font-weight: bold;">View Your Portfolio</a>
+              <a href="${SITE_BASE_URL}/portfolio/index.html" style="color: #1B16A8; text-decoration: none; font-weight: bold;">View Your Portfolio</a>
             </p>
           </div>
 
@@ -316,8 +324,6 @@ exports.sendFollowNotification = functions.https.onCall(
       );
     }
 
-    const { userEmail, userName } = data;
-
     try {
       // Get user's email preferences from Firestore
       const userDoc = await admin
@@ -330,6 +336,11 @@ exports.sendFollowNotification = functions.https.onCall(
         console.log("User has notifications disabled or not found");
         return { success: false, reason: "Notifications disabled" };
       }
+
+      // Derive identity server-side to prevent spoofing.
+      const authedUser = await admin.auth().getUser(context.auth.uid);
+      const safeEmail = authedUser.email || '(no email)';
+      const safeName = authedUser.displayName || userDoc.data().displayName || safeEmail;
 
       // Send email to Dominic
       const mailOptions = {
@@ -344,7 +355,7 @@ exports.sendFollowNotification = functions.https.onCall(
 
             <div style="background: rgba(27, 22, 168, 0.1); border: 1px solid rgba(27, 22, 168, 0.2); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
               <p style="margin: 0 0 15px 0; line-height: 1.6;">
-                <strong>${userName}</strong> (<em>${userEmail}</em>) started following you!
+                <strong>${safeName}</strong> (<em>${safeEmail}</em>) started following you!
               </p>
               <p style="margin: 0; color: #aaa; font-size: 0.9em;">
                 Keep your followers engaged with amazing content.
@@ -354,7 +365,7 @@ exports.sendFollowNotification = functions.https.onCall(
             <div style="background: rgba(27, 22, 168, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
               <p style="margin: 0; color: #bbb; text-align: center;">
                 Your follower count is growing!<br>
-                <a href="${SITE_BASE_URL}/portfolio/feed.html" style="color: #1B16A8; text-decoration: none; font-weight: bold;">View Your Portfolio</a>
+                <a href="${SITE_BASE_URL}/portfolio/index.html" style="color: #1B16A8; text-decoration: none; font-weight: bold;">View Your Portfolio</a>
               </p>
             </div>
 
@@ -379,6 +390,125 @@ exports.sendFollowNotification = functions.https.onCall(
     }
   }
 );
+
+/**
+ * Toggle a like for a portfolio item.
+ *
+ * Security model:
+ * - Clients never write to `portfolio/{id}` directly (rules can restrict to admin only).
+ * - This callable uses Admin SDK to atomically update:
+ *   - users/{uid}.likes.{photoId}
+ *   - portfolio/{photoId}.likeCount
+ */
+exports.togglePortfolioLike = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const photoId = typeof data?.photoId === 'string' ? data.photoId.trim() : '';
+  // We store likes under users/{uid}.likes.{photoId}, so we must reject IDs that
+  // could break field paths (., /) or create weird nested structures.
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(photoId)) {
+    throw new functions.https.HttpsError('invalid-argument', 'Valid photoId is required');
+  }
+
+  const uid = context.auth.uid;
+  const db = admin.firestore();
+  const userRef = db.collection('users').doc(uid);
+  const portfolioRef = db.collection('portfolio').doc(photoId);
+
+  let liked = false;
+  let likeCount = 0;
+
+  await db.runTransaction(async (tx) => {
+    const [userSnap, portfolioSnap] = await Promise.all([
+      tx.get(userRef),
+      tx.get(portfolioRef),
+    ]);
+
+    if (!portfolioSnap.exists) {
+      throw new functions.https.HttpsError('not-found', 'Portfolio item not found');
+    }
+
+    const userData = userSnap.exists ? userSnap.data() : {};
+    const likes = (userData && typeof userData.likes === 'object' && userData.likes) ? userData.likes : {};
+    const currentlyLiked = likes[photoId] === true;
+    liked = !currentlyLiked;
+
+    const currentCountRaw = portfolioSnap.data()?.likeCount;
+    const currentCount = Number.isFinite(Number(currentCountRaw)) ? Number(currentCountRaw) : 0;
+    likeCount = Math.max(0, currentCount + (liked ? 1 : -1));
+
+    const userUpdate = {
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    // Set or delete the nested like flag without overwriting other likes.
+    if (liked) {
+      userUpdate[`likes.${photoId}`] = true;
+    } else {
+      userUpdate[`likes.${photoId}`] = admin.firestore.FieldValue.delete();
+    }
+
+    tx.set(userRef, userUpdate, { merge: true });
+
+    tx.set(portfolioRef, {
+      likeCount,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+  });
+
+  return { success: true, liked, likeCount, photoId };
+});
+
+/**
+ * Set whether the current user follows Dominic.
+ * Updates users/{uid}.isFollowingDominic and profile/dominic.followers.
+ */
+exports.setFollowingDominic = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const following = data?.following === true;
+  const uid = context.auth.uid;
+  const db = admin.firestore();
+  const userRef = db.collection('users').doc(uid);
+  const profileRef = db.collection('profile').doc('dominic');
+
+  let followers = 0;
+
+  await db.runTransaction(async (tx) => {
+    const [userSnap, profileSnap] = await Promise.all([
+      tx.get(userRef),
+      tx.get(profileRef),
+    ]);
+
+    const userData = userSnap.exists ? userSnap.data() : {};
+    const currentlyFollowing = userData?.isFollowingDominic === true;
+
+    const currentFollowersRaw = profileSnap.exists ? profileSnap.data()?.followers : 0;
+    const currentFollowers = Number.isFinite(Number(currentFollowersRaw)) ? Number(currentFollowersRaw) : 0;
+
+    if (currentlyFollowing !== following) {
+      followers = Math.max(0, currentFollowers + (following ? 1 : -1));
+    } else {
+      followers = currentFollowers;
+    }
+
+    tx.set(userRef, {
+      isFollowingDominic: following,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+    tx.set(profileRef, {
+      followers,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+  });
+
+  return { success: true, following, followers };
+});
 
 /**
  * Cleanup function to delete old notifications

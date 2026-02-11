@@ -28,7 +28,9 @@
 1. Go to **Project Settings** (gear icon)
 2. Under "Your apps", select your web app
 3. Copy the Firebase configuration object
-4. Paste it into `portfolio/feed.html` replacing the `firebaseConfig` object with your actual values
+4. Paste it into `assets/js/firebase-config.js` by updating `window.__FIREBASE_CONFIG`
+
+Note: Firebase web config values are not secrets (they are embedded in client apps). Keep any server credentials (like email passwords) in Cloud Functions environment variables.
 
 ## Step 5: Set Up Cloud Functions for Email Notifications
 
@@ -93,11 +95,16 @@ Create these collections in Firestore:
 }
 ```
 
-### photos
+### portfolio (admin-managed)
+Portfolio items are created/edited by the admin dashboard and read publicly by the portfolio page.
+
+Example document:
 ```
 {
-  id: "project-1",
   title: "string",
+  description: "string",
+  category: "string",
+  imageUrl: "https://...",
   likeCount: number,
   createdAt: timestamp
 }
@@ -131,11 +138,19 @@ Create these collections in Firestore:
 - Like button shows as "liked" for current user
 - Like count persists in database
 
+**Security note (important):**
+- Regular users should not be allowed to write to `portfolio/{id}` directly.
+- Likes should be processed via Cloud Functions (callable) so only `likeCount` changes server-side.
+
 ✅ **Follow System**
 - One follow per user
 - Real-time follower count updates
 - Follow state persists in database
 - Shows "Following" status
+
+**Security note (important):**
+- Regular users should not be allowed to write to `profile/dominic` directly.
+- Follow/unfollow should be processed via Cloud Functions (callable) so `followers` is updated server-side.
 
 ✅ **Email Notifications**
 - Notification when photo is liked
