@@ -211,21 +211,7 @@
     });
     // Forgot password logic
     document.getElementById('forgotPassword').onclick = () => {
-      const email = document.getElementById('email').value;
-      if (!email) {
-        document.getElementById('loginMsg').textContent = 'Please enter your email to reset password.';
-        document.getElementById('loginMsg').className = 'message error';
-        return;
-      }
-      auth.sendPasswordResetEmail(email)
-        .then(() => {
-          document.getElementById('loginMsg').textContent = 'Password reset email sent! Check your inbox.';
-          document.getElementById('loginMsg').className = 'message success';
-        })
-        .catch(err => {
-          document.getElementById('loginMsg').textContent = 'Error: ' + (err.message || 'Failed to send reset email.');
-          document.getElementById('loginMsg').className = 'message error';
-        });
+      window.location.href = '../reset-password.html';
     };
   </script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
