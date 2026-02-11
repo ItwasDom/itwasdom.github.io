@@ -267,11 +267,20 @@
       transition: all 0.3s ease;
       background: rgba(124, 58, 237, 0.05);
       margin-bottom: 25px;
+      user-select: none;
+      -webkit-touch-callout: none;
     }
 
     .upload-area:hover {
-      background: rgba(124, 58, 237, 0.1);
+      background: rgba(124, 58, 237, 0.15);
       border-color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2);
+    }
+
+    .upload-area:active {
+      transform: translateY(0);
+      background: rgba(124, 58, 237, 0.2);
     }
 
     .upload-area.active {
@@ -635,12 +644,12 @@
         <div class="section">
           <h2><i class="fas fa-cloud-upload-alt"></i> Upload New Photo</h2>
 
-          <div class="upload-area" id="uploadArea">
+          <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" style="cursor: pointer;">
             <i class="fas fa-image"></i>
             <p>Drag and drop your photo here</p>
             <p>or <span class="highlight">click to browse</span></p>
-            <input type="file" id="fileInput" accept="image/*">
           </div>
+          <input type="file" id="fileInput" accept="image/*" style="display: none;">
 
           <img id="previewImage" class="preview-image">
 
