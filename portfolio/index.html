@@ -272,5 +272,95 @@
       &copy; 2026 Dominic Martinez. All rights reserved.
     </div>
   </footer>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
+      authDomain: "dominic-martinez-portfolio.firebaseapp.com",
+      projectId: "dominic-martinez-portfolio",
+      storageBucket: "dominic-martinez-portfolio.appspot.com",
+      messagingSenderId: "339938102474",
+      appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
+      measurementId: "G-MSKQYN75ML"
+    };
+    if (!window.firebase?.apps?.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    // Dropdown logic
+    const userName = document.getElementById('userName');
+    const userDropdown = document.getElementById('userDropdown');
+    userName.addEventListener('click', () => {
+      userDropdown.classList.toggle('show');
+    });
+    document.addEventListener('click', (e) => {
+      if (!userName.contains(e.target) && !userDropdown.contains(e.target)) {
+        userDropdown.classList.remove('show');
+      }
+    });
+    // Account settings logic
+    const accountSettings = document.getElementById('accountSettings');
+    const settingsContainer = document.getElementById('settingsContainer');
+    accountSettings.addEventListener('click', (e) => {
+      e.preventDefault();
+      settingsContainer.style.display = 'block';
+      userDropdown.classList.remove('show');
+    });
+    // Logout logic
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await auth.signOut();
+      window.location.href = '/';
+    });
+    // Show/hide password
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    togglePasswordBtn.addEventListener('click', function() {
+      const isHidden = passwordInput.type === 'password';
+      passwordInput.type = isHidden ? 'text' : 'password';
+      togglePasswordBtn.textContent = isHidden ? '🙈' : '👁️';
+      togglePasswordBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    });
+    // Settings form logic
+    document.getElementById('settingsForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('settingsMsg');
+      msg.textContent = '';
+      msg.className = 'message';
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          await user.updateProfile({ displayName: username });
+          if (password && password !== '••••••••') {
+            await user.updatePassword(password);
+          }
+          await db.collection('users').doc(user.uid).set({ displayName: username }, { merge: true });
+          msg.textContent = 'Changes saved!';
+          msg.className = 'message success';
+        }
+      } catch (err) {
+        msg.textContent = 'Error saving changes: ' + (err.message || 'Please try again.');
+        msg.className = 'message error';
+      }
+    });
+    // Load user info from backend
+    auth.onAuthStateChanged(async function(user) {
+      if (user) {
+        document.getElementById('userName').textContent = user.displayName || 'User';
+        document.getElementById('username').value = user.displayName || '';
+        document.getElementById('email').value = user.email || '';
+        document.getElementById('password').value = '••••••••';
+      } else {
+        window.location.href = '/login.html';
+      }
+    });
+  </script>
 </body>
 </html>
