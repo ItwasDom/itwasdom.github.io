@@ -640,6 +640,22 @@
       <div id="errorMessage" class="message error"></div>
 
       <div class="dashboard-grid">
+                <!-- PROFILE ADJUSTMENT SECTION -->
+                <div class="section">
+                  <h2><i class="fas fa-user-edit"></i> Edit Profile</h2>
+                  <form id="profileForm">
+                    <div class="form-group">
+                      <label for="displayName">Display Name</label>
+                      <input type="text" id="displayName" placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                      <label for="email">Email Address</label>
+                      <input type="email" id="email" placeholder="Enter your email">
+                    </div>
+                    <button type="submit" class="btn btn-upload"><i class="fas fa-save"></i> Save Changes</button>
+                  </form>
+                  <div class="message" id="profileMsg"></div>
+                </div>
         <!-- UPLOAD SECTION -->
         <div class="section">
           <h2><i class="fas fa-cloud-upload-alt"></i> Upload New Photo</h2>
@@ -707,6 +723,37 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
 
   <script>
+        // Profile adjustment logic
+        document.addEventListener('DOMContentLoaded', function() {
+          const profileForm = document.getElementById('profileForm');
+          if (profileForm) {
+            profileForm.addEventListener('submit', async function(e) {
+              e.preventDefault();
+              const displayName = document.getElementById('displayName').value;
+              const email = document.getElementById('email').value;
+              const msg = document.getElementById('profileMsg');
+              msg.textContent = '';
+              msg.className = 'message';
+              try {
+                // Update Firestore user profile (admin user assumed)
+                await db.collection('users').doc('admin').set({ displayName, email }, { merge: true });
+                msg.textContent = 'Profile updated successfully!';
+                msg.className = 'message success';
+              } catch (err) {
+                msg.textContent = 'Error updating profile: ' + (err.message || 'Please try again.');
+                msg.className = 'message error';
+              }
+            });
+            // Load profile info
+            db.collection('users').doc('admin').get().then(doc => {
+              if (doc.exists) {
+                const data = doc.data();
+                document.getElementById('displayName').value = data.displayName || '';
+                document.getElementById('email').value = data.email || '';
+              }
+            });
+          }
+        });
     // ===== ADMIN PASSWORD - CHANGE THIS! =====
     const ADMIN_PASSWORD = "Photos4Good";
 

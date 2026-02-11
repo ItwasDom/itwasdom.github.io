@@ -134,14 +134,21 @@
     <form id="loginForm" onsubmit="handleLogin(event)">
       <div class="form-group">
         <label for="password">Password</label>
-        <input 
-          type="password" 
-          id="password" 
-          placeholder="Enter admin password"
-          autocomplete="off"
-        >
+        <div style="position:relative;">
+          <input 
+            type="password" 
+            id="password" 
+            placeholder="Enter admin password"
+            autocomplete="off"
+            style="padding-right:40px;"
+          >
+          <button type="button" id="togglePassword" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);background:none;border:none;color:#bbb;font-size:1.1em;cursor:pointer;" aria-label="Show password">👁️</button>
+        </div>
       </div>
       <button type="submit">Login</button>
+          <div style="margin-top:16px;text-align:center;">
+            <a href="/reset-password.html" style="color:#7C3AED;text-decoration:underline;font-size:0.95em;">Forgot password?</a>
+          </div>
     </form>
 
     <div class="debug" id="debug"></div>
@@ -161,11 +168,21 @@
     log('📝 Password: ' + ADMIN_PASSWORD);
     log('⏳ Waiting for login attempt...');
 
+    // Show/hide password functionality
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    togglePasswordBtn.addEventListener('click', function() {
+      const isHidden = passwordInput.type === 'password';
+      passwordInput.type = isHidden ? 'text' : 'password';
+      togglePasswordBtn.textContent = isHidden ? '🙈' : '👁️';
+      togglePasswordBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    });
+
     function handleLogin(event) {
       event.preventDefault();
       log('🔐 Login button clicked');
 
-      const password = document.getElementById('password').value;
+      const password = passwordInput.value;
       const errorMsg = document.getElementById('errorMsg');
       const successMsg = document.getElementById('successMsg');
 
@@ -199,8 +216,8 @@
         errorMsg.classList.add('show');
         setTimeout(() => errorMsg.classList.remove('show'), 3000);
         
-        document.getElementById('password').value = '';
-        document.getElementById('password').focus();
+        passwordInput.value = '';
+        passwordInput.focus();
       }
     }
   </script>

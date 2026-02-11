@@ -1,4 +1,55 @@
 /**
+ * Sends password reset email to user
+ */
+exports.sendPasswordResetEmail = functions.https.onCall(async (data, context) => {
+  const { email } = data;
+  if (!email) {
+    throw new functions.https.HttpsError('invalid-argument', 'Email is required');
+  }
+
+  try {
+    // Generate a password reset link using Firebase Auth
+    const resetLink = await admin.auth().generatePasswordResetLink(email);
+
+    // Send email to user
+    const mailOptions = {
+      from: process.env.GMAIL_EMAIL,
+      to: email,
+      subject: 'Password Reset Request',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #0f0a1a 0%, #1a1a2e 100%); padding: 20px; border-radius: 12px; color: #f0f0f0;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="background: linear-gradient(135deg, #1B16A8 0%, #7C3AED 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 0;">Reset Your Password</h2>
+          </div>
+          <div style="background: rgba(27, 22, 168, 0.1); border: 1px solid rgba(27, 22, 168, 0.2); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="margin: 0 0 15px 0; line-height: 1.6;">
+              You requested a password reset. Click the link below to set a new password:
+            </p>
+            <p style="margin: 0; color: #aaa; font-size: 0.9em;">
+              <a href="${resetLink}" style="color: #1B16A8; text-decoration: underline; font-weight: bold;">Reset Password</a>
+            </p>
+          </div>
+          <div style="background: rgba(27, 22, 168, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="margin: 0; color: #bbb; text-align: center;">
+              If you did not request this, you can ignore this email.
+            </p>
+          </div>
+          <div style="text-align: center; color: #666; font-size: 0.8em; padding-top: 20px; border-top: 1px solid rgba(27, 22, 168, 0.1);">
+            <p style="margin: 10px 0;">Powered by Dominic Martinez Portfolio System</p>
+          </div>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Password reset email sent to ${email}`);
+    return { success: true, message: 'Password reset email sent' };
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    throw new functions.https.HttpsError('internal', 'Error sending password reset email');
+  }
+});
+/**
  * Firebase Cloud Functions for Portfolio Email Notifications
  * 
  * Deploy with: firebase deploy --only functions
