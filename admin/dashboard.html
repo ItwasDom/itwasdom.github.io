@@ -757,6 +757,127 @@
             </div>
           </div>
         </div>
+
+        <!-- SITE CONTENT MANAGEMENT SECTION -->
+        <div class="section">
+          <h2><i class="fas fa-pen-to-square"></i> Site Content</h2>
+
+          <details open>
+            <summary>Home Page</summary>
+            <form id="homeContentForm">
+              <div class="form-group">
+                <label for="homeHeroTitleInput">Hero Title</label>
+                <input type="text" id="homeHeroTitleInput" placeholder="Capturing Moments, Creating Stories" />
+              </div>
+              <div class="form-group">
+                <label for="homeHeroSubtitleInput">Hero Subtitle</label>
+                <input type="text" id="homeHeroSubtitleInput" placeholder="Photography & Cinematography by Dominic Martinez" />
+              </div>
+              <div class="form-group">
+                <label for="homeHeroButtonTextInput">Hero Button Text</label>
+                <input type="text" id="homeHeroButtonTextInput" placeholder="View Portfolio" />
+              </div>
+              <div class="form-group">
+                <label for="homeLearnMoreTitleInput">"Learn More" Section Title</label>
+                <input type="text" id="homeLearnMoreTitleInput" placeholder="Learn More" />
+              </div>
+              <div class="form-group">
+                <label for="homeCtaTitleInput">Bottom Call-to-Action Title</label>
+                <input type="text" id="homeCtaTitleInput" placeholder="Ready to Create Something Amazing?" />
+              </div>
+              <div class="form-group">
+                <label for="homeCtaTextInput">Bottom Call-to-Action Text</label>
+                <textarea id="homeCtaTextInput" rows="3" placeholder="Let's bring your vision to life with professional photography and cinematography."></textarea>
+              </div>
+              <button type="submit" class="btn btn-upload">
+                <i class="fas fa-save"></i> Save Home Content
+              </button>
+            </form>
+          </details>
+
+          <details>
+            <summary>About Page</summary>
+            <form id="aboutContentForm">
+              <div class="form-group">
+                <label for="aboutHeroTitleInput">Hero Title</label>
+                <input type="text" id="aboutHeroTitleInput" placeholder="About Me" />
+              </div>
+              <div class="form-group">
+                <label for="aboutHeroSubtitleInput">Hero Subtitle</label>
+                <input type="text" id="aboutHeroSubtitleInput" placeholder="Photographer & Cinematographer | San Antonio, TX" />
+              </div>
+              <div class="form-group">
+                <label for="aboutNameHeadingInput">Name Heading</label>
+                <input type="text" id="aboutNameHeadingInput" placeholder="Dominic Martinez" />
+              </div>
+              <div class="form-group">
+                <label for="aboutP1Input">Paragraph 1</label>
+                <textarea id="aboutP1Input" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="aboutP2Input">Paragraph 2</label>
+                <textarea id="aboutP2Input" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="aboutP3Input">Paragraph 3</label>
+                <textarea id="aboutP3Input" rows="3"></textarea>
+              </div>
+              <button type="submit" class="btn btn-upload">
+                <i class="fas fa-save"></i> Save About Content
+              </button>
+            </form>
+          </details>
+
+          <details>
+            <summary>Experience Page</summary>
+            <form id="experienceContentForm">
+              <div class="form-group">
+                <label for="experienceHeroTitleInput">Hero Title</label>
+                <input type="text" id="experienceHeroTitleInput" placeholder="Experience" />
+              </div>
+              <div class="form-group">
+                <label for="experienceHeroSubtitleInput">Hero Subtitle</label>
+                <input type="text" id="experienceHeroSubtitleInput" placeholder="Professional Background & Education" />
+              </div>
+              <div class="form-group">
+                <label for="experienceWorkHeadingInput">Work Experience Heading</label>
+                <input type="text" id="experienceWorkHeadingInput" placeholder="Work Experience" />
+              </div>
+              <div class="form-group">
+                <label for="experienceEducationHeadingInput">Education Heading</label>
+                <input type="text" id="experienceEducationHeadingInput" placeholder="Education" />
+              </div>
+              <button type="submit" class="btn btn-upload">
+                <i class="fas fa-save"></i> Save Experience Content
+              </button>
+            </form>
+          </details>
+
+          <details>
+            <summary>Skills Page</summary>
+            <form id="skillsContentForm">
+              <div class="form-group">
+                <label for="skillsHeroTitleInput">Hero Title</label>
+                <input type="text" id="skillsHeroTitleInput" placeholder="Skills" />
+              </div>
+              <div class="form-group">
+                <label for="skillsHeroSubtitleInput">Hero Subtitle</label>
+                <input type="text" id="skillsHeroSubtitleInput" placeholder="Professional Expertise & Technical Proficiency" />
+              </div>
+              <div class="form-group">
+                <label for="skillsCtaTitleInput">Bottom Call-to-Action Title</label>
+                <input type="text" id="skillsCtaTitleInput" placeholder="Let's Create Something Amazing" />
+              </div>
+              <div class="form-group">
+                <label for="skillsCtaTextInput">Bottom Call-to-Action Text</label>
+                <textarea id="skillsCtaTextInput" rows="3" placeholder="With my diverse skill set and professional experience, I'm ready to bring your vision to life"></textarea>
+              </div>
+              <button type="submit" class="btn btn-upload">
+                <i class="fas fa-save"></i> Save Skills Content
+              </button>
+            </form>
+          </details>
+        </div>
       </div>
     </div>
   </div>
@@ -787,6 +908,7 @@
     const ADMIN_UID = "RVAvU26oGeYsaJYk0X1OF9h6apb2";
     let selectedFile = null;
     let editingPhotoId = null;
+    let contentEventsInitialized = false;
 
     // Profile adjustment logic (uses logged-in admin user)
     document.addEventListener('DOMContentLoaded', function() {
@@ -898,6 +1020,8 @@
           console.log('✓ Authenticated as', user.email);
           showDashboard();
           setupEventListeners();
+          setupContentForms();
+          await loadSiteContent();
           await ensureInitialProjects();
           loadPhotos();
         } else {
@@ -1032,6 +1156,23 @@
       console.log('Event listeners attached');
     }
 
+    function setupContentForms() {
+      if (contentEventsInitialized) return;
+      contentEventsInitialized = true;
+
+      const homeForm = document.getElementById('homeContentForm');
+      if (homeForm) homeForm.addEventListener('submit', saveHomeContent);
+
+      const aboutForm = document.getElementById('aboutContentForm');
+      if (aboutForm) aboutForm.addEventListener('submit', saveAboutContent);
+
+      const expForm = document.getElementById('experienceContentForm');
+      if (expForm) expForm.addEventListener('submit', saveExperienceContent);
+
+      const skillsForm = document.getElementById('skillsContentForm');
+      if (skillsForm) skillsForm.addEventListener('submit', saveSkillsContent);
+    }
+
     function handleFileDrop(files) {
       if (!files || files.length === 0) return;
 
@@ -1159,6 +1300,227 @@
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
         }
+      }
+    }
+
+    async function loadSiteContent() {
+      try {
+        await Promise.all([
+          loadHomeContent(),
+          loadAboutContent(),
+          loadExperienceContent(),
+          loadSkillsContent()
+        ]);
+      } catch (err) {
+        console.error('Error loading site content:', err);
+      }
+    }
+
+    async function loadHomeContent() {
+      if (!db) return;
+      try {
+        const snap = await db.collection('siteContent').doc('home').get();
+        if (!snap.exists) return;
+        const data = snap.data();
+
+        const setVal = (id, value) => {
+          const el = document.getElementById(id);
+          if (el && value != null) el.value = value;
+        };
+
+        setVal('homeHeroTitleInput', data.heroTitle || '');
+        setVal('homeHeroSubtitleInput', data.heroSubtitle || '');
+        setVal('homeHeroButtonTextInput', data.heroButtonText || '');
+        setVal('homeLearnMoreTitleInput', data.learnMoreTitle || '');
+        setVal('homeCtaTitleInput', data.ctaTitle || '');
+        setVal('homeCtaTextInput', data.ctaText || '');
+      } catch (err) {
+        console.error('Error loading home content:', err);
+      }
+    }
+
+    async function saveHomeContent(e) {
+      e.preventDefault();
+      try {
+        const user = auth.currentUser;
+        if (!user || user.uid !== ADMIN_UID) {
+          showError('errorMessage', '❌ You are not authorized to update site content.');
+          return;
+        }
+
+        const heroTitle = document.getElementById('homeHeroTitleInput').value;
+        const heroSubtitle = document.getElementById('homeHeroSubtitleInput').value;
+        const heroButtonText = document.getElementById('homeHeroButtonTextInput').value;
+        const learnMoreTitle = document.getElementById('homeLearnMoreTitleInput').value;
+        const ctaTitle = document.getElementById('homeCtaTitleInput').value;
+        const ctaText = document.getElementById('homeCtaTextInput').value;
+
+        await db.collection('siteContent').doc('home').set({
+          heroTitle,
+          heroSubtitle,
+          heroButtonText,
+          learnMoreTitle,
+          ctaTitle,
+          ctaText
+        }, { merge: true });
+
+        showSuccess('✓ Home page content saved!');
+      } catch (err) {
+        console.error('Error saving home content:', err);
+        showError('errorMessage', '❌ Error saving home content: ' + (err.message || 'Please try again.'));
+      }
+    }
+
+    async function loadAboutContent() {
+      if (!db) return;
+      try {
+        const snap = await db.collection('siteContent').doc('about').get();
+        if (!snap.exists) return;
+        const data = snap.data();
+
+        const setVal = (id, value) => {
+          const el = document.getElementById(id);
+          if (el && value != null) el.value = value;
+        };
+
+        setVal('aboutHeroTitleInput', data.heroTitle || '');
+        setVal('aboutHeroSubtitleInput', data.heroSubtitle || '');
+        setVal('aboutNameHeadingInput', data.nameHeading || '');
+        setVal('aboutP1Input', data.paragraph1 || '');
+        setVal('aboutP2Input', data.paragraph2 || '');
+        setVal('aboutP3Input', data.paragraph3 || '');
+      } catch (err) {
+        console.error('Error loading about content:', err);
+      }
+    }
+
+    async function saveAboutContent(e) {
+      e.preventDefault();
+      try {
+        const user = auth.currentUser;
+        if (!user || user.uid !== ADMIN_UID) {
+          showError('errorMessage', '❌ You are not authorized to update site content.');
+          return;
+        }
+
+        const heroTitle = document.getElementById('aboutHeroTitleInput').value;
+        const heroSubtitle = document.getElementById('aboutHeroSubtitleInput').value;
+        const nameHeading = document.getElementById('aboutNameHeadingInput').value;
+        const paragraph1 = document.getElementById('aboutP1Input').value;
+        const paragraph2 = document.getElementById('aboutP2Input').value;
+        const paragraph3 = document.getElementById('aboutP3Input').value;
+
+        await db.collection('siteContent').doc('about').set({
+          heroTitle,
+          heroSubtitle,
+          nameHeading,
+          paragraph1,
+          paragraph2,
+          paragraph3
+        }, { merge: true });
+
+        showSuccess('✓ About page content saved!');
+      } catch (err) {
+        console.error('Error saving about content:', err);
+        showError('errorMessage', '❌ Error saving about content: ' + (err.message || 'Please try again.'));
+      }
+    }
+
+    async function loadExperienceContent() {
+      if (!db) return;
+      try {
+        const snap = await db.collection('siteContent').doc('experience').get();
+        if (!snap.exists) return;
+        const data = snap.data();
+
+        const setVal = (id, value) => {
+          const el = document.getElementById(id);
+          if (el && value != null) el.value = value;
+        };
+
+        setVal('experienceHeroTitleInput', data.heroTitle || '');
+        setVal('experienceHeroSubtitleInput', data.heroSubtitle || '');
+        setVal('experienceWorkHeadingInput', data.workHeading || '');
+        setVal('experienceEducationHeadingInput', data.educationHeading || '');
+      } catch (err) {
+        console.error('Error loading experience content:', err);
+      }
+    }
+
+    async function saveExperienceContent(e) {
+      e.preventDefault();
+      try {
+        const user = auth.currentUser;
+        if (!user || user.uid !== ADMIN_UID) {
+          showError('errorMessage', '❌ You are not authorized to update site content.');
+          return;
+        }
+
+        const heroTitle = document.getElementById('experienceHeroTitleInput').value;
+        const heroSubtitle = document.getElementById('experienceHeroSubtitleInput').value;
+        const workHeading = document.getElementById('experienceWorkHeadingInput').value;
+        const educationHeading = document.getElementById('experienceEducationHeadingInput').value;
+
+        await db.collection('siteContent').doc('experience').set({
+          heroTitle,
+          heroSubtitle,
+          workHeading,
+          educationHeading
+        }, { merge: true });
+
+        showSuccess('✓ Experience page content saved!');
+      } catch (err) {
+        console.error('Error saving experience content:', err);
+        showError('errorMessage', '❌ Error saving experience content: ' + (err.message || 'Please try again.'));
+      }
+    }
+
+    async function loadSkillsContent() {
+      if (!db) return;
+      try {
+        const snap = await db.collection('siteContent').doc('skills').get();
+        if (!snap.exists) return;
+        const data = snap.data();
+
+        const setVal = (id, value) => {
+          const el = document.getElementById(id);
+          if (el && value != null) el.value = value;
+        };
+
+        setVal('skillsHeroTitleInput', data.heroTitle || '');
+        setVal('skillsHeroSubtitleInput', data.heroSubtitle || '');
+        setVal('skillsCtaTitleInput', data.ctaTitle || '');
+        setVal('skillsCtaTextInput', data.ctaText || '');
+      } catch (err) {
+        console.error('Error loading skills content:', err);
+      }
+    }
+
+    async function saveSkillsContent(e) {
+      e.preventDefault();
+      try {
+        const user = auth.currentUser;
+        if (!user || user.uid !== ADMIN_UID) {
+          showError('errorMessage', '❌ You are not authorized to update site content.');
+          return;
+        }
+
+        const heroTitle = document.getElementById('skillsHeroTitleInput').value;
+        const heroSubtitle = document.getElementById('skillsHeroSubtitleInput').value;
+        const ctaTitle = document.getElementById('skillsCtaTitleInput').value;
+        const ctaText = document.getElementById('skillsCtaTextInput').value;
+
+        await db.collection('siteContent').doc('skills').set({
+          heroTitle,
+          heroSubtitle,
+          ctaTitle,
+          ctaText
+        }, { merge: true });
+
+        showSuccess('✓ Skills page content saved!');
+      } catch (err) {
+        console.error('Error saving skills content:', err);
+        showError('errorMessage', '❌ Error saving skills content: ' + (err.message || 'Please try again.'));
       }
     }
 

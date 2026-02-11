@@ -48,9 +48,9 @@
     <div class="hero-overlay">
       <!-- Profile Picture Placeholder -->
       <img src="image/Headshot.jpg" alt="Profile Picture" class="profile-pic" />
-      <h1>Capturing Moments, Creating Stories</h1>
-      <p>Photography & Cinematography by Dominic Martinez</p>
-      <a class="btn" href="portfolio/feed.html">View Portfolio</a>
+      <h1 id="homeHeroTitle">Capturing Moments, Creating Stories</h1>
+      <p id="homeHeroSubtitle">Photography & Cinematography by Dominic Martinez</p>
+      <a class="btn" href="portfolio/feed.html"><span id="homeHeroButtonText">View Portfolio</span></a>
     </div>
   </section>
 
@@ -181,7 +181,7 @@
   <!-- Quick Links Section -->
   <section class="content-section" style="background: linear-gradient(135deg, rgba(27, 22, 168, 0.05) 0%, rgba(15, 10, 26, 0.9) 100%);">
     <div class="container">
-      <h2 style="text-align: center; margin-bottom: 50px; background: linear-gradient(135deg, #1B16A8 0%, #7C3AED 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Learn More</h2>
+      <h2 id="homeLearnMoreTitle" style="text-align: center; margin-bottom: 50px; background: linear-gradient(135deg, #1B16A8 0%, #7C3AED 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Learn More</h2>
       <div class="quick-links-grid">
         <a href="about/index.html" class="quick-link-card">
           <div class="link-icon">
@@ -221,8 +221,8 @@
   <!-- Call to Action -->
   <section class="content-section" style="text-align: center; padding: 80px 0;">
     <div class="container">
-      <h2>Ready to Create Something Amazing?</h2>
-      <p style="margin-bottom: 40px; color: #bbb; font-size: 1.1rem;">Let's bring your vision to life with professional photography and cinematography.</p>
+      <h2 id="homeCtaTitle">Ready to Create Something Amazing?</h2>
+      <p id="homeCtaText" style="margin-bottom: 40px; color: #bbb; font-size: 1.1rem;">Let's bring your vision to life with professional photography and cinematography.</p>
       <a href="connect/index.html" class="connect-btn">Get in Touch</a>
     </div>
   </section>
@@ -238,6 +238,51 @@
   <a id="adminSecretBtn" href="admin/dashboard.html" class="admin-secret-btn" title="Admin Access">
     <i class="fas fa-lock"></i>
   </a>
+
+  <!-- Firebase (for dynamic home content) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script>
+    (function() {
+      const firebaseConfig = {
+        apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
+        authDomain: "dominic-martinez-portfolio.firebaseapp.com",
+        projectId: "dominic-martinez-portfolio",
+        storageBucket: "dominic-martinez-portfolio.appspot.com",
+        messagingSenderId: "339938102474",
+        appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
+        measurementId: "G-MSKQYN75ML"
+      };
+
+      if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = firebase.firestore();
+
+      document.addEventListener('DOMContentLoaded', async function() {
+        try {
+          const snap = await db.collection('siteContent').doc('home').get();
+          if (!snap.exists) return;
+          const data = snap.data();
+
+          const setText = (id, value) => {
+            if (!value) return;
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+          };
+
+          setText('homeHeroTitle', data.heroTitle);
+          setText('homeHeroSubtitle', data.heroSubtitle);
+          setText('homeHeroButtonText', data.heroButtonText);
+          setText('homeLearnMoreTitle', data.learnMoreTitle);
+          setText('homeCtaTitle', data.ctaTitle);
+          setText('homeCtaText', data.ctaText);
+        } catch (err) {
+          console.error('Error loading home page content:', err);
+        }
+      });
+    })();
+  </script>
 
   <!-- Structured Data (JSON-LD) -->
   <script type="application/ld+json">

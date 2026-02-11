@@ -31,8 +31,8 @@
   <!-- Page Title Section -->
   <section class="page-hero">
     <div class="page-hero-content">
-      <h1>About Me</h1>
-      <p>Photographer & Cinematographer | San Antonio, TX</p>
+      <h1 id="aboutHeroTitle">About Me</h1>
+      <p id="aboutHeroSubtitle">Photographer & Cinematographer | San Antonio, TX</p>
     </div>
   </section>
 
@@ -42,18 +42,18 @@
       <div class="about-content">
         <img src="../image/Headshot.jpg" alt="Dominic Martinez" class="about-image">
         <div class="about-text">
-          <h2>Dominic Martinez</h2>
-          <p>
+          <h2 id="aboutNameHeading">Dominic Martinez</h2>
+          <p id="aboutP1">
             I'm Dominic Martinez, a passionate photographer and cinematographer based in San Antonio, TX.
             With a background in Digital Cinematography from Full Sail University and extensive experience in
             photography and video production, I bring stories to life through my lens.
           </p>
-          <p>
+          <p id="aboutP2">
             My work captures emotions and moments, blending artistic vision with technical precision to create
             unforgettable visuals. Whether it's a portrait session, a film project, or an architectural photo,
             I approach every project with dedication and creativity.
           </p>
-          <p>
+          <p id="aboutP3">
             Beyond the technical aspects of photography and cinematography, I'm passionate about visual storytelling.
             Each project is an opportunity to connect with people and preserve memories that will last a lifetime.
             I believe in the power of images to communicate emotions and tell compelling stories.
@@ -78,6 +78,51 @@
       &copy; 2026 Dominic Martinez. All rights reserved.
     </div>
   </footer>
+
+  <!-- Firebase (for dynamic About content) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script>
+    (function() {
+      const firebaseConfig = {
+        apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
+        authDomain: "dominic-martinez-portfolio.firebaseapp.com",
+        projectId: "dominic-martinez-portfolio",
+        storageBucket: "dominic-martinez-portfolio.appspot.com",
+        messagingSenderId: "339938102474",
+        appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
+        measurementId: "G-MSKQYN75ML"
+      };
+
+      if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = firebase.firestore();
+
+      document.addEventListener('DOMContentLoaded', async function() {
+        try {
+          const snap = await db.collection('siteContent').doc('about').get();
+          if (!snap.exists) return;
+          const data = snap.data();
+
+          const setText = (id, value) => {
+            if (!value) return;
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+          };
+
+          setText('aboutHeroTitle', data.heroTitle);
+          setText('aboutHeroSubtitle', data.heroSubtitle);
+          setText('aboutNameHeading', data.nameHeading);
+          setText('aboutP1', data.paragraph1);
+          setText('aboutP2', data.paragraph2);
+          setText('aboutP3', data.paragraph3);
+        } catch (err) {
+          console.error('Error loading about page content:', err);
+        }
+      });
+    })();
+  </script>
 
   <style>
     .page-hero {
