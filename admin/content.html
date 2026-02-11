@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Edit Site Content</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/x-icon" href="../image/Headshot.jpg">
+  <style>
+    body { background: linear-gradient(135deg, #020212 0%, #0f0a1a 100%); color: #f0f0f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+    header { background: linear-gradient(135deg, #1B16A8 0%, #020212 100%); padding: 20px 0; border-bottom: 1px solid rgba(124,58,237,0.2); position: sticky; top: 0; z-index: 100; }
+    .header-content { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #1B16A8, #7C3AED); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .header-actions { display: flex; gap: 12px; align-items: center; }
+    .logout-btn, .back-btn { padding: 8px 16px; border-radius: 8px; border: 2px solid #7C3AED; background: transparent; color: #7C3AED; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+    .logout-btn:hover, .back-btn:hover { background: rgba(124,58,237,0.1); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 32px 20px 60px; }
+    h1.page-title { font-size: 2rem; margin-bottom: 20px; }
+    .section { background: radial-gradient(circle at top left, rgba(124,58,237,0.2), transparent 55%), linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid rgba(124,58,237,0.25); border-radius: 18px; padding: 24px 22px; box-shadow: 0 18px 45px rgba(0,0,0,0.45); margin-bottom: 24px; }
+    .section h2 { font-size: 1.4rem; margin-bottom: 16px; color: #7C3AED; display: flex; align-items: center; gap: 10px; }
+    details { margin-bottom: 12px; background: rgba(0,0,0,0.15); border-radius: 12px; padding: 10px 14px; }
+    summary { cursor: pointer; font-weight: 600; color: #ddd; }
+    .form-group { margin-top: 14px; margin-bottom: 18px; }
+    .form-group label { display: block; margin-bottom: 6px; color: #bbb; font-weight: 600; font-size: 0.9rem; }
+    .form-group input, .form-group textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(124,58,237,0.3); background: rgba(255,255,255,0.05); color: #f0f0f0; font-size: 0.9rem; }
+    .form-group textarea { min-height: 70px; resize: vertical; }
+    .btn { padding: 10px 18px; border-radius: 8px; border: none; background: linear-gradient(135deg, #1B16A8, #7C3AED); color: #fff; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+    .btn:hover { box-shadow: 0 10px 30px rgba(123,58,237,0.35); transform: translateY(-1px); }
+    .message { padding: 14px; border-radius: 10px; margin-bottom: 18px; display: none; font-weight: 600; }
+    .message.show { display: block; }
+    .message.success { background: rgba(76,175,80,0.2); border: 1px solid #4caf50; color: #81c784; }
+    .message.error { background: rgba(244,67,54,0.2); border: 1px solid #f44336; color: #ef5350; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo"><i class="fas fa-pen-to-square"></i> Edit Site Content</div>
+      <div class="header-actions">
+        <button class="back-btn" onclick="window.location.href='dashboard.html'">&larr; Back to Dashboard</button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1 class="page-title">Site Content Management</h1>
+    <div id="successMessage" class="message success"></div>
+    <div id="errorMessage" class="message error"></div>
+
+    <div class="section">
+      <h2><i class="fas fa-home"></i> Home Page</h2>
+      <details open>
+        <summary>Hero & Learn More</summary>
+        <form id="homeContentForm">
+          <div class="form-group">
+            <label for="homeHeroTitleInput">Hero Title</label>
+            <input type="text" id="homeHeroTitleInput" />
+          </div>
+          <div class="form-group">
+            <label for="homeHeroSubtitleInput">Hero Subtitle</label>
+            <input type="text" id="homeHeroSubtitleInput" />
+          </div>
+          <div class="form-group">
+            <label for="homeHeroButtonTextInput">Hero Button Text</label>
+            <input type="text" id="homeHeroButtonTextInput" />
+          </div>
+          <div class="form-group">
+            <label for="homeLearnMoreTitleInput">"Learn More" Section Title</label>
+            <input type="text" id="homeLearnMoreTitleInput" />
+          </div>
+          <div class="form-group">
+            <label for="homeCtaTitleInput">Bottom Call-to-Action Title</label>
+            <input type="text" id="homeCtaTitleInput" />
+          </div>
+          <div class="form-group">
+            <label for="homeCtaTextInput">Bottom Call-to-Action Text</label>
+            <textarea id="homeCtaTextInput" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn"><i class="fas fa-save"></i> Save Home Content</button>
+        </form>
+      </details>
+    </div>
+
+    <div class="section">
+      <h2><i class="fas fa-user"></i> About Page</h2>
+      <details open>
+        <summary>Hero & About Text</summary>
+        <form id="aboutContentForm">
+          <div class="form-group">
+            <label for="aboutHeroTitleInput">Hero Title</label>
+            <input type="text" id="aboutHeroTitleInput" />
+          </div>
+          <div class="form-group">
+            <label for="aboutHeroSubtitleInput">Hero Subtitle</label>
+            <input type="text" id="aboutHeroSubtitleInput" />
+          </div>
+          <div class="form-group">
+            <label for="aboutNameHeadingInput">Name Heading</label>
+            <input type="text" id="aboutNameHeadingInput" />
+          </div>
+          <div class="form-group">
+            <label for="aboutP1Input">Paragraph 1</label>
+            <textarea id="aboutP1Input" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="aboutP2Input">Paragraph 2</label>
+            <textarea id="aboutP2Input" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="aboutP3Input">Paragraph 3</label>
+            <textarea id="aboutP3Input" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn"><i class="fas fa-save"></i> Save About Content</button>
+        </form>
+      </details>
+    </div>
+
+    <div class="section">
+      <h2><i class="fas fa-briefcase"></i> Experience Page</h2>
+      <details open>
+        <summary>Headings</summary>
+        <form id="experienceContentForm">
+          <div class="form-group">
+            <label for="experienceHeroTitleInput">Hero Title</label>
+            <input type="text" id="experienceHeroTitleInput" />
+          </div>
+          <div class="form-group">
+            <label for="experienceHeroSubtitleInput">Hero Subtitle</label>
+            <input type="text" id="experienceHeroSubtitleInput" />
+          </div>
+          <div class="form-group">
+            <label for="experienceWorkHeadingInput">Work Experience Heading</label>
+            <input type="text" id="experienceWorkHeadingInput" />
+          </div>
+          <div class="form-group">
+            <label for="experienceEducationHeadingInput">Education Heading</label>
+            <input type="text" id="experienceEducationHeadingInput" />
+          </div>
+          <button type="submit" class="btn"><i class="fas fa-save"></i> Save Experience Content</button>
+        </form>
+      </details>
+    </div>
+
+    <div class="section">
+      <h2><i class="fas fa-wand-magic-sparkles"></i> Skills Page</h2>
+      <details open>
+        <summary>Hero & Call To Action</summary>
+        <form id="skillsContentForm">
+          <div class="form-group">
+            <label for="skillsHeroTitleInput">Hero Title</label>
+            <input type="text" id="skillsHeroTitleInput" />
+          </div>
+          <div class="form-group">
+            <label for="skillsHeroSubtitleInput">Hero Subtitle</label>
+            <input type="text" id="skillsHeroSubtitleInput" />
+          </div>
+          <div class="form-group">
+            <label for="skillsCtaTitleInput">Bottom Call-to-Action Title</label>
+            <input type="text" id="skillsCtaTitleInput" />
+          </div>
+          <div class="form-group">
+            <label for="skillsCtaTextInput">Bottom Call-to-Action Text</label>
+            <textarea id="skillsCtaTextInput" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn"><i class="fas fa-save"></i> Save Skills Content</button>
+        </form>
+      </details>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
+      authDomain: "dominic-martinez-portfolio.firebaseapp.com",
+      projectId: "dominic-martinez-portfolio",
+      storageBucket: "dominic-martinez-portfolio.appspot.com",
+      messagingSenderId: "339938102474",
+      appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
+      measurementId: "G-MSKQYN75ML"
+    };
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const ADMIN_UID = "RVAvU26oGeYsaJYk0X1OF9h6apb2";
+
+    function showMessage(id, text) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 4000);
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = 'dashboard.html';
+      });
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user || user.uid !== ADMIN_UID) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      await loadAllContent();
+      setupFormHandlers();
+    });
+
+    async function loadAllContent() {
+      await Promise.all([
+        loadDocIntoInputs('home', {
+          heroTitle: 'homeHeroTitleInput',
+          heroSubtitle: 'homeHeroSubtitleInput',
+          heroButtonText: 'homeHeroButtonTextInput',
+          learnMoreTitle: 'homeLearnMoreTitleInput',
+          ctaTitle: 'homeCtaTitleInput',
+          ctaText: 'homeCtaTextInput'
+        }),
+        loadDocIntoInputs('about', {
+          heroTitle: 'aboutHeroTitleInput',
+          heroSubtitle: 'aboutHeroSubtitleInput',
+          nameHeading: 'aboutNameHeadingInput',
+          paragraph1: 'aboutP1Input',
+          paragraph2: 'aboutP2Input',
+          paragraph3: 'aboutP3Input'
+        }),
+        loadDocIntoInputs('experience', {
+          heroTitle: 'experienceHeroTitleInput',
+          heroSubtitle: 'experienceHeroSubtitleInput',
+          workHeading: 'experienceWorkHeadingInput',
+          educationHeading: 'experienceEducationHeadingInput'
+        }),
+        loadDocIntoInputs('skills', {
+          heroTitle: 'skillsHeroTitleInput',
+          heroSubtitle: 'skillsHeroSubtitleInput',
+          ctaTitle: 'skillsCtaTitleInput',
+          ctaText: 'skillsCtaTextInput'
+        })
+      ]);
+    }
+
+    async function loadDocIntoInputs(docId, mapping) {
+      try {
+        const snap = await db.collection('siteContent').doc(docId).get();
+        if (!snap.exists) return;
+        const data = snap.data();
+        Object.keys(mapping).forEach(key => {
+          const inputId = mapping[key];
+          const el = document.getElementById(inputId);
+          if (el && data[key] != null) {
+            el.value = data[key];
+          }
+        });
+      } catch (err) {
+        console.error('Error loading content for', docId, err);
+      }
+    }
+
+    function setupFormHandlers() {
+      const homeForm = document.getElementById('homeContentForm');
+      if (homeForm) homeForm.addEventListener('submit', (e) => saveContentForm(e, 'home'));
+      const aboutForm = document.getElementById('aboutContentForm');
+      if (aboutForm) aboutForm.addEventListener('submit', (e) => saveContentForm(e, 'about'));
+      const expForm = document.getElementById('experienceContentForm');
+      if (expForm) expForm.addEventListener('submit', (e) => saveContentForm(e, 'experience'));
+      const skillsForm = document.getElementById('skillsContentForm');
+      if (skillsForm) skillsForm.addEventListener('submit', (e) => saveContentForm(e, 'skills'));
+    }
+
+    async function saveContentForm(e, docId) {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user || user.uid !== ADMIN_UID) {
+        showMessage('errorMessage', '❌ You are not authorized to update site content.');
+        return;
+      }
+
+      const mappingByDoc = {
+        home: {
+          heroTitle: 'homeHeroTitleInput',
+          heroSubtitle: 'homeHeroSubtitleInput',
+          heroButtonText: 'homeHeroButtonTextInput',
+          learnMoreTitle: 'homeLearnMoreTitleInput',
+          ctaTitle: 'homeCtaTitleInput',
+          ctaText: 'homeCtaTextInput'
+        },
+        about: {
+          heroTitle: 'aboutHeroTitleInput',
+          heroSubtitle: 'aboutHeroSubtitleInput',
+          nameHeading: 'aboutNameHeadingInput',
+          paragraph1: 'aboutP1Input',
+          paragraph2: 'aboutP2Input',
+          paragraph3: 'aboutP3Input'
+        },
+        experience: {
+          heroTitle: 'experienceHeroTitleInput',
+          heroSubtitle: 'experienceHeroSubtitleInput',
+          workHeading: 'experienceWorkHeadingInput',
+          educationHeading: 'experienceEducationHeadingInput'
+        },
+        skills: {
+          heroTitle: 'skillsHeroTitleInput',
+          heroSubtitle: 'skillsHeroSubtitleInput',
+          ctaTitle: 'skillsCtaTitleInput',
+          ctaText: 'skillsCtaTextInput'
+        }
+      };
+
+      const mapping = mappingByDoc[docId];
+      if (!mapping) return;
+
+      const payload = {};
+      Object.keys(mapping).forEach(key => {
+        const inputId = mapping[key];
+        const el = document.getElementById(inputId);
+        if (el) payload[key] = el.value;
+      });
+
+      try {
+        await db.collection('siteContent').doc(docId).set(payload, { merge: true });
+        showMessage('successMessage', `✓ ${docId.charAt(0).toUpperCase() + docId.slice(1)} content saved!`);
+      } catch (err) {
+        console.error('Error saving content for', docId, err);
+        showMessage('errorMessage', '❌ Error saving content: ' + (err.message || 'Please try again.'));
+      }
+    }
+  </script>
+</body>
+</html>

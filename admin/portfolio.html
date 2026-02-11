@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Manage Portfolio</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/x-icon" href="../image/Headshot.jpg">
+  <style>
+    body { background: linear-gradient(135deg, #020212 0%, #0f0a1a 100%); color: #f0f0f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+    header { background: linear-gradient(135deg, #1B16A8 0%, #020212 100%); padding: 20px 0; border-bottom: 1px solid rgba(124,58,237,0.2); position: sticky; top: 0; z-index: 100; }
+    .header-content { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #1B16A8, #7C3AED); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .header-actions { display: flex; gap: 12px; align-items: center; }
+    .logout-btn, .back-btn { padding: 8px 16px; border-radius: 8px; border: 2px solid #7C3AED; background: transparent; color: #7C3AED; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+    .logout-btn:hover, .back-btn:hover { background: rgba(124,58,237,0.1); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 32px 20px 60px; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; align-items: flex-start; }
+    .section { background: radial-gradient(circle at top left, rgba(124,58,237,0.2), transparent 55%), linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid rgba(124,58,237,0.25); border-radius: 18px; padding: 24px 22px; box-shadow: 0 18px 45px rgba(0,0,0,0.45); }
+    .section h2 { font-size: 1.4rem; margin-bottom: 16px; color: #7C3AED; display: flex; align-items: center; gap: 10px; }
+    .upload-area { border: 3px dashed #7C3AED; border-radius: 14px; padding: 40px 20px; text-align: center; cursor: pointer; background: rgba(124,58,237,0.05); margin-bottom: 18px; }
+    .upload-area i { font-size: 3rem; color: #7C3AED; margin-bottom: 12px; display: block; }
+    .upload-area p { color: #bbb; margin-bottom: 6px; font-size: 0.95rem; }
+    .upload-area .highlight { color: #7C3AED; font-weight: 700; }
+    input[type="file"] { display: none; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; color: #bbb; font-weight: 600; font-size: 0.9rem; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(124,58,237,0.3); background: rgba(255,255,255,0.05); color: #f0f0f0; font-size: 0.9rem; }
+    .form-group textarea { min-height: 70px; resize: vertical; }
+    .preview-image { width: 100%; height: 220px; object-fit: cover; border-radius: 10px; margin-bottom: 12px; border: 1px solid rgba(124,58,237,0.2); display: none; }
+    .file-info { font-size: 0.8rem; color: #aaa; margin-bottom: 12px; }
+    .button-group { display: flex; gap: 10px; margin-top: 10px; }
+    .btn { flex: 1; padding: 11px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+    .btn-upload { background: linear-gradient(135deg, #1B16A8, #7C3AED); color: #fff; }
+    .btn-clear { background: transparent; border: 2px solid #7C3AED; color: #7C3AED; }
+    .photo-grid { display: grid; grid-template-columns: 1fr; gap: 12px; max-height: 640px; overflow-y: auto; }
+    .photo-item { background: rgba(27,22,168,0.15); border: 1px solid rgba(124,58,237,0.25); border-radius: 12px; padding: 10px 12px; display: flex; gap: 10px; align-items: center; }
+    .photo-thumbnail { width: 76px; height: 76px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(124,58,237,0.2); }
+    .photo-info { flex: 1; min-width: 0; }
+    .photo-info h4 { margin: 0 0 4px 0; font-size: 0.95rem; }
+    .photo-info p { margin: 0 0 3px 0; font-size: 0.8rem; color: #a6a6b3; }
+    .photo-stats { display: flex; gap: 12px; font-size: 0.78rem; color: #7C3AED; }
+    .photo-actions { display: flex; gap: 8px; }
+    .btn-edit, .btn-delete { padding: 7px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-edit { background: transparent; border: 2px solid #7C3AED; color: #7C3AED; }
+    .btn-delete { background: #e74c3c; color: #fff; }
+    .message { padding: 12px; border-radius: 10px; margin-bottom: 14px; display: none; font-weight: 600; }
+    .message.show { display: block; }
+    .message.success { background: rgba(76,175,80,0.2); border: 1px solid #4caf50; color: #81c784; }
+    .message.error { background: rgba(244,67,54,0.2); border: 1px solid #f44336; color: #ef5350; }
+    .empty-state { text-align: center; padding: 32px 10px; color: #666; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo"><i class="fas fa-images"></i> Manage Portfolio</div>
+      <div class="header-actions">
+        <button class="back-btn" onclick="window.location.href='dashboard.html'">&larr; Back to Dashboard</button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="successMessage" class="message success"></div>
+    <div id="errorMessage" class="message error"></div>
+
+    <div class="grid">
+      <div class="section">
+        <h2><i class="fas fa-cloud-upload-alt"></i> Upload / Edit Photo</h2>
+        <div class="upload-area" id="uploadArea">
+          <i class="fas fa-image"></i>
+          <p>Drag and drop your photo here</p>
+          <p>or <span class="highlight">click to browse</span></p>
+        </div>
+        <input type="file" id="fileInput" accept="image/*,.heic,.HEIC,.dng,.DNG,.cr2,.CR2,.nef,.NEF,.arw,.ARW,.tif,.tiff,.TIF,.TIFF">
+        <img id="previewImage" class="preview-image">
+        <div id="fileInfo" class="file-info"></div>
+        <form id="uploadForm">
+          <div class="form-group">
+            <label for="photoTitle">Photo Title *</label>
+            <input type="text" id="photoTitle" required>
+          </div>
+          <div class="form-group">
+            <label for="photoDescription">Description</label>
+            <textarea id="photoDescription"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="photoCategory">Category *</label>
+            <select id="photoCategory" required>
+              <option value="">Select a category</option>
+              <option value="Portrait Photography">Portrait Photography</option>
+              <option value="Cinematography">Cinematography</option>
+              <option value="Architecture">Architecture</option>
+              <option value="Nature">Nature</option>
+              <option value="Events">Events</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="button-group">
+            <button type="submit" class="btn btn-upload" id="submitBtn"><i class="fas fa-upload"></i> Upload Photo</button>
+            <button type="button" class="btn btn-clear" onclick="resetForm()">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="section">
+        <h2><i class="fas fa-images"></i> Your Photos (<span id="photoCount">0</span>)</h2>
+        <div class="photo-grid" id="photoList">
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>No photos uploaded yet</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
+      authDomain: "dominic-martinez-portfolio.firebaseapp.com",
+      projectId: "dominic-martinez-portfolio",
+      storageBucket: "dominic-martinez-portfolio.appspot.com",
+      messagingSenderId: "339938102474",
+      appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
+      measurementId: "G-MSKQYN75ML"
+    };
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    const ADMIN_UID = "RVAvU26oGeYsaJYk0X1OF9h6apb2";
+    let selectedFile = null;
+    let editingPhotoId = null;
+
+    function showMessage(id, text) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 4000);
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = 'dashboard.html';
+      });
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user || user.uid !== ADMIN_UID) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      setupEventListeners();
+      await ensureInitialProjects();
+      loadPhotos();
+    });
+
+    async function ensureInitialProjects() {
+      const user = auth.currentUser;
+      if (!user || user.uid !== ADMIN_UID) return;
+      const initialProjects = [
+        { id: 'project-1', title: 'Gorgeous Cat', description: 'Professional portrait photography capturing stunning details and emotion.', category: 'Portrait Photography', imageUrl: '/image/Gorgeous-Cat.jpg' },
+        { id: 'project-2', title: 'La Antorcha', description: 'Dynamic cinematography project showcasing visual storytelling and technical excellence.', category: 'Cinematography', imageUrl: '/image/La-Antorcha.jpg' },
+        { id: 'project-3', title: 'Smiling Boy', description: 'Candid portrait photography capturing authentic moments and genuine expressions.', category: 'Portrait Photography', imageUrl: '/image/Smiling-Boy.jpg' },
+        { id: 'project-4', title: 'The Alamo', description: 'Architectural photography highlighting composition and cultural landmark documentation.', category: 'Architecture', imageUrl: '/image/The-Alamo.jpg' }
+      ];
+      for (const project of initialProjects) {
+        try {
+          const ref = db.collection('portfolio').doc(project.id);
+          const snap = await ref.get();
+          if (!snap.exists) {
+            await ref.set({ ...project, likeCount: 0, createdAt: new Date(), uploadedBy: 'admin' });
+          }
+        } catch (e) {
+          console.warn('Error seeding project', project.id, e);
+        }
+      }
+    }
+
+    function setupEventListeners() {
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+      const uploadForm = document.getElementById('uploadForm');
+
+      if (uploadArea) {
+        uploadArea.addEventListener('click', () => fileInput && fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('active'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('active'));
+        uploadArea.addEventListener('drop', (e) => {
+          e.preventDefault();
+          uploadArea.classList.remove('active');
+          handleFileDrop(e.dataTransfer.files);
+        });
+      }
+
+      if (fileInput) {
+        fileInput.addEventListener('change', (e) => handleFileDrop(e.target.files));
+      }
+
+      if (uploadForm) {
+        uploadForm.addEventListener('submit', handleUpload);
+      }
+    }
+
+    function handleFileDrop(files) {
+      if (!files || files.length === 0) return;
+      const file = files[0];
+      if (file.size > 50 * 1024 * 1024) {
+        showMessage('errorMessage', '❌ File is too large. Max 50MB.');
+        return;
+      }
+      selectedFile = file;
+      const info = document.getElementById('fileInfo');
+      if (info) {
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        info.textContent = `Selected: ${file.name} (${sizeMb} MB)`;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const preview = document.getElementById('previewImage');
+        if (preview) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        }
+      };
+      reader.onerror = (err) => {
+        console.error('FileReader error:', err);
+        showMessage('errorMessage', '❌ Could not generate a preview, but the file can still be uploaded.');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function handleUpload(e) {
+      e.preventDefault();
+      const titleEl = document.getElementById('photoTitle');
+      const catEl = document.getElementById('photoCategory');
+      if (!titleEl || !titleEl.value) {
+        showMessage('errorMessage', '❌ Please enter a photo title.');
+        return;
+      }
+      if (!catEl || !catEl.value) {
+        showMessage('errorMessage', '❌ Please select a category.');
+        return;
+      }
+      const submitBtn = document.getElementById('submitBtn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loading"></span> Uploading...';
+      }
+      try {
+        const user = auth.currentUser;
+        if (!user || user.uid !== ADMIN_UID) {
+          showMessage('errorMessage', '❌ You are not authorized to upload photos.');
+          return;
+        }
+        const title = titleEl.value;
+        const description = document.getElementById('photoDescription').value;
+        const category = catEl.value;
+        if (editingPhotoId) {
+          const updateData = { title, description, category };
+          if (selectedFile) {
+            const storageRef = storage.ref('portfolio/' + editingPhotoId);
+            await storageRef.put(selectedFile);
+            updateData.imageUrl = await storageRef.getDownloadURL();
+          }
+          await db.collection('portfolio').doc(editingPhotoId).update(updateData);
+          showMessage('successMessage', '✓ Photo updated successfully!');
+          resetForm();
+          loadPhotos();
+          return;
+        }
+        if (!selectedFile) {
+          showMessage('errorMessage', '❌ Please select a photo first.');
+          return;
+        }
+        const photoId = 'photo-' + Date.now();
+        const storageRef = storage.ref('portfolio/' + photoId);
+        await storageRef.put(selectedFile);
+        const imageUrl = await storageRef.getDownloadURL();
+        await db.collection('portfolio').doc(photoId).set({
+          id: photoId,
+          title,
+          description,
+          category,
+          imageUrl,
+          likeCount: 0,
+          createdAt: new Date(),
+          uploadedBy: 'admin'
+        });
+        showMessage('successMessage', '✓ Photo uploaded successfully!');
+        resetForm();
+        loadPhotos();
+      } catch (err) {
+        console.error('Upload error:', err);
+        if (err.code === 'permission-denied') {
+          showMessage('errorMessage', '❌ You are not allowed to modify portfolio items.');
+        } else {
+          showMessage('errorMessage', '❌ Error uploading photo: ' + (err.message || 'Please try again.'));
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
+        }
+      }
+    }
+
+    function resetForm() {
+      const form = document.getElementById('uploadForm');
+      const fileInput = document.getElementById('fileInput');
+      const preview = document.getElementById('previewImage');
+      const info = document.getElementById('fileInfo');
+      const submitBtn = document.getElementById('submitBtn');
+      if (form) form.reset();
+      if (fileInput) fileInput.value = '';
+      if (preview) preview.style.display = 'none';
+      if (info) info.textContent = '';
+      if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
+      selectedFile = null;
+      editingPhotoId = null;
+    }
+
+    async function loadPhotos() {
+      try {
+        const snapshot = await db.collection('portfolio').orderBy('createdAt', 'desc').get();
+        const photoList = document.getElementById('photoList');
+        const photoCount = document.getElementById('photoCount');
+        if (snapshot.empty) {
+          if (photoList) {
+            photoList.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No photos uploaded yet</p></div>';
+          }
+          if (photoCount) photoCount.textContent = '0';
+          return;
+        }
+        if (photoCount) photoCount.textContent = snapshot.size;
+        if (photoList) photoList.innerHTML = '';
+        snapshot.forEach(doc => {
+          const photo = doc.data();
+          let createdAtLabel = '';
+          try {
+            if (photo.createdAt && typeof photo.createdAt.toDate === 'function') {
+              createdAtLabel = new Date(photo.createdAt.toDate()).toLocaleDateString();
+            } else if (photo.createdAt instanceof Date) {
+              createdAtLabel = photo.createdAt.toLocaleDateString();
+            }
+          } catch (e) {
+            console.warn('Bad createdAt field for doc', doc.id, e);
+            createdAtLabel = '';
+          }
+          const item = document.createElement('div');
+          item.className = 'photo-item';
+          item.innerHTML = `
+            <img src="${photo.imageUrl}" alt="${photo.title}" class="photo-thumbnail">
+            <div class="photo-info">
+              <h4>${photo.title}</h4>
+              <p><strong>${photo.category}</strong></p>
+              <p>${photo.description || 'No description'}</p>
+              <div class="photo-stats">
+                <span>❤️ ${photo.likeCount || 0} likes</span>
+                <span>${createdAtLabel}</span>
+              </div>
+            </div>
+            <div class="photo-actions">
+              <button class="btn-edit" onclick="editPhoto('${doc.id}')">Edit</button>
+              <button class="btn-delete" onclick="deletePhoto('${doc.id}')">Delete</button>
+            </div>`;
+          if (photoList) photoList.appendChild(item);
+        });
+      } catch (err) {
+        console.error('Error loading photos:', err);
+      }
+    }
+
+    async function deletePhoto(photoId) {
+      if (!confirm('🗑️ Delete this photo? This cannot be undone.')) return;
+      try {
+        const user = auth.currentUser;
+        if (!user || user.uid !== ADMIN_UID) {
+          showMessage('errorMessage', '❌ You are not authorized to delete photos.');
+          return;
+        }
+        const docSnap = await db.collection('portfolio').doc(photoId).get();
+        if (docSnap.exists) {
+          const imageUrl = docSnap.data().imageUrl;
+          try {
+            const fileRef = storage.refFromURL(imageUrl);
+            await fileRef.delete();
+          } catch (e) {
+            console.log('Storage deletion skipped');
+          }
+        }
+        await db.collection('portfolio').doc(photoId).delete();
+        showMessage('successMessage', '✓ Photo deleted successfully!');
+        loadPhotos();
+      } catch (err) {
+        console.error('Delete error:', err);
+        if (err.code === 'permission-denied') {
+          showMessage('errorMessage', '❌ You are not allowed to modify portfolio items.');
+        } else {
+          showMessage('errorMessage', '❌ Error deleting photo: ' + (err.message || 'Please try again.'));
+        }
+      }
+    }
+
+    async function editPhoto(photoId) {
+      try {
+        const user = auth.currentUser;
+        if (!user || user.uid !== ADMIN_UID) {
+          showMessage('errorMessage', '❌ You are not authorized to edit photos.');
+          return;
+        }
+        const docSnap = await db.collection('portfolio').doc(photoId).get();
+        if (!docSnap.exists) {
+          showMessage('errorMessage', '❌ Photo not found.');
+          return;
+        }
+        const photo = docSnap.data();
+        editingPhotoId = photoId;
+        const titleInput = document.getElementById('photoTitle');
+        const descInput = document.getElementById('photoDescription');
+        const categorySelect = document.getElementById('photoCategory');
+        const previewImage = document.getElementById('previewImage');
+        const submitBtn = document.getElementById('submitBtn');
+        if (titleInput) titleInput.value = photo.title || '';
+        if (descInput) descInput.value = photo.description || '';
+        if (categorySelect) categorySelect.value = photo.category || '';
+        if (previewImage && photo.imageUrl) {
+          previewImage.src = photo.imageUrl;
+          previewImage.style.display = 'block';
+        }
+        if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+        const container = document.querySelector('.upload-area');
+        if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        console.error('Edit error:', err);
+        showMessage('errorMessage', '❌ Error loading photo for edit: ' + (err.message || 'Please try again.'));
+      }
+    }
+  </script>
+</body>
+</html>

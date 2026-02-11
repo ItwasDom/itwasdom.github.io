@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Profile - Dominic Martinez</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #020212 0%, #0f0a1a 100%);
+      color: #f0f0f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1B16A8 0%, #020212 100%);
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      font-size: 1.6rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #1B16A8, #7C3AED);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn-secondary, .btn-ghost {
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+    }
+
+    .btn-secondary {
+      background: rgba(124, 58, 237, 0.15);
+      color: #e5e7eb;
+      border: 1px solid rgba(124, 58, 237, 0.4);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #f97373;
+      border: 1px solid rgba(248, 113, 113, 0.6);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(248, 113, 113, 0.12);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 20px 50px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.25), transparent 55%),
+                  linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 18px;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      padding: 26px 24px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    }
+
+    .card h1 {
+      font-size: 1.8rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e5e7eb;
+    }
+
+    .card h1 i {
+      color: #7C3AED;
+    }
+
+    .card p.subtitle {
+      color: #9ca3af;
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 768px) {
+      .two-column {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    form .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      color: #d1d5db;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.75);
+      color: #e5e7eb;
+      padding: 11px 12px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #7C3AED;
+      box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.4);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .form-group input[readonly] {
+      opacity: 0.8;
+      cursor: default;
+    }
+
+    .form-group textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .primary-btn {
+      margin-top: 6px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      background: linear-gradient(135deg, #1B16A8, #7C3AED);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .message {
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      font-size: 0.9rem;
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.success {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.7);
+      color: #bbf7d0;
+    }
+
+    .message.error {
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.8);
+      color: #fecaca;
+    }
+
+    .profile-meta {
+      font-size: 0.88rem;
+      color: #9ca3af;
+      line-height: 1.4;
+    }
+
+    .profile-meta strong {
+      color: #e5e7eb;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <i class="fas fa-user-shield"></i>
+        <span>Admin Profile</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn-secondary" onclick="window.location.href='dashboard.html'">
+          <i class="fas fa-arrow-left"></i>
+          <span>Back to Dashboard</span>
+        </button>
+        <button class="btn-ghost" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h1><i class="fas fa-id-badge"></i> Your Admin Profile</h1>
+      <p class="subtitle">Update how your admin identity appears across the site. Login email is fixed here for security, but you can add a display name and contact email used for personalization.</p>
+
+      <div id="successMessage" class="message success"></div>
+      <div id="errorMessage" class="message error"></div>
+
+      <div class="two-column">
+        <form id="profileForm">
+          <div class="form-group">
+            <label for="displayName">Display Name</label>
+            <input type="text" id="displayName" placeholder="Your name as shown on site">
+          </div>
+
+          <div class="form-group">
+            <label for="contactEmail">Public / Contact Email</label>
+            <input type="email" id="contactEmail" placeholder="Email visitors can use to reach you">
+          </div>
+
+          <div class="form-group">
+            <label for="bio">Short Bio / Tagline</label>
+            <textarea id="bio" placeholder="A short line or two about you (optional)"></textarea>
+          </div>
+
+          <button type="submit" id="saveBtn" class="primary-btn">
+            <i class="fas fa-save"></i>
+            <span>Save Profile</span>
+          </button>
+        </form>
+
+        <div>
+          <div class="profile-meta" id="profileMeta">
+            <p><strong>Status:</strong> Checking authentication…</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
+      authDomain: "dominic-martinez-portfolio.firebaseapp.com",
+      projectId: "dominic-martinez-portfolio",
+      storageBucket: "dominic-martinez-portfolio.appspot.com",
+      messagingSenderId: "339938102474",
+      appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
+      measurementId: "G-MSKQYN75ML"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const ADMIN_UID = "RVAvU26oGeYsaJYk0X1OF9h6apb2";
+
+    function showMessage(id, text) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text;
+      el.classList.add('show');
+      if (id === 'successMessage') {
+        setTimeout(() => el.classList.remove('show'), 3500);
+      }
+    }
+
+    function clearMessages() {
+      ['successMessage', 'errorMessage'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.textContent = '';
+          el.classList.remove('show');
+        }
+      });
+    }
+
+    function setProfileMeta(text) {
+      const meta = document.getElementById('profileMeta');
+      if (!meta) return;
+      meta.innerHTML = `<p><strong>Status:</strong> ${text}</p>`;
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = 'dashboard.html';
+      }).catch(() => {
+        showMessage('errorMessage', 'Could not log out. Please close the tab.');
+      });
+    }
+
+    async function loadProfile(user) {
+      try {
+        const docRef = db.collection('users').doc(user.uid);
+        const snap = await docRef.get();
+
+        const displayNameInput = document.getElementById('displayName');
+        const contactEmailInput = document.getElementById('contactEmail');
+        const bioInput = document.getElementById('bio');
+
+        if (snap.exists) {
+          const data = snap.data();
+          if (displayNameInput) displayNameInput.value = data.displayName || '';
+          if (contactEmailInput) contactEmailInput.value = data.contactEmail || '';
+          if (bioInput) bioInput.value = data.bio || '';
+        } else {
+          if (contactEmailInput) contactEmailInput.value = user.email || '';
+        }
+
+        const loginEmail = user.email || '(no email)';
+        setProfileMeta(`Logged in as <strong>${loginEmail}</strong><br>Only this account can access the admin area.`);
+      } catch (err) {
+        console.error('Error loading profile:', err);
+        showMessage('errorMessage', 'Error loading profile. Please refresh and try again.');
+      }
+    }
+
+    async function saveProfile(e) {
+      e.preventDefault();
+      clearMessages();
+
+      const user = auth.currentUser;
+      if (!user) {
+        showMessage('errorMessage', 'You are not signed in.');
+        return;
+      }
+      if (user.uid !== ADMIN_UID) {
+        showMessage('errorMessage', 'You are not authorized to update this profile.');
+        return;
+      }
+
+      const displayNameInput = document.getElementById('displayName');
+      const contactEmailInput = document.getElementById('contactEmail');
+      const bioInput = document.getElementById('bio');
+      const saveBtn = document.getElementById('saveBtn');
+
+      const payload = {
+        displayName: displayNameInput.value.trim() || null,
+        contactEmail: contactEmailInput.value.trim() || null,
+        bio: bioInput.value.trim() || null,
+        updatedAt: new Date()
+      };
+
+      // Remove nulls so we do not overwrite fields with null
+      Object.keys(payload).forEach(key => {
+        if (payload[key] === null) {
+          delete payload[key];
+        }
+      });
+
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving…</span>';
+      }
+
+      try {
+        const docRef = db.collection('users').doc(user.uid);
+        await docRef.set(payload, { merge: true });
+
+        if (payload.displayName) {
+          try {
+            await user.updateProfile({ displayName: payload.displayName });
+          } catch (e) {
+            console.warn('Could not update Firebase Auth displayName:', e);
+          }
+        }
+
+        showMessage('successMessage', 'Profile updated successfully.');
+      } catch (err) {
+        console.error('Error saving profile:', err);
+        showMessage('errorMessage', 'Error saving profile. Please try again.');
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fas fa-save"></i><span>Save Profile</span>';
+        }
+      }
+    }
+
+    // Auth gate
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        setProfileMeta('Not signed in. Redirecting to dashboard…');
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1200);
+        return;
+      }
+
+      if (user.uid !== ADMIN_UID) {
+        setProfileMeta('This account is not authorized. Redirecting…');
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1200);
+        return;
+      }
+
+      setProfileMeta('Authenticated as admin. You can safely edit this profile.');
+      loadProfile(user);
+
+      const form = document.getElementById('profileForm');
+      if (form) {
+        form.addEventListener('submit', saveProfile);
+      }
+    });
+  </script>
+</body>
+</html>
