@@ -60,8 +60,7 @@ service cloud.firestore {
     // Portfolio collection (admin uploads)
     match /portfolio/{photoId} {
       allow read: if true;
-      allow write: if request.auth != null && resource == null; // New photo creation
-      allow update, delete: if request.auth != null; // Authenticated users can update/delete
+      allow create, update, delete: if request.auth != null && request.auth.uid == "<ADMIN_UID>";
     }
 
     // Profile collection

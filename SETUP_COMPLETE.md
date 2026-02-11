@@ -11,13 +11,16 @@ A complete photography portfolio site with:
 
 ## 🚀 Next Steps (Do These Now)
 
-### Step 1: Change Admin Password ⚠️ IMPORTANT
+### Step 1: Create an Admin Account (Firebase Auth) ⚠️ IMPORTANT
 
-1. Open `admin/index.html` in your code editor
-2. Find line ~184 (search for `ADMIN_PASSWORD`)
-3. Change `"DomAdmin123!"` to a strong password like `"MySecure123!"`
-4. Save the file
-5. **Don't share this password!**
+1. Firebase Console → **Authentication** → **Users** → **Add user**
+2. Create an email/password user you will use for admin
+3. Copy that user's UID
+4. Update the `ADMIN_UID` constant in:
+  - `admin/dashboard.html`
+  - `admin/content.html`
+  - `admin/portfolio.html`
+  - `admin/profile.html`
 
 ### Step 2: Update Firestore Rules
 
@@ -40,8 +43,7 @@ service cloud.firestore {
 
     match /portfolio/{photoId} {
       allow read: if true;
-      allow write: if request.auth != null && resource == null;
-      allow update, delete: if request.auth != null;
+      allow create, update, delete: if request.auth != null && request.auth.uid == "<ADMIN_UID>";
     }
 
     match /profile/{profileId} {
@@ -57,7 +59,7 @@ service cloud.firestore {
 ### Step 3: Upload Your First Photo
 
 1. Go to `/admin/` on your local site (or `yoursite.com/admin/` when deployed)
-2. Login with your admin password
+2. Login with your admin email/password (Firebase Auth)
 3. Drag and drop a photo
 4. Fill in title, description, category
 5. Click "Upload Photo"

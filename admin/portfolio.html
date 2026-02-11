@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Manage Portfolio</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -56,8 +57,8 @@
     <div class="header-content">
       <div class="logo"><i class="fas fa-images"></i> Manage Portfolio</div>
       <div class="header-actions">
-        <button class="back-btn" onclick="window.location.href='dashboard.html'">&larr; Back to Dashboard</button>
-        <button class="logout-btn" onclick="logout()">Logout</button>
+        <button class="back-btn" id="backBtn" type="button">&larr; Back to Dashboard</button>
+        <button class="logout-btn" id="logoutBtn" type="button">Logout</button>
       </div>
     </div>
   </header>
@@ -100,7 +101,7 @@
           </div>
           <div class="button-group">
             <button type="submit" class="btn btn-upload" id="submitBtn"><i class="fas fa-upload"></i> Upload Photo</button>
-            <button type="button" class="btn btn-clear" onclick="resetForm()">Clear</button>
+            <button type="button" class="btn btn-clear" id="clearBtn">Clear</button>
           </div>
         </form>
       </div>
@@ -121,25 +122,108 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+  <script src="../assets/js/firebase-config.js"></script>
+  <script src="../assets/js/firebase-init-compat.js"></script>
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
-      authDomain: "dominic-martinez-portfolio.firebaseapp.com",
-      projectId: "dominic-martinez-portfolio",
-      storageBucket: "dominic-martinez-portfolio.appspot.com",
-      messagingSenderId: "339938102474",
-      appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
-      measurementId: "G-MSKQYN75ML"
-    };
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
     const auth = firebase.auth();
     const db = firebase.firestore();
     const storage = firebase.storage();
     const ADMIN_UID = "RVAvU26oGeYsaJYk0X1OF9h6apb2";
     let selectedFile = null;
     let editingPhotoId = null;
+
+    function clearElement(el) {
+      if (!el) return;
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function renderEmptyState(containerEl) {
+      if (!containerEl) return;
+      clearElement(containerEl);
+      const wrap = document.createElement('div');
+      wrap.className = 'empty-state';
+      const icon = document.createElement('i');
+      icon.className = 'fas fa-inbox';
+      const p = document.createElement('p');
+      p.textContent = 'No photos uploaded yet';
+      wrap.appendChild(icon);
+      wrap.appendChild(p);
+      containerEl.appendChild(wrap);
+    }
+
+    function normalizeHttpUrl(url) {
+      if (typeof url !== 'string') return null;
+      try {
+        const parsed = new URL(url, window.location.href);
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+        return parsed.href;
+      } catch {
+        return null;
+      }
+    }
+
+    function createPhotoItem(docId, photo, createdAtLabel) {
+      const item = document.createElement('div');
+      item.className = 'photo-item';
+
+      const img = document.createElement('img');
+      img.className = 'photo-thumbnail';
+      img.alt = (photo && typeof photo.title === 'string' && photo.title.trim()) ? photo.title : 'Portfolio photo';
+      const normalizedImageUrl = normalizeHttpUrl(photo && photo.imageUrl);
+      if (normalizedImageUrl) img.src = normalizedImageUrl;
+      item.appendChild(img);
+
+      const info = document.createElement('div');
+      info.className = 'photo-info';
+
+      const h4 = document.createElement('h4');
+      h4.textContent = (photo && typeof photo.title === 'string' && photo.title.trim()) ? photo.title : 'Untitled';
+      info.appendChild(h4);
+
+      const cat = document.createElement('p');
+      const strong = document.createElement('strong');
+      strong.textContent = (photo && typeof photo.category === 'string' && photo.category.trim()) ? photo.category : 'Uncategorized';
+      cat.appendChild(strong);
+      info.appendChild(cat);
+
+      const desc = document.createElement('p');
+      desc.textContent = (photo && typeof photo.description === 'string' && photo.description.trim()) ? photo.description : 'No description';
+      info.appendChild(desc);
+
+      const stats = document.createElement('div');
+      stats.className = 'photo-stats';
+      const likes = document.createElement('span');
+      const likeCount = (photo && Number.isFinite(Number(photo.likeCount))) ? Number(photo.likeCount) : 0;
+      likes.textContent = `❤️ ${likeCount} likes`;
+      const date = document.createElement('span');
+      date.textContent = createdAtLabel || '';
+      stats.appendChild(likes);
+      stats.appendChild(date);
+      info.appendChild(stats);
+
+      item.appendChild(info);
+
+      const actions = document.createElement('div');
+      actions.className = 'photo-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn-edit';
+      editBtn.type = 'button';
+      editBtn.textContent = 'Edit';
+      editBtn.addEventListener('click', () => editPhoto(docId));
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn-delete';
+      delBtn.type = 'button';
+      delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', () => deletePhoto(docId));
+
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      item.appendChild(actions);
+
+      return item;
+    }
 
     function showMessage(id, text) {
       const el = document.getElementById(id);
@@ -191,6 +275,23 @@
       const uploadArea = document.getElementById('uploadArea');
       const fileInput = document.getElementById('fileInput');
       const uploadForm = document.getElementById('uploadForm');
+      const backBtn = document.getElementById('backBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const clearBtn = document.getElementById('clearBtn');
+
+      if (backBtn) {
+        backBtn.addEventListener('click', () => {
+          window.location.href = 'dashboard.html';
+        });
+      }
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+      }
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', resetForm);
+      }
 
       if (uploadArea) {
         uploadArea.addEventListener('click', () => fileInput && fileInput.click());
@@ -336,15 +437,13 @@
         const photoList = document.getElementById('photoList');
         const photoCount = document.getElementById('photoCount');
         if (snapshot.empty) {
-          if (photoList) {
-            photoList.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No photos uploaded yet</p></div>';
-          }
+          renderEmptyState(photoList);
           if (photoCount) photoCount.textContent = '0';
           return;
         }
-        if (photoCount) photoCount.textContent = snapshot.size;
-        if (photoList) photoList.innerHTML = '';
-        snapshot.forEach(doc => {
+        if (photoCount) photoCount.textContent = String(snapshot.size);
+        clearElement(photoList);
+        snapshot.forEach((doc) => {
           const photo = doc.data();
           let createdAtLabel = '';
           try {
@@ -357,23 +456,7 @@
             console.warn('Bad createdAt field for doc', doc.id, e);
             createdAtLabel = '';
           }
-          const item = document.createElement('div');
-          item.className = 'photo-item';
-          item.innerHTML = `
-            <img src="${photo.imageUrl}" alt="${photo.title}" class="photo-thumbnail">
-            <div class="photo-info">
-              <h4>${photo.title}</h4>
-              <p><strong>${photo.category}</strong></p>
-              <p>${photo.description || 'No description'}</p>
-              <div class="photo-stats">
-                <span>❤️ ${photo.likeCount || 0} likes</span>
-                <span>${createdAtLabel}</span>
-              </div>
-            </div>
-            <div class="photo-actions">
-              <button class="btn-edit" onclick="editPhoto('${doc.id}')">Edit</button>
-              <button class="btn-delete" onclick="deletePhoto('${doc.id}')">Delete</button>
-            </div>`;
+          const item = createPhotoItem(doc.id, photo, createdAtLabel);
           if (photoList) photoList.appendChild(item);
         });
       } catch (err) {

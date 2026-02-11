@@ -6,34 +6,32 @@ You now have a complete admin dashboard for uploading and managing photos on you
 
 ## Quick Access
 
-Visit: `https://yoursite.com/admin/` (or open `admin/index.html` locally)
+Visit: `https://yoursite.com/admin/` (redirects to `admin/dashboard.html`)
 
 ## Initial Setup
 
-### Step 1: Set Admin Password
+### Step 1: Create an Admin Account (Firebase Auth)
 
-1. Open `admin/index.html` in your code editor
-2. Find line ~184 (search for `ADMIN_PASSWORD`)
-3. Replace the default password:
-   ```javascript
-   const ADMIN_PASSWORD = "DomAdmin123!"; // CHANGE THIS!
-   ```
-   Change to a strong password of your choice:
-   ```javascript
-   const ADMIN_PASSWORD = "YourSecurePasswordHere123!";
-   ```
-4. Save the file
-5. **Important**: Don't commit this password to public repositories
+1. Go to Firebase Console → **Authentication** → **Users**
+2. Click **Add user** and create an email/password user for admin
+3. Copy the admin user's UID
 
-### Step 2: Update Firestore Rules
+### Step 2: Set `ADMIN_UID` in Admin Pages
+
+Update the `ADMIN_UID` constant in these files to match your admin UID:
+- `admin/dashboard.html`
+- `admin/content.html`
+- `admin/portfolio.html`
+- `admin/profile.html`
+
+### Step 3: Update Firestore Rules (Lock writes to Admin UID)
 
 Make sure your Firestore rules include the portfolio collection. Go to **Firebase Console → Firestore → Rules** and verify this rule is present:
 
 ```
 match /portfolio/{photoId} {
   allow read: if true;
-  allow write: if request.auth != null && resource == null;
-  allow update, delete: if request.auth != null;
+  allow create, update, delete: if request.auth != null && request.auth.uid == "<ADMIN_UID>";
 }
 ```
 
@@ -55,8 +53,7 @@ service cloud.firestore {
 
     match /portfolio/{photoId} {
       allow read: if true;
-      allow write: if request.auth != null && resource == null;
-      allow update, delete: if request.auth != null;
+      allow create, update, delete: if request.auth != null && request.auth.uid == "<ADMIN_UID>";
     }
 
     match /profile/{profileId} {
@@ -74,8 +71,7 @@ Then click **Publish** to apply the rules.
 ### Login
 
 1. Go to `/admin/`
-2. Enter your admin password
-3. Click "Login"
+2. Sign in with your Firebase Auth admin email/password
 
 ### Upload a Photo
 

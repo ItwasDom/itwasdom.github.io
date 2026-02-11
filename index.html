@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com;" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Dominic Martinez - Professional Photographer & Cinematographer in San Antonio, TX. Specializing in photography, video production, and visual storytelling." />
   <meta name="keywords" content="photographer, cinematographer, video production, San Antonio, digital cinematography, visual storytelling" />
@@ -246,72 +247,14 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="/assets/js/firebase-config.js"></script>
+  <script src="/assets/js/firebase-init-compat.js"></script>
+  <script src="/assets/js/auth-nav.js"></script>
   <script>
     (function() {
-      const firebaseConfig = {
-        apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
-        authDomain: "dominic-martinez-portfolio.firebaseapp.com",
-        projectId: "dominic-martinez-portfolio",
-        storageBucket: "dominic-martinez-portfolio.appspot.com",
-        messagingSenderId: "339938102474",
-        appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
-        measurementId: "G-MSKQYN75ML"
-      };
-
-      if (!window.firebase || !firebase.apps || !firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-      const auth = firebase.auth();
       const db = firebase.firestore();
 
-      function setAuthUI(user) {
-        const authNavBtn = document.getElementById('authNavBtn');
-        const dropdown = document.getElementById('authDropdown');
-        const logoutBtn = document.getElementById('authLogoutBtn');
-
-        if (!authNavBtn) return;
-
-        if (!user) {
-          authNavBtn.textContent = 'Login / Sign Up';
-          authNavBtn.href = 'user/login.html';
-          authNavBtn.removeAttribute('data-auth-ready');
-          if (dropdown) dropdown.classList.remove('show');
-          return;
-        }
-
-        authNavBtn.textContent = user.displayName || 'My Profile';
-        authNavBtn.href = '#';
-        authNavBtn.setAttribute('data-auth-ready', 'true');
-
-        // Toggle dropdown on click
-        authNavBtn.onclick = (e) => {
-          e.preventDefault();
-          if (dropdown) dropdown.classList.toggle('show');
-        };
-
-        // Close on outside click
-        document.addEventListener('click', (e) => {
-          if (!dropdown) return;
-          if (!authNavBtn.contains(e.target) && !dropdown.contains(e.target)) {
-            dropdown.classList.remove('show');
-          }
-        });
-
-        if (logoutBtn) {
-          logoutBtn.onclick = async (e) => {
-            e.preventDefault();
-            try {
-              await auth.signOut();
-              if (dropdown) dropdown.classList.remove('show');
-            } catch (err) {
-              console.error('Logout failed:', err);
-            }
-          };
-        }
-      }
-
       document.addEventListener('DOMContentLoaded', async function() {
-        auth.onAuthStateChanged((user) => setAuthUI(user));
         try {
           const snap = await db.collection('siteContent').doc('home').get();
           if (!snap.exists) return;

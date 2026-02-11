@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Profile - Dominic Martinez</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -248,11 +249,11 @@
         <span>Admin Profile</span>
       </div>
       <div class="header-actions">
-        <button class="btn-secondary" onclick="window.location.href='dashboard.html'">
+        <button class="btn-secondary" id="backBtn" type="button">
           <i class="fas fa-arrow-left"></i>
           <span>Back to Dashboard</span>
         </button>
-        <button class="btn-ghost" onclick="logout()">
+        <button class="btn-ghost" id="logoutBtn" type="button">
           <i class="fas fa-sign-out-alt"></i>
           <span>Logout</span>
         </button>
@@ -304,19 +305,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="../assets/js/firebase-config.js"></script>
+  <script src="../assets/js/firebase-init-compat.js"></script>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
-      authDomain: "dominic-martinez-portfolio.firebaseapp.com",
-      projectId: "dominic-martinez-portfolio",
-      storageBucket: "dominic-martinez-portfolio.appspot.com",
-      messagingSenderId: "339938102474",
-      appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
-      measurementId: "G-MSKQYN75ML"
-    };
-
-    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     const ADMIN_UID = "RVAvU26oGeYsaJYk0X1OF9h6apb2";
@@ -344,7 +336,35 @@
     function setProfileMeta(text) {
       const meta = document.getElementById('profileMeta');
       if (!meta) return;
-      meta.innerHTML = `<p><strong>Status:</strong> ${text}</p>`;
+      meta.textContent = '';
+      const p = document.createElement('p');
+      const strong = document.createElement('strong');
+      strong.textContent = 'Status:';
+      const span = document.createElement('span');
+      span.textContent = ` ${text}`;
+      p.appendChild(strong);
+      p.appendChild(span);
+      meta.appendChild(p);
+    }
+
+    function setProfileMetaLoggedIn(email) {
+      const meta = document.getElementById('profileMeta');
+      if (!meta) return;
+      meta.textContent = '';
+
+      const p = document.createElement('p');
+      const strongStatus = document.createElement('strong');
+      strongStatus.textContent = 'Status:';
+      p.appendChild(strongStatus);
+      p.appendChild(document.createTextNode(' Logged in as '));
+
+      const strongEmail = document.createElement('strong');
+      strongEmail.textContent = email || '(no email)';
+      p.appendChild(strongEmail);
+      p.appendChild(document.createElement('br'));
+      p.appendChild(document.createTextNode('Only this account can access the admin area.'));
+
+      meta.appendChild(p);
     }
 
     function logout() {
@@ -354,6 +374,19 @@
         showMessage('errorMessage', 'Could not log out. Please close the tab.');
       });
     }
+
+    (function attachHeaderHandlers() {
+      const backBtn = document.getElementById('backBtn');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => {
+          window.location.href = 'dashboard.html';
+        });
+      }
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+      }
+    })();
 
     async function loadProfile(user) {
       try {
@@ -374,7 +407,7 @@
         }
 
         const loginEmail = user.email || '(no email)';
-        setProfileMeta(`Logged in as <strong>${loginEmail}</strong><br>Only this account can access the admin area.`);
+        setProfileMetaLoggedIn(loginEmail);
       } catch (err) {
         console.error('Error loading profile:', err);
         showMessage('errorMessage', 'Error loading profile. Please refresh and try again.');

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dominic Martinez - Portfolio</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
@@ -669,7 +670,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2 id="modalTitle">Sign In</h2>
-        <button class="close-modal" onclick="closeAuthModal()">&times;</button>
+        <button class="close-modal" id="closeAuthModalBtn" type="button">&times;</button>
       </div>
 
       <div class="error-message" id="errorMessage"></div>
@@ -685,13 +686,13 @@
           <label for="loginPassword">Password</label>
           <div class="password-input-group">
             <input type="password" id="loginPassword" placeholder="Enter your password" required>
-            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('loginPassword')">
+            <button type="button" class="toggle-password" data-toggle-password-for="loginPassword">
               <i class="fas fa-eye"></i>
             </button>
           </div>
         </div>
         <div class="forgot-password">
-          <a onclick="showPasswordReset()">Forgot password?</a>
+          <a href="#" id="showPasswordResetLink">Forgot password?</a>
         </div>
         <button type="submit" class="auth-form-button">Sign In</button>
       </form>
@@ -704,7 +705,7 @@
         </div>
         <p class="help-text">We'll send you a link to reset your password</p>
         <button type="submit" class="auth-form-button">Send Reset Link</button>
-        <button type="button" class="auth-form-button" style="background: #666;" onclick="hidePasswordReset()">Back to Login</button>
+        <button type="button" class="auth-form-button" style="background: #666;" id="hidePasswordResetBtn">Back to Login</button>
       </form>
 
       <!-- Signup Form (hidden by default) -->
@@ -721,7 +722,7 @@
           <label for="signupPassword">Password</label>
           <div class="password-input-group">
             <input type="password" id="signupPassword" placeholder="Create a password" required>
-            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('signupPassword')">
+            <button type="button" class="toggle-password" data-toggle-password-for="signupPassword">
               <i class="fas fa-eye"></i>
             </button>
           </div>
@@ -734,7 +735,7 @@
       </form>
 
       <div class="toggle-form">
-        <span id="toggleText">Don't have an account? <a onclick="toggleAuthForm()">Sign Up</a></span>
+        <span id="toggleText">Don't have an account? <a href="#" id="toggleAuthLink">Sign Up</a></span>
       </div>
     </div>
   </div>
@@ -790,21 +791,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-functions-compat.js"></script>
+  <script src="/assets/js/firebase-config.js"></script>
+  <script src="/assets/js/firebase-init-compat.js"></script>
 
   <script>
-    // Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
-      authDomain: "dominic-martinez-portfolio.firebaseapp.com",
-      projectId: "dominic-martinez-portfolio",
-      storageBucket: "dominic-martinez-portfolio.appspot.com",
-      messagingSenderId: "339938102474",
-      appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
-      measurementId: "G-MSKQYN75ML"
-    };
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
@@ -882,32 +872,53 @@
       clearAuthForm();
     }
 
+    function setToggleText(mode) {
+      const toggleText = document.getElementById('toggleText');
+      if (!toggleText) return;
+      toggleText.textContent = '';
+
+      const prefix = document.createTextNode(
+        mode === 'signup' ? 'Already have an account? ' : "Don't have an account? "
+      );
+      const link = document.createElement('a');
+      link.href = '#';
+      link.id = 'toggleAuthLink';
+      link.textContent = mode === 'signup' ? 'Sign In' : 'Sign Up';
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleAuthForm();
+      });
+
+      toggleText.appendChild(prefix);
+      toggleText.appendChild(link);
+    }
+
     function toggleAuthForm() {
       const loginForm = document.getElementById('loginForm');
       const signupForm = document.getElementById('signupForm');
       const resetForm = document.getElementById('resetForm');
       const modalTitle = document.getElementById('modalTitle');
-      const toggleText = document.getElementById('toggleText');
 
       if (loginForm.style.display === 'none') {
         loginForm.style.display = 'block';
         signupForm.style.display = 'none';
         resetForm.style.display = 'none';
         modalTitle.textContent = 'Sign In';
-        toggleText.innerHTML = "Don't have an account? <a onclick=\"toggleAuthForm()\">Sign Up</a>";
+        setToggleText('login');
       } else {
         loginForm.style.display = 'none';
         signupForm.style.display = 'block';
         resetForm.style.display = 'none';
         modalTitle.textContent = 'Create Account';
-        toggleText.innerHTML = 'Already have an account? <a onclick="toggleAuthForm()">Sign In</a>';
+        setToggleText('signup');
       }
       clearErrorMessages();
     }
 
-    function togglePasswordVisibility(inputId) {
+    function togglePasswordVisibility(event, inputId) {
       const input = document.getElementById(inputId);
-      const button = event.target.closest('.toggle-password');
+      const button = event && event.target ? event.target.closest('.toggle-password') : null;
+      if (!input || !button) return;
       const icon = button.querySelector('i');
       
       if (input.type === 'password') {
@@ -934,6 +945,47 @@
       loginForm.style.display = 'block';
       resetForm.style.display = 'none';
       document.getElementById('resetForm').reset();
+    }
+
+    function attachAuthModalHandlers() {
+      const authButton = document.getElementById('authButton');
+      if (authButton) {
+        authButton.addEventListener('click', (e) => {
+          e.preventDefault();
+          const action = authButton.dataset.action;
+          if (action === 'logout') return logout();
+          return openAuthModal();
+        });
+      }
+
+      const closeBtn = document.getElementById('closeAuthModalBtn');
+      if (closeBtn) closeBtn.addEventListener('click', closeAuthModal);
+
+      const showResetLink = document.getElementById('showPasswordResetLink');
+      if (showResetLink) {
+        showResetLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          showPasswordReset();
+        });
+      }
+
+      const hideResetBtn = document.getElementById('hidePasswordResetBtn');
+      if (hideResetBtn) hideResetBtn.addEventListener('click', hidePasswordReset);
+
+      document.querySelectorAll('button.toggle-password[data-toggle-password-for]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const inputId = btn.getAttribute('data-toggle-password-for');
+          if (inputId) togglePasswordVisibility(e, inputId);
+        });
+      });
+
+      const toggleLink = document.getElementById('toggleAuthLink');
+      if (toggleLink) {
+        toggleLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          toggleAuthForm();
+        });
+      }
     }
 
     function sendNotification(title, options) {
@@ -1077,11 +1129,11 @@
       if (currentUser) {
         const userName = currentUser.displayName || userEmail.split('@')[0];
         authButton.textContent = userName;
-        authButton.onclick = logout;
+        authButton.dataset.action = 'logout';
         authButton.classList.add('logout');
       } else {
         authButton.textContent = 'Sign In';
-        authButton.onclick = openAuthModal;
+        authButton.dataset.action = 'open-auth';
         authButton.classList.remove('logout');
       }
     }
@@ -1109,28 +1161,82 @@
       loadLikeCounts();
     }
 
+    function normalizeNavUrl(maybeUrl) {
+      if (!maybeUrl || typeof maybeUrl !== 'string') return null;
+      try {
+        const u = new URL(maybeUrl, window.location.href);
+        if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+        return u.href;
+      } catch {
+        return null;
+      }
+    }
+
     function renderPortfolioGrid() {
       const grid = document.getElementById('portfolioGrid');
-      grid.innerHTML = portfolioItems.map(item => `
-        <div class="instagram-item" ${item.url ? `onclick="window.location.href='${item.url}'"` : ''} style="${item.url ? 'cursor: pointer;' : 'cursor: default;'}">
-          <img src="${item.image}" alt="${item.title}">
-          <div class="instagram-overlay">
-            <div class="overlay-stat">
-              <span class="overlay-stat-number" id="likes-${item.id}">0</span>
-              <span class="overlay-stat-label">Likes</span>
-            </div>
-            <div class="overlay-stat">
-              <span class="overlay-stat-number">0</span>
-              <span class="overlay-stat-label">Comments</span>
-            </div>
-          </div>
-          ${currentUser ? `
-            <button class="like-button-overlay" id="like-btn-${item.id}" onclick="toggleLike('${item.id}', event)">
-              <i class="fas fa-heart"></i>
-            </button>
-          ` : ''}
-        </div>
-      `).join('');
+      if (!grid) return;
+
+      grid.textContent = '';
+
+      for (const item of portfolioItems) {
+        const container = document.createElement('div');
+        container.className = 'instagram-item';
+
+        const navUrl = normalizeNavUrl(item.url);
+        container.style.cursor = navUrl ? 'pointer' : 'default';
+        if (navUrl) {
+          container.addEventListener('click', () => {
+            window.location.href = navUrl;
+          });
+        }
+
+        const img = document.createElement('img');
+        img.src = String(item.image || '');
+        img.alt = String(item.title || '');
+        container.appendChild(img);
+
+        const overlay = document.createElement('div');
+        overlay.className = 'instagram-overlay';
+
+        const likesStat = document.createElement('div');
+        likesStat.className = 'overlay-stat';
+        const likesNum = document.createElement('span');
+        likesNum.className = 'overlay-stat-number';
+        likesNum.id = `likes-${item.id}`;
+        likesNum.textContent = '0';
+        const likesLabel = document.createElement('span');
+        likesLabel.className = 'overlay-stat-label';
+        likesLabel.textContent = 'Likes';
+        likesStat.appendChild(likesNum);
+        likesStat.appendChild(likesLabel);
+
+        const commentsStat = document.createElement('div');
+        commentsStat.className = 'overlay-stat';
+        const commentsNum = document.createElement('span');
+        commentsNum.className = 'overlay-stat-number';
+        commentsNum.textContent = '0';
+        const commentsLabel = document.createElement('span');
+        commentsLabel.className = 'overlay-stat-label';
+        commentsLabel.textContent = 'Comments';
+        commentsStat.appendChild(commentsNum);
+        commentsStat.appendChild(commentsLabel);
+
+        overlay.appendChild(likesStat);
+        overlay.appendChild(commentsStat);
+        container.appendChild(overlay);
+
+        if (currentUser) {
+          const likeBtn = document.createElement('button');
+          likeBtn.className = 'like-button-overlay';
+          likeBtn.id = `like-btn-${item.id}`;
+          likeBtn.type = 'button';
+          likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
+          likeBtn.addEventListener('click', (e) => toggleLike(String(item.id), e));
+          container.appendChild(likeBtn);
+        }
+
+        grid.appendChild(container);
+      }
     }
 
     async function loadLikeCounts() {
@@ -1378,6 +1484,7 @@
 
     // Initial load
     window.addEventListener('load', () => {
+      attachAuthModalHandlers();
       loadFollowerCount();
     });
   </script>
