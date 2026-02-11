@@ -51,10 +51,17 @@ service cloud.firestore {
       allow read, update: if request.auth.uid == userId;
     }
 
-    // Photos collection
+    // Photos collection (legacy)
     match /photos/{photoId} {
       allow read: if true;
       allow write: if false;
+    }
+
+    // Portfolio collection (admin uploads)
+    match /portfolio/{photoId} {
+      allow read: if true;
+      allow write: if request.auth != null && resource == null; // New photo creation
+      allow update, delete: if request.auth != null; // Authenticated users can update/delete
     }
 
     // Profile collection

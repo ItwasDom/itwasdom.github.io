@@ -733,34 +733,65 @@
     let currentUser = null;
     let userEmail = null;
     let isUserFollowing = false;
+    let portfolioItems = [];
 
-    // Portfolio data
-    const portfolioItems = [
+    // Portfolio data (legacy - will be merged with Firestore items)
+    const legacyPortfolioItems = [
       {
         id: 'project-1',
         title: 'Gorgeous Cat',
         image: '../image/Gorgeous-Cat.jpg',
-        url: 'project-1.html'
+        url: 'project-1.html',
+        isLegacy: true
       },
       {
         id: 'project-2',
         title: 'La Antorcha',
         image: '../image/La-Antorcha.jpg',
-        url: 'project-2.html'
+        url: 'project-2.html',
+        isLegacy: true
       },
       {
         id: 'project-3',
         title: 'Smiling Boy',
         image: '../image/Smiling-Boy.jpg',
-        url: 'project-3.html'
+        url: 'project-3.html',
+        isLegacy: true
       },
       {
         id: 'project-4',
         title: 'The Alamo',
         image: '../image/The-Alamo.jpg',
-        url: 'project-4.html'
+        url: 'project-4.html',
+        isLegacy: true
       }
     ];
+
+    // Load portfolio items from Firestore
+    async function loadPortfolioItems() {
+      try {
+        // Load from new portfolio collection (uploaded by admin)
+        const portfolioSnapshot = await db.collection('portfolio').orderBy('createdAt', 'desc').get();
+        const firestoreItems = portfolioSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title,
+            image: data.imageUrl,
+            description: data.description,
+            category: data.category,
+            url: null,
+            isLegacy: false
+          };
+        });
+
+        // Combine with legacy items
+        portfolioItems = [...firestoreItems, ...legacyPortfolioItems];
+      } catch (error) {
+        console.log('Error loading portfolio items:', error);
+        portfolioItems = legacyPortfolioItems;
+      }
+    }
 
     // ===== Authentication Functions =====
     function openAuthModal() {
@@ -897,6 +928,8 @@
 
     // ===== Like and Follow Functions =====
     async function initializePortfolio() {
+      // Load portfolio items from Firestore
+      await loadPortfolioItems();
       renderPortfolioGrid();
 
       if (currentUser) {
@@ -919,7 +952,7 @@
     function renderPortfolioGrid() {
       const grid = document.getElementById('portfolioGrid');
       grid.innerHTML = portfolioItems.map(item => `
-        <div class="instagram-item" onclick="window.location.href='${item.url}'">
+        <div class="instagram-item" ${item.url ? `onclick="window.location.href='${item.url}'"` : ''} style="${item.url ? 'cursor: pointer;' : 'cursor: default;'}">
           <img src="${item.image}" alt="${item.title}">
           <div class="instagram-overlay">
             <div class="overlay-stat">
@@ -943,12 +976,20 @@
     async function loadLikeCounts() {
       for (const item of portfolioItems) {
         try {
-          const likesDoc = await db.collection('photos').doc(item.id).get();
-          if (likesDoc.exists) {
-            const likeCount = likesDoc.data().likeCount || 0;
-            const el = document.getElementById(`likes-${item.id}`);
-            if (el) el.textContent = likeCount.toLocaleString();
+          let likeCount = 0;
+
+          if (item.isLegacy) {
+            // Load from old photos collection
+            const likesDoc = await db.collection('photos').doc(item.id).get();
+            likeCount = likesDoc.exists ? (likesDoc.data().likeCount || 0) : 0;
+          } else {
+            // Load from new portfolio collection
+            const portfolioDoc = await db.collection('portfolio').doc(item.id).get();
+            likeCount = portfolioDoc.exists ? (portfolioDoc.data().likeCount || 0) : 0;
           }
+
+          const el = document.getElementById(`likes-${item.id}`);
+          if (el) el.textContent = likeCount.toLocaleString();
         } catch (error) {
           console.log('Error loading like count for', item.id);
         }
@@ -984,6 +1025,8 @@
 
       const likeBtn = document.getElementById(`like-btn-${photoId}`);
       const isCurrentlyLiked = likeBtn.classList.contains('liked');
+      const item = portfolioItems.find(i => i.id === photoId);
+      const isLegacy = item?.isLegacy || false;
 
       try {
         if (isCurrentlyLiked) {
@@ -993,7 +1036,8 @@
           });
 
           // Decrement like count
-          await db.collection('photos').doc(photoId).update({
+          const collectionName = isLegacy ? 'photos' : 'portfolio';
+          await db.collection(collectionName).doc(photoId).update({
             likeCount: firebase.firestore.FieldValue.increment(-1)
           });
         } else {
@@ -1003,7 +1047,8 @@
           });
 
           // Increment like count
-          const photoRef = db.collection('photos').doc(photoId);
+          const collectionName = isLegacy ? 'photos' : 'portfolio';
+          const photoRef = db.collection(collectionName).doc(photoId);
           const photoDoc = await photoRef.get();
 
           if (photoDoc.exists) {
@@ -1133,6 +1178,34 @@
         updateAuthUI();
         initializePortfolio();
       }
+    });
+
+    // Set up real-time listener for portfolio updates
+    db.collection('portfolio').onSnapshot(() => {
+      loadPortfolioItems().then(() => {
+        renderPortfolioGrid();
+        loadLikeCounts();
+      });
+    });
+
+    // Set up real-time listener for like count updates on portfolio
+    db.collection('portfolio').onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        const photoId = change.doc.id;
+        const likeCount = change.doc.data().likeCount || 0;
+        const el = document.getElementById(`likes-${photoId}`);
+        if (el) el.textContent = likeCount.toLocaleString();
+      });
+    });
+
+    // Set up real-time listener for like count updates on legacy photos
+    db.collection('photos').onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        const photoId = change.doc.id;
+        const likeCount = change.doc.data().likeCount || 0;
+        const el = document.getElementById(`likes-${photoId}`);
+        if (el) el.textContent = likeCount.toLocaleString();
+      });
     });
 
     // Close modal when clicking outside
