@@ -42,6 +42,7 @@
       font-size: 1.5rem;
       font-weight: 800;
       background: linear-gradient(135deg, #1B16A8, #7C3AED);
+      background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -383,6 +384,10 @@
       }
     }
   </style>
+  <script>
+    // Redirect to the updated admin dashboard
+    window.location.replace('dashboard.html');
+  </script>
 </head>
 <body>
   <!-- Login Screen -->
@@ -483,7 +488,7 @@
       apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
       authDomain: "dominic-martinez-portfolio.firebaseapp.com",
       projectId: "dominic-martinez-portfolio",
-      storageBucket: "dominic-martinez-portfolio.firebasestorage.app",
+      storageBucket: "dominic-martinez-portfolio.appspot.com",
       messagingSenderId: "339938102474",
       appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
       measurementId: "G-MSKQYN75ML"

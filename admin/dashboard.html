@@ -57,6 +57,7 @@
     .login-header h1 {
       font-size: 2.5rem;
       background: linear-gradient(135deg, #1B16A8, #7C3AED);
+      background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 10px;
@@ -195,6 +196,7 @@
       font-size: 1.8rem;
       font-weight: 800;
       background: linear-gradient(135deg, #1B16A8, #7C3AED);
+      background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -233,21 +235,24 @@
 
     .dashboard-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      margin-bottom: 60px;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 32px;
+      margin-bottom: 40px;
+      align-items: flex-start;
     }
 
     .section {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      border: 1px solid rgba(124, 58, 237, 0.2);
-      border-radius: 16px;
-      padding: 35px;
+      background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.2), transparent 55%),
+                  linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      border-radius: 18px;
+      padding: 28px 26px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
     }
 
     .section h2 {
-      font-size: 1.8rem;
-      margin-bottom: 30px;
+      font-size: 1.6rem;
+      margin-bottom: 22px;
       color: #7C3AED;
       display: flex;
       align-items: center;
@@ -352,7 +357,7 @@
 
     .preview-image {
       width: 100%;
-      height: 200px;
+      height: 220px;
       object-fit: cover;
       border-radius: 10px;
       margin-bottom: 20px;
@@ -405,30 +410,31 @@
     .photo-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 15px;
-      max-height: 700px;
+      gap: 14px;
+      max-height: 640px;
       overflow-y: auto;
     }
 
     .photo-item {
-      background: rgba(27, 22, 168, 0.1);
-      border: 1px solid rgba(124, 58, 237, 0.2);
-      border-radius: 10px;
-      padding: 15px;
+      background: rgba(27, 22, 168, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      border-radius: 12px;
+      padding: 14px 14px 14px 12px;
       display: flex;
-      gap: 15px;
+      gap: 14px;
       align-items: center;
-      transition: all 0.3s ease;
+      transition: all 0.22s ease;
     }
 
     .photo-item:hover {
-      background: rgba(27, 22, 168, 0.15);
-      border-color: rgba(124, 58, 237, 0.4);
+      background: rgba(27, 22, 168, 0.22);
+      border-color: rgba(124, 58, 237, 0.45);
+      transform: translateY(-1px);
     }
 
     .photo-thumbnail {
-      width: 80px;
-      height: 80px;
+      width: 84px;
+      height: 84px;
       object-fit: cover;
       border-radius: 8px;
       border: 1px solid rgba(124, 58, 237, 0.2);
@@ -442,7 +448,7 @@
 
     .photo-info h4 {
       color: #fff;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       font-size: 0.95rem;
       white-space: nowrap;
       overflow: hidden;
@@ -450,8 +456,8 @@
     }
 
     .photo-info p {
-      color: #999;
-      font-size: 0.85rem;
+      color: #a6a6b3;
+      font-size: 0.82rem;
       margin-bottom: 3px;
       white-space: nowrap;
       overflow: hidden;
@@ -463,6 +469,28 @@
       gap: 15px;
       font-size: 0.8rem;
       color: #7C3AED;
+    }
+
+    .photo-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-edit {
+      padding: 8px 15px;
+      background: transparent;
+      color: #7C3AED;
+      border: 2px solid #7C3AED;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .btn-edit:hover {
+      background: rgba(124, 58, 237, 0.1);
     }
 
     .btn-delete {
@@ -596,20 +624,30 @@
       <div class="login-header">
         <h1><i class="fas fa-lock"></i></h1>
         <h1>Admin Access</h1>
-        <p>Enter your password to access the admin panel</p>
+        <p>Sign in with your admin email and password</p>
       </div>
 
       <div id="loginError" class="error-message"></div>
 
       <form id="loginForm">
         <div class="form-group">
-          <label for="adminPassword">Admin Password</label>
+          <label for="adminEmail">Admin Email</label>
+          <input 
+            type="email" 
+            id="adminEmail" 
+            placeholder="you@example.com" 
+            required
+            autocomplete="email"
+          >
+        </div>
+        <div class="form-group">
+          <label for="adminPassword">Password</label>
           <input 
             type="password" 
             id="adminPassword" 
-            placeholder="Enter admin password" 
+            placeholder="Enter password" 
             required
-            autocomplete="off"
+            autocomplete="current-password"
           >
         </div>
         <button type="submit" class="login-btn">
@@ -618,7 +656,7 @@
       </form>
 
       <div class="hint">
-        Forgot your password? <a href="../" style="color: #999;">Go back home</a>
+        Forgot your password? <a href="../reset-password.html" style="color: #999;">Reset it here</a>
       </div>
     </div>
   </div>
@@ -723,59 +761,89 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
 
   <script>
-        // Profile adjustment logic
-        document.addEventListener('DOMContentLoaded', function() {
-          const profileForm = document.getElementById('profileForm');
-          if (profileForm) {
-            profileForm.addEventListener('submit', async function(e) {
-              e.preventDefault();
-              const displayName = document.getElementById('displayName').value;
-              const email = document.getElementById('email').value;
-              const msg = document.getElementById('profileMsg');
-              msg.textContent = '';
-              msg.className = 'message';
-              try {
-                // Update Firestore user profile (admin user assumed)
-                await db.collection('users').doc('admin').set({ displayName, email }, { merge: true });
-                msg.textContent = 'Profile updated successfully!';
-                msg.className = 'message success';
-              } catch (err) {
-                msg.textContent = 'Error updating profile: ' + (err.message || 'Please try again.');
-                msg.className = 'message error';
-              }
-            });
-            // Load profile info
-            db.collection('users').doc('admin').get().then(doc => {
+    // Firebase configuration and initialization (compat SDK)
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
+      authDomain: "dominic-martinez-portfolio.firebaseapp.com",
+      projectId: "dominic-martinez-portfolio",
+      storageBucket: "dominic-martinez-portfolio.appspot.com",
+      messagingSenderId: "339938102474",
+      appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
+      measurementId: "G-MSKQYN75ML"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    // Admin UID (must match Firestore rules)
+    const ADMIN_UID = "RVAvU26oGeYsaJYk0X1OF9h6apb2";
+    let selectedFile = null;
+    let editingPhotoId = null;
+
+    // Profile adjustment logic (uses logged-in admin user)
+    document.addEventListener('DOMContentLoaded', function() {
+      const profileForm = document.getElementById('profileForm');
+      if (profileForm) {
+        profileForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const user = auth.currentUser;
+          if (!user) {
+            const msg = document.getElementById('profileMsg');
+            if (msg) {
+              msg.textContent = 'You must be logged in to update your profile.';
+              msg.className = 'message error';
+            }
+            return;
+          }
+
+          const displayName = document.getElementById('displayName').value;
+          const email = document.getElementById('email').value;
+          const msg = document.getElementById('profileMsg');
+          msg.textContent = '';
+          msg.className = 'message';
+          try {
+            await db.collection('users').doc(user.uid).set({ displayName, email }, { merge: true });
+            msg.textContent = 'Profile updated successfully!';
+            msg.className = 'message success';
+          } catch (err) {
+            msg.textContent = 'Error updating profile: ' + (err.message || 'Please try again.');
+            msg.className = 'message error';
+          }
+        });
+
+        auth.onAuthStateChanged(user => {
+          if (user) {
+            db.collection('users').doc(user.uid).get().then(doc => {
               if (doc.exists) {
                 const data = doc.data();
                 document.getElementById('displayName').value = data.displayName || '';
-                document.getElementById('email').value = data.email || '';
+                document.getElementById('email').value = data.email || user.email || '';
+              } else {
+                document.getElementById('email').value = user.email || '';
               }
             });
           }
         });
-    // ===== ADMIN PASSWORD - CHANGE THIS! =====
-    const ADMIN_PASSWORD = "Photos4Good";
+      }
+    });
 
     console.log('🔐 Admin panel loading...');
-    console.log('📝 Password set to: ' + ADMIN_PASSWORD);
 
-    // Check login status immediately (before Firebase loads)
+    // Check auth state and show appropriate screen
     window.addEventListener('load', function() {
-      console.log('✓ Page fully loaded, checking admin status...');
-      const adminToken = sessionStorage.getItem('adminLoggedIn');
-      console.log('Admin token in storage:', adminToken);
-      
-      if (adminToken === 'true') {
-        console.log('✓ User is logged in, showing dashboard');
-        showDashboard();
-        initializeFirebase();
-        loadPhotos();
-      } else {
-        console.log('✗ User not logged in, showing login screen');
-        showLogin();
-        attachLoginHandler();
-      }
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          console.log('✓ Authenticated as', user.email);
+          showDashboard();
+          setupEventListeners();
+          loadPhotos();
+        } else {
+          console.log('✗ Not authenticated, showing login');
+          showLogin();
+          attachLoginHandler();
+        }
+      });
     });
 
     function attachLoginHandler() {
@@ -784,41 +852,34 @@
         console.error('❌ Login form not found!');
         return;
       }
-      
       console.log('✓ Attaching login form handler');
       loginForm.addEventListener('submit', handleLogin);
     }
 
-    function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
       console.log('🔐 Login button clicked');
-      
+
+      const emailInput = document.getElementById('adminEmail');
       const passwordInput = document.getElementById('adminPassword');
+      const email = emailInput.value.trim();
       const password = passwordInput.value;
       const loginBox = document.getElementById('loginBox');
-      
-      console.log('Password entered length:', password.length);
-      console.log('Expected password:', ADMIN_PASSWORD);
-      console.log('Match:', password === ADMIN_PASSWORD);
 
-      if (!password) {
-        console.log('❌ No password entered');
-        showLoginError('❌ Please enter your password');
+      if (!email || !password) {
+        showLoginError('❌ Please enter email and password');
         shakeElement(loginBox);
         return;
       }
 
-      if (password === ADMIN_PASSWORD) {
-        console.log('✅ PASSWORD CORRECT!');
-        sessionStorage.setItem('adminLoggedIn', 'true');
-        console.log('Session storage updated');
-        showDashboard();
-        console.log('Dashboard shown, initializing Firebase...');
-        initializeFirebase();
-        loadPhotos();
-      } else {
-        console.log('❌ PASSWORD INCORRECT - Expected "' + ADMIN_PASSWORD + '" but got "' + password + '"');
-        showLoginError('❌ Incorrect password. Please try again.');
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        console.log('✅ Firebase Auth login successful');
+        // onAuthStateChanged will handle showing the dashboard
+        passwordInput.value = '';
+      } catch (error) {
+        console.error('Auth error:', error);
+        showLoginError('❌ Login failed: ' + (error.message || 'Check your credentials.'));
         shakeElement(loginBox);
         passwordInput.value = '';
         passwordInput.focus();
@@ -866,45 +927,18 @@
     }
 
     function logout() {
-      sessionStorage.removeItem('adminLoggedIn');
-      showLogin();
-      resetForm();
-      console.log('User logged out');
+      auth.signOut().then(() => {
+        showLogin();
+        resetForm();
+        console.log('User logged out');
+      });
     }
 
-    // ===== FIREBASE INITIALIZATION =====
-    let db, storage;
-
-    function initializeFirebase() {
-      const firebaseConfig = {
-        apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
-        authDomain: "dominic-martinez-portfolio.firebaseapp.com",
-        projectId: "dominic-martinez-portfolio",
-        storageBucket: "dominic-martinez-portfolio.firebasestorage.app",
-        messagingSenderId: "339938102474",
-        appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
-        measurementId: "G-MSKQYN75ML"
-      };
-
-      try {
-        // Initialize Firebase (compat version)
-        const app = firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore(app);
-        storage = firebase.storage(app);
-        console.log('✓ Firebase initialized successfully');
-        setupEventListeners();
-      } catch (error) {
-        console.error('Firebase initialization error:', error);
-        if (error.code === 'app/duplicate-app') {
-          console.log('Firebase already initialized, using existing instance');
-          db = firebase.firestore();
-          storage = firebase.storage();
-          setupEventListeners();
-        }
-      }
-    }
+    let eventsInitialized = false;
 
     function setupEventListeners() {
+      if (eventsInitialized) return;
+      eventsInitialized = true;
       console.log('Setting up event listeners...');
       
       const uploadArea = document.getElementById('uploadArea');
@@ -936,8 +970,6 @@
       console.log('Event listeners attached');
     }
 
-    let selectedFile = null;
-
     function handleFileDrop(files) {
       if (files.length === 0) return;
 
@@ -968,11 +1000,6 @@
     async function handleUpload(e) {
       e.preventDefault();
 
-      if (!selectedFile) {
-        showError('errorMessage', '❌ Please select a photo first.');
-        return;
-      }
-
       if (!document.getElementById('photoTitle').value) {
         showError('errorMessage', '❌ Please enter a photo title.');
         return;
@@ -990,6 +1017,41 @@
       }
 
       try {
+        const user = auth.currentUser;
+        if (!user || user.uid !== ADMIN_UID) {
+          showError('errorMessage', '❌ You are not authorized to upload photos.');
+          return;
+        }
+
+        const title = document.getElementById('photoTitle').value;
+        const description = document.getElementById('photoDescription').value;
+        const category = document.getElementById('photoCategory').value;
+
+        // If editing an existing photo
+        if (editingPhotoId) {
+          const updateData = { title, description, category };
+
+          // If a new file is selected, replace the image in Storage and update imageUrl
+          if (selectedFile) {
+            const storageRef = storage.ref('portfolio/' + editingPhotoId);
+            await storageRef.put(selectedFile);
+            const newImageUrl = await storageRef.getDownloadURL();
+            updateData.imageUrl = newImageUrl;
+          }
+
+          await db.collection('portfolio').doc(editingPhotoId).update(updateData);
+          showSuccess('✓ Photo updated successfully!');
+          resetForm();
+          loadPhotos();
+          return;
+        }
+
+        // Creating a brand new photo requires a file
+        if (!selectedFile) {
+          showError('errorMessage', '❌ Please select a photo first.');
+          return;
+        }
+
         const photoId = 'photo-' + Date.now();
         const storageRef = storage.ref('portfolio/' + photoId);
         await storageRef.put(selectedFile);
@@ -997,9 +1059,9 @@
 
         await db.collection('portfolio').doc(photoId).set({
           id: photoId,
-          title: document.getElementById('photoTitle').value,
-          description: document.getElementById('photoDescription').value,
-          category: document.getElementById('photoCategory').value,
+          title,
+          description,
+          category,
           imageUrl: imageUrl,
           likeCount: 0,
           createdAt: new Date(),
@@ -1011,7 +1073,11 @@
         loadPhotos();
       } catch (error) {
         console.error('Upload error:', error);
-        showError('errorMessage', '❌ Error uploading photo: ' + error.message);
+        if (error.code === 'permission-denied') {
+          showError('errorMessage', '❌ You are not allowed to modify portfolio items.');
+        } else {
+          showError('errorMessage', '❌ Error uploading photo: ' + (error.message || 'Please try again.'));
+        }
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -1024,11 +1090,16 @@
       const uploadForm = document.getElementById('uploadForm');
       const fileInput = document.getElementById('fileInput');
       const previewImage = document.getElementById('previewImage');
-      
+      const submitBtn = document.getElementById('submitBtn');
+
       if (uploadForm) uploadForm.reset();
       if (fileInput) fileInput.value = '';
       if (previewImage) previewImage.style.display = 'none';
       selectedFile = null;
+      editingPhotoId = null;
+      if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
+      }
     }
 
     async function loadPhotos() {
@@ -1073,7 +1144,10 @@
                 <span>${new Date(photo.createdAt.toDate()).toLocaleDateString()}</span>
               </div>
             </div>
-            <button class="btn-delete" onclick="deletePhoto('${doc.id}')">Delete</button>
+            <div class="photo-actions">
+              <button class="btn-edit" onclick="editPhoto('${doc.id}')">Edit</button>
+              <button class="btn-delete" onclick="deletePhoto('${doc.id}')">Delete</button>
+            </div>
           `;
           if (photoList) photoList.appendChild(photoItem);
         });
@@ -1088,6 +1162,12 @@
       }
 
       try {
+        const user = auth.currentUser;
+        if (!user || user.uid !== ADMIN_UID) {
+          showError('errorMessage', '❌ You are not authorized to delete photos.');
+          return;
+        }
+
         const doc = await db.collection('portfolio').doc(photoId).get();
         if (doc.exists) {
           const imageUrl = doc.data().imageUrl;
@@ -1104,7 +1184,55 @@
         loadPhotos();
       } catch (error) {
         console.error('Delete error:', error);
-        showError('errorMessage', '❌ Error deleting photo: ' + error.message);
+        if (error.code === 'permission-denied') {
+          showError('errorMessage', '❌ You are not allowed to modify portfolio items.');
+        } else {
+          showError('errorMessage', '❌ Error deleting photo: ' + (error.message || 'Please try again.'));
+        }
+      }
+    }
+
+    async function editPhoto(photoId) {
+      try {
+        const user = auth.currentUser;
+        if (!user || user.uid !== ADMIN_UID) {
+          showError('errorMessage', '❌ You are not authorized to edit photos.');
+          return;
+        }
+
+        const doc = await db.collection('portfolio').doc(photoId).get();
+        if (!doc.exists) {
+          showError('errorMessage', '❌ Photo not found.');
+          return;
+        }
+
+        const photo = doc.data();
+        editingPhotoId = photoId;
+
+        const titleInput = document.getElementById('photoTitle');
+        const descInput = document.getElementById('photoDescription');
+        const categorySelect = document.getElementById('photoCategory');
+        const previewImage = document.getElementById('previewImage');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (titleInput) titleInput.value = photo.title || '';
+        if (descInput) descInput.value = photo.description || '';
+        if (categorySelect) categorySelect.value = photo.category || '';
+        if (previewImage && photo.imageUrl) {
+          previewImage.src = photo.imageUrl;
+          previewImage.style.display = 'block';
+        }
+        if (submitBtn) {
+          submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+        }
+
+        const container = document.querySelector('.upload-area');
+        if (container) {
+          container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } catch (error) {
+        console.error('Edit error:', error);
+        showError('errorMessage', '❌ Error loading photo for edit: ' + (error.message || 'Please try again.'));
       }
     }
 
