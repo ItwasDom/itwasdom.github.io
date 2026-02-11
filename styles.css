@@ -173,6 +173,26 @@ header .logo {
   width: 100%;
 }
 
+.nav-links li a.login-nav-btn {
+  background: linear-gradient(135deg, #1B16A8 0%, #7C3AED 100%);
+  color: #fff !important;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(123, 58, 237, 0.3);
+  transition: all 0.3s ease-in-out;
+}
+
+.nav-links li a.login-nav-btn:hover {
+  background: linear-gradient(135deg, #2D23E3 0%, #9F5FED 100%);
+  box-shadow: 0 6px 20px rgba(123, 58, 237, 0.5);
+  transform: translateY(-2px);
+}
+
+.nav-links li a.login-nav-btn::after {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .nav-links li a {
     transition: none;
