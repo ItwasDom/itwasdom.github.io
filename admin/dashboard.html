@@ -830,13 +830,68 @@
 
     console.log('🔐 Admin panel loading...');
 
+    // Seed initial portfolio projects (static 4 items from public portfolio)
+    async function ensureInitialProjects() {
+      const user = auth.currentUser;
+      if (!user || user.uid !== ADMIN_UID) return;
+
+      const initialProjects = [
+        {
+          id: 'project-1',
+          title: 'Gorgeous Cat',
+          description: 'Professional portrait photography capturing stunning details and emotion.',
+          category: 'Portrait Photography',
+          imageUrl: '/image/Gorgeous-Cat.jpg',
+        },
+        {
+          id: 'project-2',
+          title: 'La Antorcha',
+          description: 'Dynamic cinematography project showcasing visual storytelling and technical excellence.',
+          category: 'Cinematography',
+          imageUrl: '/image/La-Antorcha.jpg',
+        },
+        {
+          id: 'project-3',
+          title: 'Smiling Boy',
+          description: 'Candid portrait photography capturing authentic moments and genuine expressions.',
+          category: 'Portrait Photography',
+          imageUrl: '/image/Smiling-Boy.jpg',
+        },
+        {
+          id: 'project-4',
+          title: 'The Alamo',
+          description: 'Architectural photography highlighting composition and cultural landmark documentation.',
+          category: 'Architecture',
+          imageUrl: '/image/The-Alamo.jpg',
+        },
+      ];
+
+      for (const project of initialProjects) {
+        try {
+          const ref = db.collection('portfolio').doc(project.id);
+          const snap = await ref.get();
+          if (!snap.exists) {
+            await ref.set({
+              ...project,
+              likeCount: 0,
+              createdAt: new Date(),
+              uploadedBy: 'admin',
+            });
+          }
+        } catch (e) {
+          console.warn('Error seeding project', project.id, e);
+        }
+      }
+    }
+
     // Check auth state and show appropriate screen
     window.addEventListener('load', function() {
-      auth.onAuthStateChanged(user => {
+      auth.onAuthStateChanged(async user => {
         if (user) {
           console.log('✓ Authenticated as', user.email);
           showDashboard();
           setupEventListeners();
+          await ensureInitialProjects();
           loadPhotos();
         } else {
           console.log('✗ Not authenticated, showing login');
