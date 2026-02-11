@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Sign Up - Dominic Martinez</title>
+  <link rel="icon" type="image/x-icon" href="../image/Headshot.jpg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #020212 0%, #0f0a1a 100%);
+      color: #f0f0f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+    }
+    .login-container {
+      max-width: 420px;
+      margin: 80px auto;
+      background: #1a1a2e;
+      border-radius: 16px;
+      padding: 40px 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      color: #f0f0f0;
+    }
+    .login-container h2 {
+      color: #7C3AED;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #bbb;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid rgba(124, 58, 237, 0.3);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      color: #f0f0f0;
+      font-size: 1rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: #7C3AED;
+      background: rgba(124,58,237,0.1);
+    }
+    .toggle-link {
+      color: #7C3AED;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.95em;
+      display: block;
+      margin: 18px 0 0 0;
+      text-align: center;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #1B16A8, #7C3AED);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .message {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: none;
+    }
+    .message.success {
+      background: rgba(76,175,80,0.2);
+      border: 2px solid #4caf50;
+      color: #81c784;
+      display: block;
+    }
+    .message.error {
+      background: rgba(231,76,60,0.2);
+      border: 2px solid #e74c3c;
+      color: #ef5350;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo"><a href="../index.html" style="text-decoration: none; color: inherit;">Dominic Martinez</a></div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="../about/index.html">About</a></li>
+          <li><a href="../experience/index.html">Experience</a></li>
+          <li><a href="../skills/index.html">Skills</a></li>
+          <li><a href="../portfolio/index.html">Portfolio</a></li>
+          <li><a href="../connect/index.html">Connect</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <div class="login-container">
+    <h2 id="formTitle">Login</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
+      </div>
+      <button type="submit">Login</button>
+      <span class="toggle-link" id="toggleSignup">Don't have an account? Sign Up</span>
+      <span class="toggle-link" id="forgotPassword">Forgot Password?</span>
+    </form>
+    <form id="signupForm" style="display:none;">
+      <h2 style="color:#7C3AED;text-align:center;margin-bottom:24px;">Sign Up</h2>
+      <div class="form-group">
+        <label for="signupEmail">Email Address</label>
+        <input type="email" id="signupEmail" placeholder="Enter your email" required>
+      </div>
+      <div class="form-group">
+        <label for="signupPassword">Password</label>
+        <input type="password" id="signupPassword" placeholder="Create a password" required>
+      </div>
+      <div class="form-group">
+        <label for="signupName">Display Name</label>
+        <input type="text" id="signupName" placeholder="Your name" required>
+      </div>
+      <button type="submit">Sign Up</button>
+      <span class="toggle-link" id="toggleLogin">Already have an account? Login</span>
+    </form>
+    <div class="message" id="loginMsg"></div>
+    <div class="message" id="signupMsg"></div>
+  </div>
+  <script>
+    // Toggle between login and signup forms
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const formTitle = document.getElementById('formTitle');
+    document.getElementById('toggleSignup').onclick = () => {
+      loginForm.style.display = 'none';
+      signupForm.style.display = 'block';
+      formTitle.style.display = 'none';
+    };
+    document.getElementById('toggleLogin').onclick = () => {
+      loginForm.style.display = 'block';
+      signupForm.style.display = 'none';
+      formTitle.style.display = 'block';
+    };
+    // Firebase setup (add your config here)
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
+      authDomain: "dominic-martinez-portfolio.firebaseapp.com",
+      projectId: "dominic-martinez-portfolio",
+      storageBucket: "dominic-martinez-portfolio.firebasestorage.app",
+      messagingSenderId: "339938102474",
+      appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
+      measurementId: "G-MSKQYN75ML"
+    };
+    if (!window.firebase?.apps?.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    // Login logic
+    loginForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('loginMsg');
+      msg.textContent = '';
+      msg.className = 'message';
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        msg.textContent = 'Login successful! Redirecting...';
+        msg.className = 'message success';
+        setTimeout(() => window.location.href = '../user/dashboard.html', 1200);
+      } catch (err) {
+        msg.textContent = 'Error: ' + (err.message || 'Login failed.');
+        msg.className = 'message error';
+      }
+    });
+    // Signup logic
+    signupForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const displayName = document.getElementById('signupName').value;
+      const msg = document.getElementById('signupMsg');
+      msg.textContent = '';
+      msg.className = 'message';
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        await userCredential.user.updateProfile({ displayName });
+        msg.textContent = 'Sign up successful! Redirecting...';
+        msg.className = 'message success';
+        setTimeout(() => window.location.href = '../user/dashboard.html', 1200);
+      } catch (err) {
+        msg.textContent = 'Error: ' + (err.message || 'Sign up failed.');
+        msg.className = 'message error';
+      }
+    });
+    // Forgot password logic
+    document.getElementById('forgotPassword').onclick = () => {
+      const email = document.getElementById('email').value;
+      if (!email) {
+        document.getElementById('loginMsg').textContent = 'Please enter your email to reset password.';
+        document.getElementById('loginMsg').className = 'message error';
+        return;
+      }
+      auth.sendPasswordResetEmail(email)
+        .then(() => {
+          document.getElementById('loginMsg').textContent = 'Password reset email sent! Check your inbox.';
+          document.getElementById('loginMsg').className = 'message success';
+        })
+        .catch(err => {
+          document.getElementById('loginMsg').textContent = 'Error: ' + (err.message || 'Failed to send reset email.');
+          document.getElementById('loginMsg').className = 'message error';
+        });
+    };
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+</body>
+</html>
