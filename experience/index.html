@@ -22,7 +22,13 @@
           <li><a href="../skills/index.html">Skills</a></li>
           <li><a href="../portfolio/index.html">Portfolio</a></li>
           <li><a href="../connect/index.html">Connect</a></li>
-          <li><a href="../user/login.html" class="login-nav-btn">Login / Profile</a></li>
+          <li class="auth-nav-item">
+            <a id="authNavBtn" href="../user/login.html" class="login-nav-btn">Login / Sign Up</a>
+            <div id="authDropdown" class="auth-dropdown">
+              <a id="authDashboardLink" href="../user/dashboard.html">My Dashboard</a>
+              <a href="#" id="authLogoutBtn">Logout</a>
+            </div>
+          </li>
         </ul>
       </nav>
     </div>
@@ -131,6 +137,7 @@
 
   <!-- Firebase (for dynamic Experience content) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
   <script>
     (function() {
@@ -147,9 +154,63 @@
       if (!window.firebase || !firebase.apps || !firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
       }
+      const auth = firebase.auth();
       const db = firebase.firestore();
 
+      function setAuthUI(user) {
+        const authNavBtn = document.getElementById('authNavBtn');
+        const dropdown = document.getElementById('authDropdown');
+
+        if (!authNavBtn) return;
+
+        if (!user) {
+          authNavBtn.textContent = 'Login / Sign Up';
+          authNavBtn.href = '../user/login.html';
+          authNavBtn.removeAttribute('data-auth-ready');
+          if (dropdown) dropdown.classList.remove('show');
+          return;
+        }
+
+        authNavBtn.textContent = user.displayName || 'My Profile';
+        authNavBtn.href = '#';
+        authNavBtn.setAttribute('data-auth-ready', 'true');
+      }
+
+      function bindAuthNavHandlersOnce() {
+        const authNavBtn = document.getElementById('authNavBtn');
+        const dropdown = document.getElementById('authDropdown');
+        const logoutBtn = document.getElementById('authLogoutBtn');
+        if (!authNavBtn || !dropdown || !logoutBtn) return;
+        if (document.documentElement.getAttribute('data-auth-nav-bound') === 'true') return;
+        document.documentElement.setAttribute('data-auth-nav-bound', 'true');
+
+        authNavBtn.addEventListener('click', (e) => {
+          if (!auth.currentUser) return;
+          e.preventDefault();
+          dropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!authNavBtn.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('show');
+          }
+        });
+
+        logoutBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          try {
+            await auth.signOut();
+            dropdown.classList.remove('show');
+            window.location.href = '../index.html';
+          } catch (err) {
+            console.error('Logout failed:', err);
+          }
+        });
+      }
+
       document.addEventListener('DOMContentLoaded', async function() {
+        bindAuthNavHandlersOnce();
+        auth.onAuthStateChanged((user) => setAuthUI(user));
         try {
           const snap = await db.collection('siteContent').doc('experience').get();
           if (!snap.exists) return;

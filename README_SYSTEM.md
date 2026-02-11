@@ -111,7 +111,7 @@ firebase deploy --only functions
 2. Rename `portfolio/feed-new.html` → `portfolio/feed.html`
 
 ### 7️⃣ Test (5 min)
-1. Open https://itwasdom.github.io/portfolio/feed.html
+1. Open your deployed site at `/portfolio/feed.html` (for example: `https://<your-domain>/portfolio/feed.html`)
 2. Click "Sign In" → "Sign Up"
 3. Create test account (enable notifications)
 4. Hover over portfolio items (like count shows 0)

@@ -16,6 +16,36 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
+      .quick-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      .quick-actions a,
+      .quick-actions button {
+        width: auto;
+        flex: 1;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .muted {
+        color: #bbb;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+      .pill {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(124,58,237,0.12);
+        border: 1px solid rgba(124,58,237,0.28);
+        color: #ddd;
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-top: 10px;
+        word-break: break-word;
+      }
       padding: 20px 40px;
       background: linear-gradient(135deg, #1B16A8 0%, #020212 100%);
       border-bottom: 1px solid rgba(124, 58, 237, 0.2);
@@ -28,6 +58,16 @@
       cursor: pointer;
       font-weight: 700;
       color: #7C3AED;
+    <div class="settings-container" id="welcomeContainer" style="display:none;">
+      <h2>Welcome, <span id="welcomeName">User</span></h2>
+      <p class="muted">You’re signed in. Use the menu in the top-right to open Account Settings, or jump back to your portfolio feed.</p>
+      <div class="pill" id="welcomeEmail">Checking email…</div>
+
+      <div class="quick-actions">
+        <button type="button" id="openSettingsBtn">Account Settings</button>
+        <a href="../portfolio/feed.html" style="background: linear-gradient(135deg, #1B16A8, #7C3AED); color:#fff; border:none; border-radius:8px; font-weight:700; padding:12px;">Go to Feed</a>
+      </div>
+    </div>
       font-size: 1.1em;
       padding: 8px 18px;
       border-radius: 8px;

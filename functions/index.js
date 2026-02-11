@@ -1,4 +1,32 @@
 /**
+ * Firebase Cloud Functions for Portfolio Email Notifications
+ *
+ * Deploy with: firebase deploy --only functions
+ *
+ * Environment Variables needed:
+ * - GMAIL_EMAIL: Your Gmail address
+ * - GMAIL_PASSWORD: Your Gmail app-specific password
+ * - ADMIN_EMAIL: Dominic's email
+ * - SITE_BASE_URL: (optional) e.g. https://your-domain.example (no trailing slash)
+ */
+
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+const nodemailer = require("nodemailer");
+
+admin.initializeApp();
+
+const SITE_BASE_URL = (process.env.SITE_BASE_URL || "https://itwasdom.github.io").replace(/\/+$/, "");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_EMAIL,
+    pass: process.env.GMAIL_PASSWORD,
+  },
+});
+
+/**
  * Sends a password reset email with a unique 6-digit PIN
  * Stores the PIN in Firestore for verification
  */
@@ -35,7 +63,7 @@ exports.sendPasswordResetPin = functions.https.onCall(async (data, context) => {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #0f0a1a 0%, #1a1a2e 100%); padding: 24px; border-radius: 16px; color: #f0f0f0;">
         <div style="text-align: center; margin-bottom: 32px;">
-          <img src="https://itwasdom.github.io/image/Headshot.jpg" alt="Dominic Martinez" style="width:80px;height:80px;border-radius:50%;margin-bottom:12px;">
+          <img src="${SITE_BASE_URL}/image/Headshot.jpg" alt="Dominic Martinez" style="width:80px;height:80px;border-radius:50%;margin-bottom:12px;">
           <h2 style="background: linear-gradient(135deg, #1B16A8 0%, #7C3AED 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 0;">Reset Your Password</h2>
         </div>
         <div style="background: rgba(27, 22, 168, 0.1); border: 1px solid rgba(27, 22, 168, 0.2); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
@@ -157,7 +185,7 @@ exports.sendPasswordResetEmail = functions.https.onCall(async (data, context) =>
   try {
     // Generate a password reset link using Firebase Auth with custom actionCodeSettings
     const actionCodeSettings = {
-      url: 'https://itwasdom.github.io/reset-password.html', // Your site reset page
+      url: `${SITE_BASE_URL}/reset-password.html`,
       handleCodeInApp: false
     };
     const resetLink = await admin.auth().generatePasswordResetLink(email, actionCodeSettings);
@@ -200,33 +228,6 @@ exports.sendPasswordResetEmail = functions.https.onCall(async (data, context) =>
     throw new functions.https.HttpsError('internal', 'Error sending password reset email');
   }
 });
-/**
- * Firebase Cloud Functions for Portfolio Email Notifications
- * 
- * Deploy with: firebase deploy --only functions
- * 
- * Environment Variables needed:
- * - GMAIL_EMAIL: Your Gmail address
- * - GMAIL_PASSWORD: Your Gmail app-specific password
- * - ADMIN_EMAIL: Dominic's email
- */
-
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-const nodemailer = require("nodemailer");
-
-// Initialize Firebase Admin SDK
-admin.initializeApp();
-
-// Configure nodemailer with Gmail
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_EMAIL,
-    pass: process.env.GMAIL_PASSWORD,
-  },
-});
-
 /**
  * Sends email notification when someone likes a photo
  */
@@ -277,7 +278,7 @@ exports.sendLikeNotification = functions.https.onCall(async (data, context) => {
           <div style="background: rgba(27, 22, 168, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             <p style="margin: 0; color: #bbb; text-align: center;">
               Keep creating amazing content!<br>
-              <a href="https://itwasdom.github.io/portfolio/feed.html" style="color: #1B16A8; text-decoration: none; font-weight: bold;">View Your Portfolio</a>
+              <a href="${SITE_BASE_URL}/portfolio/feed.html" style="color: #1B16A8; text-decoration: none; font-weight: bold;">View Your Portfolio</a>
             </p>
           </div>
 
@@ -353,7 +354,7 @@ exports.sendFollowNotification = functions.https.onCall(
             <div style="background: rgba(27, 22, 168, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
               <p style="margin: 0; color: #bbb; text-align: center;">
                 Your follower count is growing!<br>
-                <a href="https://itwasdom.github.io/portfolio/feed.html" style="color: #1B16A8; text-decoration: none; font-weight: bold;">View Your Portfolio</a>
+                <a href="${SITE_BASE_URL}/portfolio/feed.html" style="color: #1B16A8; text-decoration: none; font-weight: bold;">View Your Portfolio</a>
               </p>
             </div>
 
