@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio - Dominic Martinez</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .portfolio-page-container {
+      max-width: 1200px;
+      margin: 120px auto 60px;
+      padding: 0 20px;
+    }
+
+    .back-to-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #e74c3c;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 40px;
+      transition: all 0.3s ease;
+    }
+
+    .back-to-home:hover {
+      transform: translateX(-5px);
+    }
+
+    .portfolio-title {
+      font-size: 2.8rem;
+      text-align: center;
+      background: linear-gradient(135deg, #e74c3c 0%, #ec7063 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 50px;
+      font-weight: 800;
+    }
+
+    .portfolio-feed-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .portfolio-feed-item {
+      background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      border: 1px solid rgba(231, 76, 60, 0.2);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      animation: fadeInBounce 0.8s ease-out;
+      position: relative;
+      aspect-ratio: 1;
+    }
+
+    .portfolio-feed-item:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 20px 50px rgba(231, 76, 60, 0.3);
+      border-color: rgba(231, 76, 60, 0.5);
+    }
+
+    .portfolio-feed-item img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      transition: all 0.4s ease-in-out;
+      filter: brightness(0.9);
+      display: block;
+      border-radius: 16px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .portfolio-feed-item:hover img {
+      filter: brightness(1.1) contrast(1.1);
+      transform: scale(1.15);
+      height: 320px;
+    }
+
+    .portfolio-feed-content {
+      padding: 18px;
+      background: rgba(15, 15, 15, 0.9);
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.3s ease-in-out;
+      opacity: 0.85;
+    }
+
+    .portfolio-feed-content h3 {
+      font-size: 1.1rem;
+      color: #e74c3c;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .portfolio-feed-content p {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin: 0;
+      line-height: 1.4;
+      flex-grow: 1;
+    }
+
+    .portfolio-feed-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .portfolio-feed-tags span {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      transition: all 0.3s ease-in-out;
+    }
+
+    .portfolio-feed-tags span:hover {
+      background: rgba(231, 76, 60, 0.35);
+      border-color: rgba(231, 76, 60, 0.6);
+    }
+
+    .portfolio-footer-message {
+      text-align: center;
+      color: #999;
+      font-size: 1.1rem;
+      padding: 40px 20px;
+      border-top: 1px solid rgba(231, 76, 60, 0.2);
+      margin-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .portfolio-page-container {
+        margin-top: 100px;
+      }
+
+      .portfolio-title {
+        font-size: 2rem;
+      }
+
+      .portfolio-feed-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+      }
+
+      .portfolio-feed-item {
+        aspect-ratio: 1;
+      }
+
+      .portfolio-feed-item img {
+        height: 200px;
+      }
+
+      .portfolio-feed-item:hover img {
+        height: 240px;
+      }
+
+      .portfolio-feed-content {
+        padding: 16px;
+      }
+
+      .portfolio-feed-content h3 {
+        font-size: 1rem;
+      }
+
+      .portfolio-feed-content p {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo">Dominic Martinez</div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Portfolio</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../index.html#connect">Connect</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="portfolio-page-container">
+    <a href="../index.html#portfolio" class="back-to-home">
+      <i class="fas fa-arrow-left"></i>
+      Back to Home
+    </a>
+
+    <h1 class="portfolio-title">My Work</h1>
+
+    <div class="portfolio-feed-grid">
+      <a href="project-1.html" class="portfolio-feed-item">
+        <img src="../image/Gorgeous-Cat.jpg" alt="Professional Cat Photography" loading="lazy">
+        <div class="portfolio-feed-content">
+          <h3>Gorgeous Cat</h3>
+          <p>Professional portrait photography capturing stunning details and emotion.</p>
+          <div class="portfolio-feed-tags">
+            <span>Portrait</span>
+            <span>Photography</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="project-2.html" class="portfolio-feed-item">
+        <img src="../image/La-Antorcha.jpg" alt="Cinematography Project" loading="lazy">
+        <div class="portfolio-feed-content">
+          <h3>La Antorcha</h3>
+          <p>Dynamic cinematography project showcasing visual storytelling and technical excellence.</p>
+          <div class="portfolio-feed-tags">
+            <span>Cinematography</span>
+            <span>Video</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="project-3.html" class="portfolio-feed-item">
+        <img src="../image/Smiling-Boy.jpg" alt="Portrait Photography" loading="lazy">
+        <div class="portfolio-feed-content">
+          <h3>Smiling Boy</h3>
+          <p>Candid portrait photography capturing authentic moments and genuine expressions.</p>
+          <div class="portfolio-feed-tags">
+            <span>Portrait</span>
+            <span>Candid</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="project-1.html" class="portfolio-feed-item">
+        <img src="../image/The-Alamo.jpg" alt="Architecture Photography" loading="lazy">
+        <div class="portfolio-feed-content">
+          <h3>The Alamo</h3>
+          <p>Architectural photography highlighting composition and cultural landmark documentation.</p>
+          <div class="portfolio-feed-tags">
+            <span>Architecture</span>
+            <span>Landmark</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="portfolio-footer-message">
+      <p>Interested in a project? <a href="../index.html#connect" style="color: #e74c3c; text-decoration: none; font-weight: 600;">Get in touch</a></p>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      &copy; 2026 Dominic Martinez. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>
