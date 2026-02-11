@@ -698,111 +698,79 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js"></script>
 
   <script>
-    // Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
-      authDomain: "dominic-martinez-portfolio.firebaseapp.com",
-      projectId: "dominic-martinez-portfolio",
-      storageBucket: "dominic-martinez-portfolio.firebasestorage.app",
-      messagingSenderId: "339938102474",
-      appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
-      measurementId: "G-MSKQYN75ML"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const storage = firebase.storage();
-
     // ===== ADMIN PASSWORD - CHANGE THIS! =====
     const ADMIN_PASSWORD = "Photos4Good";
 
-    let selectedFile = null;
+    console.log('🔐 Admin panel loading...');
+    console.log('📝 Password set to: ' + ADMIN_PASSWORD);
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM Loaded - Setting up admin panel');
-      checkAdminStatus();
-      setupEventListeners();
+    // Check login status immediately (before Firebase loads)
+    window.addEventListener('load', function() {
+      console.log('✓ Page fully loaded, checking admin status...');
+      const adminToken = sessionStorage.getItem('adminLoggedIn');
+      console.log('Admin token in storage:', adminToken);
+      
+      if (adminToken === 'true') {
+        console.log('✓ User is logged in, showing dashboard');
+        showDashboard();
+        initializeFirebase();
+        loadPhotos();
+      } else {
+        console.log('✗ User not logged in, showing login screen');
+        showLogin();
+        attachLoginHandler();
+      }
     });
 
-    function checkAdminStatus() {
-      const adminToken = sessionStorage.getItem('adminLoggedIn');
-      console.log('Admin token:', adminToken);
-      if (adminToken === 'true') {
-        showDashboard();
-      } else {
-        showLogin();
-      }
-    }
-
-    function setupEventListeners() {
-      // Login form
+    function attachLoginHandler() {
       const loginForm = document.getElementById('loginForm');
-      if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-        console.log('Login form listener attached');
-      } else {
-        console.error('Login form not found!');
+      if (!loginForm) {
+        console.error('❌ Login form not found!');
+        return;
       }
-
-      // Upload area
-      const uploadArea = document.getElementById('uploadArea');
-      uploadArea.addEventListener('click', () => document.getElementById('fileInput').click());
-      uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('active');
-      });
-      uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('active'));
-      uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('active');
-        handleFileDrop(e.dataTransfer.files);
-      });
-
-      document.getElementById('fileInput').addEventListener('change', (e) => {
-        handleFileDrop(e.target.files);
-      });
-
-      // Upload form
-      document.getElementById('uploadForm').addEventListener('submit', handleUpload);
+      
+      console.log('✓ Attaching login form handler');
+      loginForm.addEventListener('submit', handleLogin);
     }
 
     function handleLogin(e) {
       e.preventDefault();
-      console.log('Login attempt...');
+      console.log('🔐 Login button clicked');
       
-      const password = document.getElementById('adminPassword').value;
+      const passwordInput = document.getElementById('adminPassword');
+      const password = passwordInput.value;
       const loginBox = document.getElementById('loginBox');
-      const errorDiv = document.getElementById('loginError');
-
-      console.log('Password entered:', password ? 'Yes' : 'No');
+      
+      console.log('Password entered length:', password.length);
       console.log('Expected password:', ADMIN_PASSWORD);
+      console.log('Match:', password === ADMIN_PASSWORD);
 
       if (!password) {
-        console.log('No password entered');
+        console.log('❌ No password entered');
         showLoginError('❌ Please enter your password');
         shakeElement(loginBox);
         return;
       }
 
-      console.log('Comparing:', password, '===', ADMIN_PASSWORD, '?', password === ADMIN_PASSWORD);
-
       if (password === ADMIN_PASSWORD) {
-        console.log('✓ Password correct!');
+        console.log('✅ PASSWORD CORRECT!');
         sessionStorage.setItem('adminLoggedIn', 'true');
-        console.log('Session storage set, redirecting...');
+        console.log('Session storage updated');
         showDashboard();
+        console.log('Dashboard shown, initializing Firebase...');
+        initializeFirebase();
         loadPhotos();
       } else {
-        console.log('✗ Password incorrect');
+        console.log('❌ PASSWORD INCORRECT - Expected "' + ADMIN_PASSWORD + '" but got "' + password + '"');
         showLoginError('❌ Incorrect password. Please try again.');
         shakeElement(loginBox);
-        document.getElementById('adminPassword').value = '';
-        document.getElementById('adminPassword').focus();
+        passwordInput.value = '';
+        passwordInput.focus();
       }
     }
 
     function shakeElement(element) {
+      if (!element) return;
       element.classList.remove('shake');
       void element.offsetWidth;
       element.classList.add('shake');
@@ -810,9 +778,102 @@
 
     function showLoginError(message) {
       const errorDiv = document.getElementById('loginError');
-      errorDiv.textContent = message;
-      errorDiv.classList.add('show');
+      if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.classList.add('show');
+        setTimeout(() => errorDiv.classList.remove('show'), 4000);
+      }
     }
+
+    function showDashboard() {
+      const loginScreen = document.getElementById('loginScreen');
+      const dashboardContainer = document.getElementById('dashboardContainer');
+      
+      if (loginScreen) loginScreen.style.display = 'none';
+      if (dashboardContainer) dashboardContainer.style.display = 'block';
+      console.log('Dashboard now visible');
+    }
+
+    function showLogin() {
+      const loginScreen = document.getElementById('loginScreen');
+      const dashboardContainer = document.getElementById('dashboardContainer');
+      
+      if (loginScreen) loginScreen.style.display = 'flex';
+      if (dashboardContainer) dashboardContainer.style.display = 'none';
+      
+      // Focus password field
+      setTimeout(() => {
+        const passwordInput = document.getElementById('adminPassword');
+        if (passwordInput) passwordInput.focus();
+      }, 100);
+      console.log('Login screen now visible');
+    }
+
+    function logout() {
+      sessionStorage.removeItem('adminLoggedIn');
+      showLogin();
+      resetForm();
+      console.log('User logged out');
+    }
+
+    // ===== FIREBASE INITIALIZATION =====
+    let db, storage;
+
+    function initializeFirebase() {
+      const firebaseConfig = {
+        apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
+        authDomain: "dominic-martinez-portfolio.firebaseapp.com",
+        projectId: "dominic-martinez-portfolio",
+        storageBucket: "dominic-martinez-portfolio.firebasestorage.app",
+        messagingSenderId: "339938102474",
+        appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
+        measurementId: "G-MSKQYN75ML"
+      };
+
+      try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        storage = firebase.storage();
+        console.log('✓ Firebase initialized');
+        setupEventListeners();
+      } catch (error) {
+        console.error('Firebase error:', error);
+      }
+    }
+
+    function setupEventListeners() {
+      console.log('Setting up event listeners...');
+      
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+      const uploadForm = document.getElementById('uploadForm');
+
+      if (uploadArea) {
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          uploadArea.classList.add('active');
+        });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('active'));
+        uploadArea.addEventListener('drop', (e) => {
+          e.preventDefault();
+          uploadArea.classList.remove('active');
+          handleFileDrop(e.dataTransfer.files);
+        });
+      }
+
+      if (fileInput) {
+        fileInput.addEventListener('change', (e) => handleFileDrop(e.target.files));
+      }
+
+      if (uploadForm) {
+        uploadForm.addEventListener('submit', handleUpload);
+      }
+
+      console.log('Event listeners attached');
+    }
+
+    let selectedFile = null;
 
     function handleFileDrop(files) {
       if (files.length === 0) return;
@@ -830,12 +891,13 @@
 
       selectedFile = file;
 
-      // Show preview
       const reader = new FileReader();
       reader.onload = (e) => {
         const preview = document.getElementById('previewImage');
-        preview.src = e.target.result;
-        preview.style.display = 'block';
+        if (preview) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -859,8 +921,10 @@
       }
 
       const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="loading"></span> Uploading...';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loading"></span> Uploading...';
+      }
 
       try {
         const photoId = 'photo-' + Date.now();
@@ -886,37 +950,50 @@
         console.error('Upload error:', error);
         showError('errorMessage', '❌ Error uploading photo: ' + error.message);
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
+        }
       }
     }
 
     function resetForm() {
-      document.getElementById('uploadForm').reset();
-      document.getElementById('fileInput').value = '';
-      document.getElementById('previewImage').style.display = 'none';
+      const uploadForm = document.getElementById('uploadForm');
+      const fileInput = document.getElementById('fileInput');
+      const previewImage = document.getElementById('previewImage');
+      
+      if (uploadForm) uploadForm.reset();
+      if (fileInput) fileInput.value = '';
+      if (previewImage) previewImage.style.display = 'none';
       selectedFile = null;
     }
 
     async function loadPhotos() {
+      if (!db) {
+        console.log('Firebase not initialized yet');
+        return;
+      }
+
       try {
         const snapshot = await db.collection('portfolio').orderBy('createdAt', 'desc').get();
         const photoList = document.getElementById('photoList');
         const photoCount = document.getElementById('photoCount');
 
         if (snapshot.empty) {
-          photoList.innerHTML = `
-            <div class="empty-state">
-              <i class="fas fa-inbox"></i>
-              <p>No photos uploaded yet</p>
-            </div>
-          `;
-          photoCount.textContent = '0';
+          if (photoList) {
+            photoList.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No photos uploaded yet</p>
+              </div>
+            `;
+          }
+          if (photoCount) photoCount.textContent = '0';
           return;
         }
 
-        photoCount.textContent = snapshot.size;
-        photoList.innerHTML = '';
+        if (photoCount) photoCount.textContent = snapshot.size;
+        if (photoList) photoList.innerHTML = '';
 
         snapshot.forEach(doc => {
           const photo = doc.data();
@@ -935,7 +1012,7 @@
             </div>
             <button class="btn-delete" onclick="deletePhoto('${doc.id}')">Delete</button>
           `;
-          photoList.appendChild(photoItem);
+          if (photoList) photoList.appendChild(photoItem);
         });
       } catch (error) {
         console.error('Error loading photos:', error);
@@ -968,63 +1045,34 @@
       }
     }
 
-    function showDashboard() {
-      console.log('Showing dashboard...');
-      const loginScreen = document.getElementById('loginScreen');
-      const dashboardContainer = document.getElementById('dashboardContainer');
-      
-      if (loginScreen) {
-        loginScreen.style.display = 'none';
-        console.log('Login screen hidden');
-      }
-      if (dashboardContainer) {
-        dashboardContainer.style.display = 'block';
-        console.log('Dashboard shown');
-      }
-      loadPhotos();
-    }
-
-    function showLogin() {
-      console.log('Showing login...');
-      const loginScreen = document.getElementById('loginScreen');
-      const dashboardContainer = document.getElementById('dashboardContainer');
-      
-      if (loginScreen) {
-        loginScreen.style.display = 'flex';
-        console.log('Login screen shown');
-      }
-      if (dashboardContainer) {
-        dashboardContainer.style.display = 'none';
-        console.log('Dashboard hidden');
-      }
-    }
-
-    function logout() {
-      sessionStorage.removeItem('adminLoggedIn');
-      showLogin();
-      resetForm();
-      document.getElementById('adminPassword').value = '';
-      document.getElementById('adminPassword').focus();
-    }
-
     function showSuccess(message) {
       const successDiv = document.getElementById('successMessage');
-      successDiv.textContent = message;
-      successDiv.classList.add('show');
-      setTimeout(() => successDiv.classList.remove('show'), 4000);
+      if (successDiv) {
+        successDiv.textContent = message;
+        successDiv.classList.add('show');
+        setTimeout(() => successDiv.classList.remove('show'), 4000);
+      }
     }
 
     function showError(elementId, message) {
       const errorDiv = document.getElementById(elementId);
-      errorDiv.textContent = message;
-      errorDiv.classList.add('show');
-      setTimeout(() => errorDiv.classList.remove('show'), 5000);
+      if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.classList.add('show');
+        setTimeout(() => errorDiv.classList.remove('show'), 5000);
+      }
     }
 
     // Real-time updates
-    db.collection('portfolio').onSnapshot(() => {
-      loadPhotos();
-    });
+    function setupRealtimeUpdates() {
+      if (!db) return;
+      db.collection('portfolio').onSnapshot(() => {
+        loadPhotos();
+      });
+    }
+
+    // Start real-time updates after Firebase loads
+    setTimeout(setupRealtimeUpdates, 1000);
   </script>
 </body>
 </html>
