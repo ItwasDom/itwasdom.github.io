@@ -1,4 +1,53 @@
 /**
+ * Registers a new user and stores profile in Firestore
+ */
+exports.registerUser = functions.https.onCall(async (data, context) => {
+  const { email, password, displayName } = data;
+  if (!email || !password) {
+    throw new functions.https.HttpsError('invalid-argument', 'Email and password are required');
+  }
+  try {
+    // Create user in Firebase Auth
+    const userRecord = await admin.auth().createUser({
+      email,
+      password,
+      displayName,
+    });
+    // Store profile in Firestore
+    await admin.firestore().collection('users').doc(userRecord.uid).set({
+      email,
+      displayName,
+      createdAt: new Date(),
+    });
+    return { success: true, uid: userRecord.uid };
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+/**
+ * Updates user profile and password
+ */
+exports.updateUserProfile = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+  const { displayName, password } = data;
+  try {
+    const uid = context.auth.uid;
+    if (displayName) {
+      await admin.auth().updateUser(uid, { displayName });
+      await admin.firestore().collection('users').doc(uid).set({ displayName }, { merge: true });
+    }
+    if (password) {
+      await admin.auth().updateUser(uid, { password });
+    }
+    return { success: true };
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+/**
  * Sends password reset email to user
  */
 exports.sendPasswordResetEmail = functions.https.onCall(async (data, context) => {
