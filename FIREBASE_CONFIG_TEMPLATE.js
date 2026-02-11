@@ -22,13 +22,13 @@
 // }
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC0oiaP_1D5CFRTEdXN8NF5OQYqwL-Ni8c",
-  authDomain: "dominic-martinez-portfolio.firebaseapp.com",
-  projectId: "dominic-martinez-portfolio",
-  storageBucket: "dominic-martinez-portfolio.appspot.com",
-  messagingSenderId: "339938102474",
-  appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
-  measurementId: "G-MSKQYN75ML"
+  apiKey: "PASTE_YOUR_FIREBASE_WEB_API_KEY_HERE",
+  authDomain: "PASTE_YOUR_AUTH_DOMAIN_HERE",
+  projectId: "PASTE_YOUR_PROJECT_ID_HERE",
+  storageBucket: "PASTE_YOUR_STORAGE_BUCKET_HERE",
+  messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID_HERE",
+  appId: "PASTE_YOUR_APP_ID_HERE",
+  measurementId: "PASTE_YOUR_MEASUREMENT_ID_HERE"
 };
 
 // Usage:

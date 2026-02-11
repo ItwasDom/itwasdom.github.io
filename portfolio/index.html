@@ -64,7 +64,6 @@
       flex-direction: column;
       animation: fadeInBounce 0.8s ease-out;
       position: relative;
-      aspect-ratio: 1;
     }
 
     .portfolio-feed-item:hover {
@@ -225,7 +224,6 @@
       }
 
       .portfolio-feed-item {
-        aspect-ratio: 1;
       }
 
       .portfolio-feed-item img {
@@ -246,6 +244,173 @@
 
       .portfolio-feed-content p {
         font-size: 0.8rem;
+      }
+    }
+
+    /* ===== Portfolio Details Modal ===== */
+    .portfolio-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      z-index: 2000;
+    }
+
+    .portfolio-modal-overlay.open {
+      display: flex;
+    }
+
+    .portfolio-modal {
+      width: min(980px, 100%);
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border: 1px solid rgba(124, 58, 237, 0.35);
+      border-radius: 18px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      max-height: 90vh;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+    }
+
+    .portfolio-modal-media {
+      background: #0b0b12;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 320px;
+      position: relative;
+    }
+
+    .portfolio-modal-media img {
+      width: 100%;
+      height: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+      display: block;
+    }
+
+    .portfolio-modal-thumbs {
+      display: flex;
+      gap: 10px;
+      padding: 12px;
+      border-top: 1px solid rgba(124, 58, 237, 0.18);
+      overflow-x: auto;
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    .portfolio-modal-thumb {
+      width: 84px;
+      height: 64px;
+      border-radius: 10px;
+      border: 2px solid rgba(124, 58, 237, 0.25);
+      background: #0b0b12;
+      overflow: hidden;
+      cursor: pointer;
+      flex: 0 0 auto;
+      padding: 0;
+    }
+
+    .portfolio-modal-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.9);
+    }
+
+    .portfolio-modal-thumb.active {
+      border-color: rgba(124, 58, 237, 0.85);
+      box-shadow: 0 10px 30px rgba(124, 58, 237, 0.18);
+    }
+
+    .portfolio-modal-body {
+      padding: 22px;
+      overflow: auto;
+    }
+
+    .portfolio-modal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .portfolio-modal-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #f0f0f0;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .portfolio-modal-close {
+      border: 2px solid rgba(124, 58, 237, 0.55);
+      background: transparent;
+      color: #7C3AED;
+      border-radius: 10px;
+      width: 42px;
+      height: 42px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .portfolio-modal-desc {
+      color: #bbb;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin: 10px 0 14px;
+      white-space: pre-wrap;
+    }
+
+    .portfolio-modal-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+
+    .portfolio-modal-tags span {
+      background: rgba(124, 58, 237, 0.2);
+      color: #7C3AED;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .portfolio-modal-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .portfolio-modal-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(124, 58, 237, 0.55);
+      background: transparent;
+      color: #7C3AED;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    @media (max-width: 860px) {
+      .portfolio-modal {
+        grid-template-columns: 1fr;
+      }
+      .portfolio-modal-body {
+        padding: 18px;
       }
     }
   </style>
@@ -295,6 +460,36 @@
 
     <div class="portfolio-footer-message">
       <p>Interested in a project? <a href="../index.html#connect" style="color: #7C3AED; text-decoration: none; font-weight: 600;">Get in touch</a></p>
+    </div>
+  </div>
+
+  <!-- Portfolio details modal -->
+  <div id="portfolioModalOverlay" class="portfolio-modal-overlay" aria-hidden="true">
+    <div class="portfolio-modal" role="dialog" aria-modal="true" aria-labelledby="portfolioModalTitle">
+      <div>
+        <div class="portfolio-modal-media">
+          <img id="portfolioModalImage" alt="" />
+        </div>
+        <div id="portfolioModalThumbs" class="portfolio-modal-thumbs" aria-label="Project images"></div>
+      </div>
+      <div class="portfolio-modal-body">
+        <div class="portfolio-modal-top">
+          <h2 id="portfolioModalTitle" class="portfolio-modal-title"></h2>
+          <button id="portfolioModalClose" class="portfolio-modal-close" type="button" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div id="portfolioModalTags" class="portfolio-modal-tags"></div>
+        <p id="portfolioModalDesc" class="portfolio-modal-desc"></p>
+
+        <div class="portfolio-modal-actions">
+          <span id="portfolioModalLikeCount" class="like-count"></span>
+          <a id="portfolioModalOpenImage" class="portfolio-modal-open" href="#" target="_blank" rel="noopener noreferrer">
+            <i class="fas fa-arrow-up-right-from-square"></i> Open Image
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -377,7 +572,11 @@
       }
 
       function createCard(item) {
-        const imageUrl = normalizeHttpUrl(item && item.imageUrl);
+        const imageUrlsRaw = Array.isArray(item && item.imageUrls)
+          ? item.imageUrls
+          : (item && item.imageUrl ? [item.imageUrl] : []);
+        const imageUrls = imageUrlsRaw.map((u) => normalizeHttpUrl(u)).filter(Boolean).slice(0, 10);
+        const imageUrl = imageUrls.length ? imageUrls[0] : null;
         const title = (item && typeof item.title === 'string' && item.title.trim()) ? item.title.trim() : 'Untitled';
         const description = (item && typeof item.description === 'string' && item.description.trim()) ? item.description.trim() : '';
         const category = (item && typeof item.category === 'string' && item.category.trim()) ? item.category.trim() : '';
@@ -390,14 +589,19 @@
         a.className = 'portfolio-feed-item';
         a.setAttribute('aria-label', title);
 
-        if (imageUrl) {
-          a.href = imageUrl;
-          a.target = '_blank';
-          a.rel = 'noopener noreferrer';
-        } else {
-          a.href = '#';
-          a.addEventListener('click', (e) => e.preventDefault());
-        }
+        a.href = '#';
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          openPortfolioModal({
+            id,
+            title,
+            description,
+            category,
+            imageUrl,
+            imageUrls,
+            likeCount,
+          });
+        });
 
         const img = document.createElement('img');
         img.loading = 'lazy';
@@ -479,6 +683,122 @@
 
         a.appendChild(content);
         return a;
+      }
+
+      function ensurePortfolioModal() {
+        const overlay = document.getElementById('portfolioModalOverlay');
+        const closeBtn = document.getElementById('portfolioModalClose');
+        if (!overlay || !closeBtn) return;
+
+        if (overlay.getAttribute('data-wired') === 'true') return;
+        overlay.setAttribute('data-wired', 'true');
+
+        const close = () => closePortfolioModal();
+
+        closeBtn.addEventListener('click', close);
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) close();
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') close();
+        });
+      }
+
+      function openPortfolioModal(item) {
+        ensurePortfolioModal();
+
+        const overlay = document.getElementById('portfolioModalOverlay');
+        const titleEl = document.getElementById('portfolioModalTitle');
+        const imgEl = document.getElementById('portfolioModalImage');
+        const descEl = document.getElementById('portfolioModalDesc');
+        const tagsEl = document.getElementById('portfolioModalTags');
+        const likeEl = document.getElementById('portfolioModalLikeCount');
+        const openLink = document.getElementById('portfolioModalOpenImage');
+        const thumbsEl = document.getElementById('portfolioModalThumbs');
+
+        if (!overlay || !titleEl || !imgEl || !descEl || !tagsEl || !likeEl || !openLink || !thumbsEl) return;
+
+        titleEl.textContent = item && item.title ? String(item.title) : '';
+
+        const urlsRaw = Array.isArray(item && item.imageUrls)
+          ? item.imageUrls
+          : (item && item.imageUrl ? [item.imageUrl] : []);
+        const urls = urlsRaw
+          .map((u) => normalizeHttpUrl(u))
+          .filter(Boolean)
+          .slice(0, 10);
+
+        thumbsEl.innerHTML = '';
+
+        const selectImage = (url, title) => {
+          imgEl.src = url;
+          imgEl.alt = title || 'Portfolio image';
+          openLink.href = url;
+          openLink.style.display = '';
+        };
+
+        if (urls.length) {
+          selectImage(urls[0], item && item.title ? String(item.title) : 'Portfolio image');
+
+          urls.forEach((url, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'portfolio-modal-thumb' + (idx === 0 ? ' active' : '');
+            btn.setAttribute('aria-label', `View image ${idx + 1}`);
+
+            const timg = document.createElement('img');
+            timg.alt = '';
+            timg.loading = 'lazy';
+            timg.src = url;
+            btn.appendChild(timg);
+
+            btn.addEventListener('click', () => {
+              thumbsEl.querySelectorAll('.portfolio-modal-thumb').forEach((el) => el.classList.remove('active'));
+              btn.classList.add('active');
+              selectImage(url, item && item.title ? String(item.title) : 'Portfolio image');
+            });
+
+            thumbsEl.appendChild(btn);
+          });
+
+          thumbsEl.style.display = urls.length > 1 ? '' : 'none';
+        } else {
+          imgEl.removeAttribute('src');
+          imgEl.alt = '';
+          openLink.href = '#';
+          openLink.style.display = 'none';
+          thumbsEl.style.display = 'none';
+        }
+
+        const desc = item && item.description ? String(item.description) : '';
+        descEl.textContent = desc;
+        descEl.style.display = desc.trim().length ? '' : 'none';
+
+        tagsEl.innerHTML = '';
+        const cat = item && item.category ? String(item.category) : '';
+        if (cat.trim().length) {
+          const span = document.createElement('span');
+          span.textContent = cat;
+          tagsEl.appendChild(span);
+          tagsEl.style.display = '';
+        } else {
+          tagsEl.style.display = 'none';
+        }
+
+        const n = Number.isFinite(Number(item && item.likeCount)) ? Number(item.likeCount) : 0;
+        likeEl.textContent = `${n.toLocaleString()} like${n === 1 ? '' : 's'}`;
+
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.documentElement.style.overflow = 'hidden';
+      }
+
+      function closePortfolioModal() {
+        const overlay = document.getElementById('portfolioModalOverlay');
+        if (!overlay) return;
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.documentElement.style.overflow = '';
       }
 
       function renderPortfolio() {

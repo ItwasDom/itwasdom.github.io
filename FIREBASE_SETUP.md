@@ -32,6 +32,24 @@
 
 Note: Firebase web config values are not secrets (they are embedded in client apps). Keep any server credentials (like email passwords) in Cloud Functions environment variables.
 
+### If your API key was flagged/leaked
+
+If Google emails you that your key is publicly accessible, the usual fix is:
+
+1. **Rotate the key** in Google Cloud Console (APIs & Services → Credentials).
+2. **Restrict the new key**:
+  - **Application restrictions** → HTTP referrers (web sites): add your domains (e.g. `https://itwasdom.github.io/*` and any custom domain).
+  - **API restrictions**: limit to only the APIs you actually use.
+3. Update `assets/js/firebase-config.js` with the **new** key.
+
+## Step 4.5 (Local Dev): Authorize localhost + Storage uploads
+
+If you run the site with a local server (e.g. VS Code Live Server on `127.0.0.1:5500`), you may need:
+
+- Firebase Console → **Authentication** → **Settings** → **Authorized domains**: add `127.0.0.1` and `localhost`.
+- Google Cloud Console → **Credentials** → your API key → **HTTP referrers**: allow your dev origin(s) and hosting origin(s).
+- Firebase Storage bucket CORS: see [STORAGE_CORS_SETUP.md](STORAGE_CORS_SETUP.md) (needed when Safari shows preflight/CORS errors on uploads).
+
 ## Step 5: Set Up Cloud Functions for Email Notifications
 
 1. Install Firebase CLI: `npm install -g firebase-tools`

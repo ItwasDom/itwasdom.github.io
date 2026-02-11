@@ -39,7 +39,7 @@
   <section class="page-hero">
     <div class="page-hero-content">
       <h1 id="experienceHeroTitle">Experience</h1>
-      <p id="experienceHeroSubtitle">Professional Background & Education</p>
+      <p id="experienceHeroSubtitle">Professional Background &amp; Education</p>
     </div>
   </section>
 
@@ -54,7 +54,7 @@
             <h2 id="experienceWorkHeading">Work Experience</h2>
           </div>
           <div class="experience">
-            <ul>
+            <ul id="experienceWorkList">
               <li>
                 <h3>Sales Associate</h3>
                 <p class="company">The Camera Exchange, San Antonio, TX</p>
@@ -84,7 +84,7 @@
             <h2 id="experienceEducationHeading">Education</h2>
           </div>
           <div class="experience">
-            <ul>
+            <ul id="experienceEducationList">
               <li>
                 <h3>Bachelor's in Digital Cinematography</h3>
                 <p class="company">Full Sail University</p>
@@ -147,6 +147,59 @@
     (function() {
       const db = firebase.firestore();
 
+      function normalizeExperienceItems(value) {
+        if (!Array.isArray(value)) return [];
+        return value
+          .filter(Boolean)
+          .map((item) => ({
+            title: item.title ? String(item.title).trim() : '',
+            company: item.company ? String(item.company).trim() : '',
+            dates: item.dates ? String(item.dates).trim() : '',
+            description: item.description ? String(item.description).trim() : '',
+          }))
+          .filter((item) => Object.values(item).some(v => v && v.length > 0));
+      }
+
+      function renderExperienceList(listId, itemsRaw) {
+        const ul = document.getElementById(listId);
+        if (!ul) return;
+        if (itemsRaw === undefined || itemsRaw === null) return; // keep hard-coded fallback
+        const items = normalizeExperienceItems(itemsRaw);
+
+        ul.innerHTML = '';
+        items.forEach((it) => {
+          const li = document.createElement('li');
+
+          const h3 = document.createElement('h3');
+          h3.textContent = it.title;
+          li.appendChild(h3);
+
+          if (it.company) {
+            const company = document.createElement('p');
+            company.className = 'company';
+            company.textContent = it.company;
+            li.appendChild(company);
+          }
+
+          if (it.dates) {
+            const duration = document.createElement('p');
+            duration.className = 'duration';
+            duration.innerHTML = '<i class="fas fa-calendar"></i> ';
+            duration.appendChild(document.createTextNode(it.dates));
+            li.appendChild(duration);
+          }
+
+          if (it.description) {
+            const desc = document.createElement('p');
+            desc.className = 'description';
+            desc.textContent = it.description;
+            li.appendChild(desc);
+          }
+
+          ul.appendChild(li);
+        });
+      }
+
       document.addEventListener('DOMContentLoaded', async function() {
         try {
           const snap = await db.collection('siteContent').doc('experience').get();
@@ -154,15 +207,19 @@
           const data = snap.data();
 
           const setText = (id, value) => {
-            if (!value) return;
+            if (value === undefined || value === null) return;
             const el = document.getElementById(id);
-            if (el) el.textContent = value;
+            if (el) el.textContent = String(value);
           };
 
           setText('experienceHeroTitle', data.heroTitle);
           setText('experienceHeroSubtitle', data.heroSubtitle);
           setText('experienceWorkHeading', data.workHeading);
           setText('experienceEducationHeading', data.educationHeading);
+
+          // Lists (optional). If missing/empty, static HTML remains.
+          renderExperienceList('experienceWorkList', data.workItems);
+          renderExperienceList('experienceEducationList', data.educationItems);
         } catch (err) {
           console.error('Error loading experience page content:', err);
         }

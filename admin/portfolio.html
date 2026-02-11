@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://apis.google.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com; frame-src 'self' https://*.firebaseapp.com https://*.google.com https://accounts.google.com; worker-src 'self' blob:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Manage Portfolio</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -30,6 +30,14 @@
     .form-group textarea { min-height: 70px; resize: vertical; }
     .preview-image { width: 100%; height: 220px; object-fit: cover; border-radius: 10px; margin-bottom: 12px; border: 1px solid rgba(124,58,237,0.2); display: none; }
     .file-info { font-size: 0.8rem; color: #aaa; margin-bottom: 12px; }
+    .inline-check { display: flex; align-items: center; gap: 10px; color: #bbb; font-weight: 600; font-size: 0.9rem; }
+    .inline-check input { width: auto; }
+    .existing-images { display: flex; gap: 10px; padding: 10px; border-radius: 12px; border: 1px solid rgba(124,58,237,0.25); background: rgba(0,0,0,0.12); overflow-x: auto; }
+    .existing-image { position: relative; width: 96px; height: 72px; border-radius: 10px; overflow: hidden; border: 2px solid rgba(124,58,237,0.25); background: #0b0b12; flex: 0 0 auto; }
+    .existing-image img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.92); }
+    .existing-image.removed { opacity: 0.45; border-color: rgba(244, 67, 54, 0.65); }
+    .existing-image button { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 8px; border: none; cursor: pointer; font-weight: 900; color: #fff; background: rgba(244, 67, 54, 0.9); }
+    .existing-image.removed button { background: rgba(76, 175, 80, 0.85); }
     .button-group { display: flex; gap: 10px; margin-top: 10px; }
     .btn { flex: 1; padding: 11px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
     .btn-upload { background: linear-gradient(135deg, #1B16A8, #7C3AED); color: #fff; }
@@ -75,9 +83,24 @@
           <p>Drag and drop your photo here</p>
           <p>or <span class="highlight">click to browse</span></p>
         </div>
-        <input type="file" id="fileInput" accept="image/*,.heic,.HEIC,.dng,.DNG,.cr2,.CR2,.nef,.NEF,.arw,.ARW,.tif,.tiff,.TIF,.TIFF">
-        <img id="previewImage" class="preview-image">
+        <input type="file" id="fileInput" multiple accept="image/*,.heic,.HEIC,.dng,.DNG,.cr2,.CR2,.nef,.NEF,.arw,.ARW,.tif,.tiff,.TIF,.TIFF">
+        <div id="selectedImagesPreview" class="existing-images" style="display:none;"></div>
         <div id="fileInfo" class="file-info"></div>
+
+        <div id="existingImagesSection" style="display:none;">
+          <div class="form-group">
+            <label>Current Images</label>
+            <div id="existingImagesList" class="existing-images"></div>
+            <div id="existingImagesInfo" class="file-info"></div>
+          </div>
+          <div class="form-group">
+            <label class="inline-check">
+              <input type="checkbox" id="replaceImagesCheckbox">
+              Replace existing images (instead of adding)
+            </label>
+          </div>
+        </div>
+
         <form id="uploadForm">
           <div class="form-group">
             <label for="photoTitle">Photo Title *</label>
@@ -122,6 +145,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
   <script src="../assets/js/firebase-config.js"></script>
   <script src="../assets/js/firebase-init-compat.js"></script>
   <script>
@@ -129,8 +153,13 @@
     const db = firebase.firestore();
     const storage = firebase.storage();
     const ADMIN_UID = "RVAvU26oGeYsaJYk0X1OF9h6apb2";
-    let selectedFile = null;
+    let selectedFiles = [];
     let editingPhotoId = null;
+    let existingImageUrls = [];
+    let removedImageUrls = new Set();
+    let replaceImages = false;
+    let selectedPreviewObjectUrls = [];
+    let selectedPreviewRenderToken = 0;
 
     function clearElement(el) {
       if (!el) return;
@@ -162,6 +191,320 @@
       }
     }
 
+    function clearSelectedPreviewObjectUrls() {
+      if (!Array.isArray(selectedPreviewObjectUrls)) {
+        selectedPreviewObjectUrls = [];
+        return;
+      }
+      for (const u of selectedPreviewObjectUrls) {
+        try { URL.revokeObjectURL(u); } catch {}
+      }
+      selectedPreviewObjectUrls = [];
+    }
+
+    function getFileExt(name) {
+      if (typeof name !== 'string') return '';
+      const idx = name.lastIndexOf('.');
+      if (idx === -1) return '';
+      return name.slice(idx + 1).toLowerCase();
+    }
+
+    function isHeicLike(file) {
+      if (!file) return false;
+      const t = (file.type || '').toLowerCase();
+      if (t === 'image/heic' || t === 'image/heif') return true;
+      const ext = getFileExt(file.name);
+      return ext === 'heic' || ext === 'heif';
+    }
+
+    function isRawLike(file) {
+      const ext = getFileExt(file && file.name);
+      return ext === 'dng' || ext === 'cr2' || ext === 'nef' || ext === 'arw';
+    }
+
+    async function waitForHeic2any(maxMs = 1200) {
+      const start = Date.now();
+      while (Date.now() - start < maxMs) {
+        const candidate = window.heic2any;
+        const fn = (typeof candidate === 'function')
+          ? candidate
+          : (candidate && typeof candidate.default === 'function' ? candidate.default : null);
+        if (fn) return fn;
+        await new Promise((r) => setTimeout(r, 80));
+      }
+      return null;
+    }
+
+    function renderUnpreviewableTile(container, label) {
+      const tile = document.createElement('div');
+      tile.className = 'existing-image removed';
+      tile.style.display = 'flex';
+      tile.style.alignItems = 'center';
+      tile.style.justifyContent = 'center';
+      tile.style.padding = '8px';
+      tile.style.textAlign = 'center';
+      tile.style.color = '#ddd';
+      tile.style.fontSize = '0.7rem';
+      tile.textContent = label || 'Preview not available';
+      container.appendChild(tile);
+    }
+
+    async function loadPreviewIntoImg(file, imgEl, token) {
+      if (!file || !imgEl) return;
+      try {
+        // RAW formats generally can't be previewed in-browser.
+        if (isRawLike(file)) throw new Error('raw-not-previewable');
+
+        let blobForPreview = file;
+        if (isHeicLike(file)) {
+          const converter = await waitForHeic2any(1200);
+          if (converter) {
+            blobForPreview = await converter({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+          } else {
+            // Some browsers (notably Safari) can preview HEIC directly.
+            // Fall back to trying the raw File object.
+            blobForPreview = file;
+          }
+        }
+
+        const url = URL.createObjectURL(blobForPreview);
+        if (token !== selectedPreviewRenderToken) {
+          try { URL.revokeObjectURL(url); } catch {}
+          return;
+        }
+        selectedPreviewObjectUrls.push(url);
+        imgEl.src = url;
+      } catch (e) {
+        // Let caller handle fallback.
+        throw e;
+      }
+    }
+
+    function renderSelectedImagesPreview() {
+      const wrap = document.getElementById('selectedImagesPreview');
+      if (!wrap) return;
+      const files = Array.isArray(selectedFiles) ? selectedFiles.filter(Boolean) : [];
+
+      selectedPreviewRenderToken += 1;
+      const token = selectedPreviewRenderToken;
+      clearSelectedPreviewObjectUrls();
+      clearElement(wrap);
+
+      if (files.length === 0) {
+        wrap.style.display = 'none';
+        return;
+      }
+
+      wrap.style.display = '';
+      files.forEach((file, idx) => {
+        const card = document.createElement('div');
+        card.className = 'existing-image';
+
+        const img = document.createElement('img');
+        img.alt = '';
+        img.loading = 'lazy';
+        img.src = '';
+        img.style.background = '#0b0b12';
+        img.onerror = () => {
+          // Safari can sometimes fail decoding HEIC from object URLs.
+          // Try a data URL fallback before giving up.
+          try {
+            if (!file || token !== selectedPreviewRenderToken) throw new Error('stale');
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (token !== selectedPreviewRenderToken) return;
+              if (typeof reader.result === 'string') img.src = reader.result;
+            };
+            reader.onerror = () => {
+              if (token !== selectedPreviewRenderToken) return;
+              if (card && card.parentNode) {
+                const ext = getFileExt(file && file.name);
+                card.innerHTML = '';
+                card.className = 'existing-image removed';
+                const label = document.createElement('div');
+                label.style.padding = '8px';
+                label.style.fontSize = '0.7rem';
+                label.style.textAlign = 'center';
+                label.style.color = '#ddd';
+                label.textContent = ext ? `${ext.toUpperCase()} preview not supported` : 'Preview not supported';
+                card.appendChild(label);
+              }
+            };
+            reader.readAsDataURL(file);
+          } catch {
+            // ignore
+          }
+        };
+        card.appendChild(img);
+
+        // Load preview (with HEIC conversion when possible).
+        loadPreviewIntoImg(file, img, token).catch((err) => {
+          const ext = getFileExt(file && file.name);
+          if (String(err && err.message) === 'raw-not-previewable') {
+            card.innerHTML = '';
+            renderUnpreviewableTile(card, ext ? `${ext.toUpperCase()} can't preview` : `Can't preview`);
+            return;
+          }
+          // Otherwise, let the onerror handler handle it if needed.
+        });
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.title = 'Remove from selection';
+        btn.textContent = '×';
+        btn.addEventListener('click', () => {
+          selectedFiles = files.filter((_, i) => i !== idx);
+          reconcileSelectionLimit();
+          renderSelectedImagesPreview();
+          updateFileInfoText();
+        });
+        card.appendChild(btn);
+
+        wrap.appendChild(card);
+      });
+    }
+
+    function updateFileInfoText() {
+      const info = document.getElementById('fileInfo');
+      if (!info) return;
+
+      if (!selectedFiles || selectedFiles.length === 0) {
+        info.textContent = '';
+        return;
+      }
+
+      const files = selectedFiles.filter(Boolean);
+      if (files.length === 1) {
+        const file = files[0];
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        info.textContent = editingPhotoId
+          ? `Selected new image: ${file.name} (${sizeMb} MB)${replaceImages ? ' (will replace existing images)' : ' (will be added)'}`
+          : `Selected: ${file.name} (${sizeMb} MB)`;
+      } else {
+        const totalMb = (files.reduce((sum, f) => sum + (f ? f.size : 0), 0) / (1024 * 1024)).toFixed(2);
+        info.textContent = editingPhotoId
+          ? `Selected new images: ${files.length} (${totalMb} MB total)${replaceImages ? ' (will replace existing images)' : ' (will be added)'}`
+          : `Selected: ${files.length} images (${totalMb} MB total)`;
+      }
+    }
+
+    function mergeSelectedFiles(existing, incoming, maxCount) {
+      const safeExisting = Array.isArray(existing) ? existing.filter(Boolean) : [];
+      const safeIncoming = Array.isArray(incoming) ? incoming.filter(Boolean) : [];
+
+      const seen = new Set();
+      const out = [];
+      const keyFor = (f) => `${f && f.name ? f.name : ''}::${f && f.size ? f.size : 0}::${f && f.lastModified ? f.lastModified : 0}`;
+
+      for (const f of safeExisting) {
+        const k = keyFor(f);
+        if (seen.has(k)) continue;
+        seen.add(k);
+        out.push(f);
+        if (out.length >= maxCount) return out;
+      }
+
+      for (const f of safeIncoming) {
+        const k = keyFor(f);
+        if (seen.has(k)) continue;
+        seen.add(k);
+        out.push(f);
+        if (out.length >= maxCount) return out;
+      }
+
+      return out;
+    }
+
+    function getPrevUrlsFromDoc(photo) {
+      const urls = Array.isArray(photo && photo.imageUrls)
+        ? photo.imageUrls
+        : (photo && photo.imageUrl ? [photo.imageUrl] : []);
+      return urls.map((u) => normalizeHttpUrl(u)).filter(Boolean).slice(0, 10);
+    }
+
+    function getKeptExistingUrls() {
+      const list = Array.isArray(existingImageUrls) ? existingImageUrls : [];
+      if (replaceImages) return [];
+      return list.filter((u) => u && !removedImageUrls.has(u)).slice(0, 10);
+    }
+
+    function renderExistingImages() {
+      const section = document.getElementById('existingImagesSection');
+      const listEl = document.getElementById('existingImagesList');
+      const infoEl = document.getElementById('existingImagesInfo');
+      const checkbox = document.getElementById('replaceImagesCheckbox');
+      if (!section || !listEl || !infoEl) return;
+
+      const urls = Array.isArray(existingImageUrls) ? existingImageUrls : [];
+      if (!editingPhotoId) {
+        section.style.display = 'none';
+        return;
+      }
+
+      section.style.display = '';
+      if (checkbox) checkbox.checked = !!replaceImages;
+
+      clearElement(listEl);
+      if (urls.length === 0) {
+        const empty = document.createElement('div');
+        empty.style.color = '#888';
+        empty.style.fontSize = '0.85rem';
+        empty.textContent = 'No images saved for this project yet.';
+        listEl.appendChild(empty);
+      } else {
+        urls.forEach((url) => {
+          const wrap = document.createElement('div');
+          wrap.className = 'existing-image' + (removedImageUrls.has(url) || replaceImages ? ' removed' : '');
+
+          const img = document.createElement('img');
+          img.alt = '';
+          img.loading = 'lazy';
+          img.src = url;
+          wrap.appendChild(img);
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.title = removedImageUrls.has(url) ? 'Undo remove' : 'Remove image';
+          btn.textContent = removedImageUrls.has(url) || replaceImages ? '↺' : '×';
+          btn.addEventListener('click', () => {
+            if (replaceImages) {
+              // In replace mode, existing images are treated as removed.
+              return;
+            }
+            if (removedImageUrls.has(url)) removedImageUrls.delete(url);
+            else removedImageUrls.add(url);
+            renderExistingImages();
+            reconcileSelectionLimit();
+          });
+          wrap.appendChild(btn);
+
+          listEl.appendChild(wrap);
+        });
+      }
+
+      const kept = getKeptExistingUrls().length;
+      const removed = urls.filter((u) => removedImageUrls.has(u)).length;
+      const mode = replaceImages ? 'Replace mode: existing images will be replaced on save.' : 'Add mode: selected images will be appended on save.';
+      const remainingSlots = replaceImages ? 10 : Math.max(0, 10 - kept);
+      infoEl.textContent = `${mode} Current: ${urls.length}. Keeping: ${kept}. Removed: ${replaceImages ? urls.length : removed}. You can add up to ${remainingSlots} more.`;
+    }
+
+    function reconcileSelectionLimit() {
+      const info = document.getElementById('fileInfo');
+      const incoming = Array.isArray(selectedFiles) ? selectedFiles.filter(Boolean) : [];
+      const existingCount = getKeptExistingUrls().length;
+      const allowed = replaceImages ? 10 : Math.max(0, 10 - existingCount);
+      if (editingPhotoId && allowed <= 0) {
+        selectedFiles = [];
+        if (info) info.textContent = 'You already have 10 images. Remove one to add another.';
+        return;
+      }
+      if (incoming.length > allowed) {
+        selectedFiles = incoming.slice(0, allowed);
+        showMessage('errorMessage', `❌ Max 10 images per project. Only ${allowed} new image${allowed === 1 ? '' : 's'} can be added right now.`);
+      }
+    }
+
     function createPhotoItem(docId, photo, createdAtLabel) {
       const item = document.createElement('div');
       item.className = 'photo-item';
@@ -169,7 +512,10 @@
       const img = document.createElement('img');
       img.className = 'photo-thumbnail';
       img.alt = (photo && typeof photo.title === 'string' && photo.title.trim()) ? photo.title : 'Portfolio photo';
-      const normalizedImageUrl = normalizeHttpUrl(photo && photo.imageUrl);
+      const images = Array.isArray(photo && photo.imageUrls)
+        ? photo.imageUrls
+        : (photo && photo.imageUrl ? [photo.imageUrl] : []);
+      const normalizedImageUrl = normalizeHttpUrl(images[0]);
       if (normalizedImageUrl) img.src = normalizedImageUrl;
       item.appendChild(img);
 
@@ -195,9 +541,13 @@
       const likes = document.createElement('span');
       const likeCount = (photo && Number.isFinite(Number(photo.likeCount))) ? Number(photo.likeCount) : 0;
       likes.textContent = `❤️ ${likeCount} likes`;
+      const imageCount = document.createElement('span');
+      const imgCount = Array.isArray(images) ? images.length : 0;
+      imageCount.textContent = `🖼️ ${imgCount} image${imgCount === 1 ? '' : 's'}`;
       const date = document.createElement('span');
       date.textContent = createdAtLabel || '';
       stats.appendChild(likes);
+      stats.appendChild(imageCount);
       stats.appendChild(date);
       info.appendChild(stats);
 
@@ -257,7 +607,7 @@
         { id: 'project-2', title: 'La Antorcha', description: 'Dynamic cinematography project showcasing visual storytelling and technical excellence.', category: 'Cinematography', imageUrl: '/image/La-Antorcha.jpg' },
         { id: 'project-3', title: 'Smiling Boy', description: 'Candid portrait photography capturing authentic moments and genuine expressions.', category: 'Portrait Photography', imageUrl: '/image/Smiling-Boy.jpg' },
         { id: 'project-4', title: 'The Alamo', description: 'Architectural photography highlighting composition and cultural landmark documentation.', category: 'Architecture', imageUrl: '/image/The-Alamo.jpg' }
-      ];
+      ].map((p) => ({ ...p, imageUrls: p.imageUrl ? [p.imageUrl] : [] }));
       for (const project of initialProjects) {
         try {
           const ref = db.collection('portfolio').doc(project.id);
@@ -278,6 +628,7 @@
       const backBtn = document.getElementById('backBtn');
       const logoutBtn = document.getElementById('logoutBtn');
       const clearBtn = document.getElementById('clearBtn');
+      const replaceCheckbox = document.getElementById('replaceImagesCheckbox');
 
       if (backBtn) {
         backBtn.addEventListener('click', () => {
@@ -308,6 +659,17 @@
         fileInput.addEventListener('change', (e) => handleFileDrop(e.target.files));
       }
 
+      if (replaceCheckbox) {
+        replaceCheckbox.addEventListener('change', (e) => {
+          replaceImages = !!(e && e.target && e.target.checked);
+          // When switching modes, re-check how many new files can be selected.
+          reconcileSelectionLimit();
+          renderExistingImages();
+          renderSelectedImagesPreview();
+          updateFileInfoText();
+        });
+      }
+
       if (uploadForm) {
         uploadForm.addEventListener('submit', handleUpload);
       }
@@ -315,30 +677,67 @@
 
     function handleFileDrop(files) {
       if (!files || files.length === 0) return;
-      const file = files[0];
-      if (file.size > 50 * 1024 * 1024) {
-        showMessage('errorMessage', '❌ File is too large. Max 50MB.');
+      const incoming = Array.from(files).filter(Boolean);
+      if (incoming.length === 0) return;
+
+      const keptExistingCount = editingPhotoId ? getKeptExistingUrls().length : 0;
+      const allowedTotalNew = editingPhotoId ? (replaceImages ? 10 : Math.max(0, 10 - keptExistingCount)) : 10;
+      if (editingPhotoId && !replaceImages && allowedTotalNew <= 0) {
+        showMessage('errorMessage', '❌ This project already has 10 images. Remove one to add another.');
         return;
       }
-      selectedFile = file;
-      const info = document.getElementById('fileInfo');
-      if (info) {
-        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
-        info.textContent = `Selected: ${file.name} (${sizeMb} MB)`;
+
+      const currentSelected = Array.isArray(selectedFiles) ? selectedFiles.filter(Boolean).length : 0;
+      const remaining = Math.max(0, allowedTotalNew - currentSelected);
+      if (remaining <= 0) {
+        showMessage('errorMessage', '❌ No remaining slots for new images. Remove one or enable Replace mode.');
+        return;
       }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const preview = document.getElementById('previewImage');
-        if (preview) {
-          preview.src = e.target.result;
-          preview.style.display = 'block';
+
+      if (incoming.length > remaining) {
+        showMessage('errorMessage', `❌ Max 10 images per project. Only the first ${remaining} were selected.`);
+      }
+
+      const nextFiles = incoming.slice(0, remaining);
+      for (const f of nextFiles) {
+        if (f && f.size > 50 * 1024 * 1024) {
+          showMessage('errorMessage', `❌ "${f.name}" is too large. Max 50MB per image.`);
+          return;
         }
-      };
-      reader.onerror = (err) => {
-        console.error('FileReader error:', err);
-        showMessage('errorMessage', '❌ Could not generate a preview, but the file can still be uploaded.');
-      };
-      reader.readAsDataURL(file);
+      }
+
+      selectedFiles = mergeSelectedFiles(selectedFiles, nextFiles, allowedTotalNew);
+      updateFileInfoText();
+      renderSelectedImagesPreview();
+    }
+
+    async function uploadSelectedFiles(photoId, files) {
+      const finalFiles = Array.isArray(files) ? files.filter(Boolean).slice(0, 10) : [];
+      const urls = [];
+
+      for (let i = 0; i < finalFiles.length; i++) {
+        const file = finalFiles[i];
+        const safeName = (file && file.name) ? String(file.name).replace(/[^a-zA-Z0-9._-]+/g, '_') : `image_${i}`;
+        const path = `portfolio/${photoId}/${Date.now()}_${i}_${safeName}`;
+        const storageRef = storage.ref(path);
+        await storageRef.put(file);
+        const url = await storageRef.getDownloadURL();
+        urls.push(url);
+      }
+
+      return urls;
+    }
+
+    async function deleteStorageUrls(urls) {
+      const list = Array.isArray(urls) ? urls.filter(Boolean) : [];
+      for (const url of list) {
+        try {
+          const ref = storage.refFromURL(url);
+          await ref.delete();
+        } catch {
+          // ignore (local/static URLs or already deleted)
+        }
+      }
     }
 
     async function handleUpload(e) {
@@ -369,31 +768,92 @@
         const category = catEl.value;
         if (editingPhotoId) {
           const updateData = { title, description, category };
-          if (selectedFile) {
-            const storageRef = storage.ref('portfolio/' + editingPhotoId);
-            await storageRef.put(selectedFile);
-            updateData.imageUrl = await storageRef.getDownloadURL();
+
+          const needsImageUpdate =
+            (Array.isArray(selectedFiles) && selectedFiles.length > 0) ||
+            (removedImageUrls && removedImageUrls.size > 0) ||
+            replaceImages === true;
+
+          if (needsImageUpdate) {
+            const docSnap = await db.collection('portfolio').doc(editingPhotoId).get();
+            const prev = docSnap.exists ? (docSnap.data() || {}) : {};
+            const prevUrls = getPrevUrlsFromDoc(prev);
+
+            if (replaceImages && (!selectedFiles || selectedFiles.length === 0)) {
+              showMessage('errorMessage', '❌ Select at least one image to replace the existing images.');
+              return;
+            }
+
+            const kept = replaceImages
+              ? []
+              : prevUrls.filter((u) => u && !removedImageUrls.has(normalizeHttpUrl(u) || u)).slice(0, 10);
+
+            const allowedNew = replaceImages ? 10 : Math.max(0, 10 - kept.length);
+            const filesToUpload = Array.isArray(selectedFiles)
+              ? selectedFiles.filter(Boolean).slice(0, allowedNew)
+              : [];
+
+            let newUrls = [];
+            if (filesToUpload.length) {
+              newUrls = await uploadSelectedFiles(editingPhotoId, filesToUpload);
+            }
+
+            const combined = kept.concat(newUrls).slice(0, 10);
+            updateData.imageUrls = combined;
+            updateData.imageUrl = combined[0] || null;
+
+            const toDelete = replaceImages
+              ? prevUrls
+              : prevUrls.filter((u) => removedImageUrls.has(normalizeHttpUrl(u) || u));
+            if (toDelete.length) deleteStorageUrls(toDelete).catch(() => {});
           }
+
           await db.collection('portfolio').doc(editingPhotoId).update(updateData);
           showMessage('successMessage', '✓ Photo updated successfully!');
-          resetForm();
+          // Keep edit mode open; refresh Current Images strip.
+          selectedFiles = [];
+          clearSelectedPreviewObjectUrls();
+          const selWrap = document.getElementById('selectedImagesPreview');
+          if (selWrap) {
+            clearElement(selWrap);
+            selWrap.style.display = 'none';
+          }
+          const fileInput = document.getElementById('fileInput');
+          if (fileInput) fileInput.value = '';
+          updateFileInfoText();
+
+          try {
+            const refreshed = await db.collection('portfolio').doc(editingPhotoId).get();
+            if (refreshed.exists) {
+              const data = refreshed.data() || {};
+              existingImageUrls = getPrevUrlsFromDoc(data);
+            }
+          } catch (e) {
+            console.warn('Could not refresh portfolio item after save', e);
+          }
+
+          removedImageUrls = new Set();
+          replaceImages = false;
+          const checkbox = document.getElementById('replaceImagesCheckbox');
+          if (checkbox) checkbox.checked = false;
+          renderExistingImages();
           loadPhotos();
           return;
         }
-        if (!selectedFile) {
-          showMessage('errorMessage', '❌ Please select a photo first.');
+        if (!selectedFiles || selectedFiles.length === 0) {
+          showMessage('errorMessage', '❌ Please select at least one image first.');
           return;
         }
         const photoId = 'photo-' + Date.now();
-        const storageRef = storage.ref('portfolio/' + photoId);
-        await storageRef.put(selectedFile);
-        const imageUrl = await storageRef.getDownloadURL();
+        const imageUrls = await uploadSelectedFiles(photoId, selectedFiles);
+        const imageUrl = imageUrls[0] || null;
         await db.collection('portfolio').doc(photoId).set({
           id: photoId,
           title,
           description,
           category,
           imageUrl,
+          imageUrls,
           likeCount: 0,
           createdAt: new Date(),
           uploadedBy: 'admin'
@@ -405,6 +865,14 @@
         console.error('Upload error:', err);
         if (err.code === 'permission-denied') {
           showMessage('errorMessage', '❌ You are not allowed to modify portfolio items.');
+        } else if (
+          (err && typeof err.code === 'string' && err.code.startsWith('storage/')) ||
+          (err && typeof err.message === 'string' && /CORS|preflight|access control checks/i.test(err.message))
+        ) {
+          showMessage(
+            'errorMessage',
+            '❌ Upload failed. If you are running locally in Safari, this is often Firebase Storage CORS. See STORAGE_CORS_SETUP.md and make sure your API key + Authorized domains allow 127.0.0.1/localhost.'
+          );
         } else {
           showMessage('errorMessage', '❌ Error uploading photo: ' + (err.message || 'Please try again.'));
         }
@@ -419,16 +887,27 @@
     function resetForm() {
       const form = document.getElementById('uploadForm');
       const fileInput = document.getElementById('fileInput');
-      const preview = document.getElementById('previewImage');
       const info = document.getElementById('fileInfo');
       const submitBtn = document.getElementById('submitBtn');
       if (form) form.reset();
       if (fileInput) fileInput.value = '';
-      if (preview) preview.style.display = 'none';
       if (info) info.textContent = '';
       if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
-      selectedFile = null;
+      selectedFiles = [];
+      clearSelectedPreviewObjectUrls();
+      const selWrap = document.getElementById('selectedImagesPreview');
+      if (selWrap) {
+        clearElement(selWrap);
+        selWrap.style.display = 'none';
+      }
       editingPhotoId = null;
+      existingImageUrls = [];
+      removedImageUrls = new Set();
+      replaceImages = false;
+      const section = document.getElementById('existingImagesSection');
+      if (section) section.style.display = 'none';
+      const checkbox = document.getElementById('replaceImagesCheckbox');
+      if (checkbox) checkbox.checked = false;
     }
 
     async function loadPhotos() {
@@ -474,13 +953,11 @@
         }
         const docSnap = await db.collection('portfolio').doc(photoId).get();
         if (docSnap.exists) {
-          const imageUrl = docSnap.data().imageUrl;
-          try {
-            const fileRef = storage.refFromURL(imageUrl);
-            await fileRef.delete();
-          } catch (e) {
-            console.log('Storage deletion skipped');
-          }
+          const data = docSnap.data() || {};
+          const urls = Array.isArray(data.imageUrls)
+            ? data.imageUrls
+            : (data.imageUrl ? [data.imageUrl] : []);
+          await deleteStorageUrls(urls);
         }
         await db.collection('portfolio').doc(photoId).delete();
         showMessage('successMessage', '✓ Photo deleted successfully!');
@@ -509,19 +986,32 @@
         }
         const photo = docSnap.data();
         editingPhotoId = photoId;
+        existingImageUrls = getPrevUrlsFromDoc(photo);
+        removedImageUrls = new Set();
+        replaceImages = false;
         const titleInput = document.getElementById('photoTitle');
         const descInput = document.getElementById('photoDescription');
         const categorySelect = document.getElementById('photoCategory');
-        const previewImage = document.getElementById('previewImage');
         const submitBtn = document.getElementById('submitBtn');
         if (titleInput) titleInput.value = photo.title || '';
         if (descInput) descInput.value = photo.description || '';
         if (categorySelect) categorySelect.value = photo.category || '';
-        if (previewImage && photo.imageUrl) {
-          previewImage.src = photo.imageUrl;
-          previewImage.style.display = 'block';
-        }
         if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+
+        // Clear any pending new selection when switching items.
+        selectedFiles = [];
+        clearSelectedPreviewObjectUrls();
+        const selWrap = document.getElementById('selectedImagesPreview');
+        if (selWrap) {
+          clearElement(selWrap);
+          selWrap.style.display = 'none';
+        }
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) fileInput.value = '';
+        const info = document.getElementById('fileInfo');
+        if (info) info.textContent = '';
+
+        renderExistingImages();
         const container = document.querySelector('.upload-area');
         if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (err) {

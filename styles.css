@@ -589,7 +589,6 @@ header .logo {
   color: inherit;
   animation: fadeInBounce 0.8s ease-out;
   position: relative;
-  aspect-ratio: 1;
 }
 
 .portfolio-item:hover {
@@ -672,7 +671,6 @@ header .logo {
   }
   
   .portfolio-item {
-    aspect-ratio: 1;
   }
   
   .portfolio-item img {

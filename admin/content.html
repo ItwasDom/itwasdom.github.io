@@ -81,7 +81,7 @@
     <div class="section active" data-page-section="home">
       <h2><i class="fas fa-home"></i> Home Page</h2>
       <details open>
-        <summary>Hero & Learn More</summary>
+        <summary>Homepage Content</summary>
         <form id="homeContentForm">
           <div class="form-group">
             <label for="homeHeroTitleInput">Hero Title</label>
@@ -95,10 +95,216 @@
             <label for="homeHeroButtonTextInput">Hero Button Text</label>
             <input type="text" id="homeHeroButtonTextInput" />
           </div>
+
+          <details>
+            <summary>About Section</summary>
+            <div class="form-group">
+              <label for="homeAboutTitleInput">About Section Title</label>
+              <input type="text" id="homeAboutTitleInput" />
+            </div>
+            <div class="form-group">
+              <label for="homeAboutP1Input">About Paragraph 1</label>
+              <textarea id="homeAboutP1Input" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="homeAboutP2Input">About Paragraph 2</label>
+              <textarea id="homeAboutP2Input" rows="3"></textarea>
+            </div>
+          </details>
+
+          <details>
+            <summary>Experience Section</summary>
+            <div class="form-group">
+              <label for="homeExperienceTitleInput">Experience Section Title</label>
+              <input type="text" id="homeExperienceTitleInput" />
+            </div>
+            <div class="form-group">
+              <label for="homeExperienceWorkSubheadingInput">Work Subheading</label>
+              <input type="text" id="homeExperienceWorkSubheadingInput" />
+            </div>
+            <div class="form-group">
+              <label>Work Items</label>
+              <p style="color:#9ca3af; font-size:0.85rem; margin-top:-6px;">Each item is Title, Company/Details, Dates.</p>
+              <div id="homeWorkItemsEditor"></div>
+              <button type="button" class="btn" id="homeAddWorkItemBtn" style="margin-top:10px;"><i class="fas fa-plus"></i> Add Work Item</button>
+            </div>
+            <div class="form-group">
+              <label for="homeExperienceEducationSubheadingInput">Education Subheading</label>
+              <input type="text" id="homeExperienceEducationSubheadingInput" />
+            </div>
+            <div class="form-group">
+              <label>Education Items</label>
+              <div id="homeEducationItemsEditor"></div>
+              <button type="button" class="btn" id="homeAddEducationItemBtn" style="margin-top:10px;"><i class="fas fa-plus"></i> Add Education Item</button>
+            </div>
+          </details>
+
+          <details>
+            <summary>Skills Section</summary>
+            <div class="form-group">
+              <label for="homeSkillsTitleInput">Skills Section Title</label>
+              <input type="text" id="homeSkillsTitleInput" />
+            </div>
+            <div class="form-group">
+              <label for="homeSkillsItemsInput">Skills List (one per line)</label>
+              <textarea id="homeSkillsItemsInput" rows="8"></textarea>
+            </div>
+          </details>
+
+          <details>
+            <summary>Portfolio Section</summary>
+            <div class="form-group">
+              <label for="homePortfolioTitleInput">Portfolio Section Title</label>
+              <input type="text" id="homePortfolioTitleInput" />
+            </div>
+            <div class="form-group">
+              <label for="homePortfolioIntroInput">Portfolio Intro Text</label>
+              <textarea id="homePortfolioIntroInput" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="homePortfolioViewButtonTextInput">"View Full Portfolio" Button Text</label>
+              <input type="text" id="homePortfolioViewButtonTextInput" />
+            </div>
+
+            <details>
+              <summary>Featured Portfolio Card 1</summary>
+              <div class="form-group">
+                <label for="homePortfolioItem1TitleInput">Title</label>
+                <input type="text" id="homePortfolioItem1TitleInput" />
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem1DescInput">Description</label>
+                <textarea id="homePortfolioItem1DescInput" rows="2"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem1Tag1Input">Tag 1</label>
+                <input type="text" id="homePortfolioItem1Tag1Input" />
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem1Tag2Input">Tag 2</label>
+                <input type="text" id="homePortfolioItem1Tag2Input" />
+              </div>
+            </details>
+
+            <details>
+              <summary>Featured Portfolio Card 2</summary>
+              <div class="form-group">
+                <label for="homePortfolioItem2TitleInput">Title</label>
+                <input type="text" id="homePortfolioItem2TitleInput" />
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem2DescInput">Description</label>
+                <textarea id="homePortfolioItem2DescInput" rows="2"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem2Tag1Input">Tag 1</label>
+                <input type="text" id="homePortfolioItem2Tag1Input" />
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem2Tag2Input">Tag 2</label>
+                <input type="text" id="homePortfolioItem2Tag2Input" />
+              </div>
+            </details>
+
+            <details>
+              <summary>Featured Portfolio Card 3</summary>
+              <div class="form-group">
+                <label for="homePortfolioItem3TitleInput">Title</label>
+                <input type="text" id="homePortfolioItem3TitleInput" />
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem3DescInput">Description</label>
+                <textarea id="homePortfolioItem3DescInput" rows="2"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem3Tag1Input">Tag 1</label>
+                <input type="text" id="homePortfolioItem3Tag1Input" />
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem3Tag2Input">Tag 2</label>
+                <input type="text" id="homePortfolioItem3Tag2Input" />
+              </div>
+            </details>
+
+            <details>
+              <summary>Featured Portfolio Card 4</summary>
+              <div class="form-group">
+                <label for="homePortfolioItem4TitleInput">Title</label>
+                <input type="text" id="homePortfolioItem4TitleInput" />
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem4DescInput">Description</label>
+                <textarea id="homePortfolioItem4DescInput" rows="2"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem4Tag1Input">Tag 1</label>
+                <input type="text" id="homePortfolioItem4Tag1Input" />
+              </div>
+              <div class="form-group">
+                <label for="homePortfolioItem4Tag2Input">Tag 2</label>
+                <input type="text" id="homePortfolioItem4Tag2Input" />
+              </div>
+            </details>
+          </details>
+
+          <details>
+            <summary>Learn More / Quick Links</summary>
           <div class="form-group">
             <label for="homeLearnMoreTitleInput">"Learn More" Section Title</label>
             <input type="text" id="homeLearnMoreTitleInput" />
           </div>
+
+            <details>
+              <summary>Quick Link Card: About</summary>
+              <div class="form-group">
+                <label for="homeQuickAboutTitleInput">Title</label>
+                <input type="text" id="homeQuickAboutTitleInput" />
+              </div>
+              <div class="form-group">
+                <label for="homeQuickAboutTextInput">Text</label>
+                <textarea id="homeQuickAboutTextInput" rows="2"></textarea>
+              </div>
+            </details>
+
+            <details>
+              <summary>Quick Link Card: Experience</summary>
+              <div class="form-group">
+                <label for="homeQuickExperienceTitleInput">Title</label>
+                <input type="text" id="homeQuickExperienceTitleInput" />
+              </div>
+              <div class="form-group">
+                <label for="homeQuickExperienceTextInput">Text</label>
+                <textarea id="homeQuickExperienceTextInput" rows="2"></textarea>
+              </div>
+            </details>
+
+            <details>
+              <summary>Quick Link Card: Skills</summary>
+              <div class="form-group">
+                <label for="homeQuickSkillsTitleInput">Title</label>
+                <input type="text" id="homeQuickSkillsTitleInput" />
+              </div>
+              <div class="form-group">
+                <label for="homeQuickSkillsTextInput">Text</label>
+                <textarea id="homeQuickSkillsTextInput" rows="2"></textarea>
+              </div>
+            </details>
+
+            <details>
+              <summary>Quick Link Card: Connect</summary>
+              <div class="form-group">
+                <label for="homeQuickConnectTitleInput">Title</label>
+                <input type="text" id="homeQuickConnectTitleInput" />
+              </div>
+              <div class="form-group">
+                <label for="homeQuickConnectTextInput">Text</label>
+                <textarea id="homeQuickConnectTextInput" rows="2"></textarea>
+              </div>
+            </details>
+          </details>
+
+          <details>
+            <summary>Bottom Call To Action</summary>
           <div class="form-group">
             <label for="homeCtaTitleInput">Bottom Call-to-Action Title</label>
             <input type="text" id="homeCtaTitleInput" />
@@ -107,6 +313,11 @@
             <label for="homeCtaTextInput">Bottom Call-to-Action Text</label>
             <textarea id="homeCtaTextInput" rows="3"></textarea>
           </div>
+            <div class="form-group">
+              <label for="homeCtaButtonTextInput">Bottom Call-to-Action Button Text</label>
+              <input type="text" id="homeCtaButtonTextInput" />
+            </div>
+          </details>
           <button type="submit" class="btn"><i class="fas fa-save"></i> Save Home Content</button>
         </form>
       </details>
@@ -118,7 +329,7 @@
             <h4 id="homeLive_heroTitle">Capturing Moments, Creating Stories</h4>
             <p id="homeLive_heroSubtitle" class="preview-tagline">Photography &amp; Cinematography by Dominic Martinez</p>
             <span id="homeLive_heroButtonText" class="preview-cta">View Portfolio</span>
-            <p id="homeLive_learnMoreTitle" style="margin-top:10px; font-weight:600;">About the Work</p>
+                <p id="homeLive_learnMoreTitle" style="margin-top:10px; font-weight:600;">Learn More</p>
             <h4 id="homeLive_ctaTitle" style="margin-top:8px;">Ready to Create Something Amazing?</h4>
             <p id="homeLive_ctaText">Let's bring your vision to life with professional photography and cinematography.</p>
           </div>
@@ -176,7 +387,7 @@
           <div class="page-preview">
             <h4 id="aboutLive_heroTitle">About Me</h4>
             <p id="aboutLive_heroSubtitle" class="preview-tagline">Photographer &amp; Cinematographer | San Antonio, TX</p>
-            <p id="aboutLive_nameHeading" style="margin-top:8px; font-weight:600;">Hi, I’m Dominic.</p>
+            <p id="aboutLive_nameHeading" style="margin-top:8px; font-weight:600;">Dominic Martinez</p>
             <p id="aboutLive_paragraph1"></p>
             <p id="aboutLive_paragraph2"></p>
             <p id="aboutLive_paragraph3"></p>
@@ -217,6 +428,21 @@
             <label for="experienceEducationHeadingInput">Education Heading</label>
             <input type="text" id="experienceEducationHeadingInput" />
           </div>
+
+          <div class="form-group">
+            <label>Work Experience Items</label>
+            <p style="color:#9ca3af; font-size:0.85rem; margin-top:-6px;">Add/edit each job (title, company/location, dates, description). These are what render in the Work Experience list.</p>
+            <div id="experienceWorkItemsEditor"></div>
+            <button type="button" class="btn" id="experienceAddWorkItemBtn" style="margin-top:10px;"><i class="fas fa-plus"></i> Add Work Item</button>
+          </div>
+
+          <div class="form-group">
+            <label>Education Items</label>
+            <p style="color:#9ca3af; font-size:0.85rem; margin-top:-6px;">Add/edit each education entry (degree/program, school, dates, description).</p>
+            <div id="experienceEducationItemsEditor"></div>
+            <button type="button" class="btn" id="experienceAddEducationItemBtn" style="margin-top:10px;"><i class="fas fa-plus"></i> Add Education Item</button>
+          </div>
+
           <button type="submit" class="btn"><i class="fas fa-save"></i> Save Experience Content</button>
         </form>
       </details>
@@ -229,6 +455,12 @@
             <p id="experienceLive_heroSubtitle" class="preview-tagline">Professional Background &amp; Education</p>
             <p id="experienceLive_workHeading" style="margin-top:8px; font-weight:600;">Work Experience</p>
             <p id="experienceLive_educationHeading" style="font-weight:600;">Education</p>
+            <div style="margin-top:10px;">
+              <p style="font-weight:600; color:#e5e7eb; margin-bottom:6px;">Work</p>
+              <div id="experienceLive_workItems"></div>
+              <p style="font-weight:600; color:#e5e7eb; margin:10px 0 6px;">Education</p>
+              <div id="experienceLive_educationItems"></div>
+            </div>
           </div>
         </div>
         <div class="preview-card">
@@ -238,6 +470,12 @@
             <p id="experienceDraft_heroSubtitle" class="preview-tagline"></p>
             <p id="experienceDraft_workHeading" style="margin-top:8px; font-weight:600;"></p>
             <p id="experienceDraft_educationHeading" style="font-weight:600;"></p>
+            <div style="margin-top:10px;">
+              <p style="font-weight:600; color:#e5e7eb; margin-bottom:6px;">Work</p>
+              <div id="experienceDraft_workItems"></div>
+              <p style="font-weight:600; color:#e5e7eb; margin:10px 0 6px;">Education</p>
+              <div id="experienceDraft_educationItems"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -264,6 +502,24 @@
             <label for="skillsCtaTextInput">Bottom Call-to-Action Text</label>
             <textarea id="skillsCtaTextInput" rows="3"></textarea>
           </div>
+
+          <div class="form-group">
+            <label for="skillsListPhotographyInput">Photography & Videography (one skill per line)</label>
+            <textarea id="skillsListPhotographyInput" rows="6"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="skillsListEditingInput">Video Editing & Post-Production (one skill per line)</label>
+            <textarea id="skillsListEditingInput" rows="6"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="skillsListSoftwareInput">Creative Software Suite (one skill per line)</label>
+            <textarea id="skillsListSoftwareInput" rows="6"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="skillsListDesignInput">Graphic Design & Visual Content (one skill per line)</label>
+            <textarea id="skillsListDesignInput" rows="6"></textarea>
+          </div>
+
           <button type="submit" class="btn"><i class="fas fa-save"></i> Save Skills Content</button>
         </form>
       </details>
@@ -274,8 +530,12 @@
           <div class="page-preview">
             <h4 id="skillsLive_heroTitle">Skills</h4>
             <p id="skillsLive_heroSubtitle" class="preview-tagline">Professional Expertise &amp; Technical Proficiency</p>
-            <h4 id="skillsLive_ctaTitle" style="margin-top:8px;">Ready to build something together?</h4>
-            <p id="skillsLive_ctaText"></p>
+            <h4 id="skillsLive_ctaTitle" style="margin-top:8px;">Let's Create Something Amazing</h4>
+            <p id="skillsLive_ctaText">With my diverse skill set and professional experience, I'm ready to bring your vision to life</p>
+            <div style="margin-top:10px;">
+              <p style="font-weight:600; color:#e5e7eb; margin-bottom:6px;">Skills</p>
+              <div id="skillsLive_lists"></div>
+            </div>
           </div>
         </div>
         <div class="preview-card">
@@ -285,6 +545,10 @@
             <p id="skillsDraft_heroSubtitle" class="preview-tagline"></p>
             <h4 id="skillsDraft_ctaTitle" style="margin-top:8px;"></h4>
             <p id="skillsDraft_ctaText"></p>
+            <div style="margin-top:10px;">
+              <p style="font-weight:600; color:#e5e7eb; margin-bottom:6px;">Skills</p>
+              <div id="skillsDraft_lists"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -302,14 +566,196 @@
     const ADMIN_UID = "RVAvU26oGeYsaJYk0X1OF9h6apb2";
     const publishedContent = {};
 
+    // These defaults match what is hard-coded in the public pages.
+    // If a Firestore doc or field is missing, the public site keeps these values.
+    const DEFAULT_CONTENT = {
+      home: {
+        heroTitle: 'Capturing Moments, Creating Stories',
+        heroSubtitle: 'Photography & Cinematography by Dominic Martinez',
+        heroButtonText: 'View Portfolio',
+        aboutTitle: 'About Me',
+        aboutP1: "I’m Dominic Martinez, a passionate photographer and cinematographer based in San Antonio, TX. With a background in Digital Cinematography from Full Sail University and extensive experience in photography and video production, I bring stories to life through my lens.",
+        aboutP2: 'My work captures emotions and moments, blending artistic vision with technical precision to create unforgettable visuals.',
+        experienceTitle: 'Experience',
+        experienceWorkSubheading: 'Work Experience',
+        homeWorkItems: [
+          { title: 'Sales Associate', company: 'The Camera Exchange, San Antonio, TX', dates: 'Feb 2022 - 2023' },
+          { title: 'Sales Lead', company: 'MarketSource/Target Mobile, San Antonio, TX', dates: 'May 2021 - 2022' },
+          { title: 'Various Roles', company: 'Security, Event Security, Customer Service, and Culinary', dates: 'Various positions in San Antonio, TX' },
+        ],
+        experienceEducationSubheading: 'Education',
+        homeEducationItems: [
+          { title: "Bachelor's in Digital Cinematography", company: 'Full Sail University', dates: 'Jul 2020 - 2023' },
+        ],
+        skillsTitle: 'Skills',
+        homeSkillsItems: [
+          'Photography (8 years)',
+          'Filming (7 years)',
+          'Video Production (6 years)',
+          'Video Editing (6 years)',
+          'Adobe Premiere Pro (6 years)',
+          'Adobe After Effects (2 years)',
+          'Adobe Lightroom (6 years)',
+          'Adobe Photoshop (6 years)',
+          'Graphic Design (7 years)',
+        ],
+        portfolioTitle: 'Portfolio',
+        portfolioIntro: 'Explore my latest work in photography and cinematography.',
+        portfolioViewButtonText: 'View Full Portfolio',
+        portfolioItem1Title: 'Gorgeous Cat',
+        portfolioItem1Desc: 'Professional portrait photography capturing stunning details and emotion.',
+        portfolioItem1Tag1: 'Portrait',
+        portfolioItem1Tag2: 'Photography',
+        portfolioItem2Title: 'La Antorcha',
+        portfolioItem2Desc: 'Dynamic cinematography project showcasing visual storytelling and technical excellence.',
+        portfolioItem2Tag1: 'Cinematography',
+        portfolioItem2Tag2: 'Video',
+        portfolioItem3Title: 'Smiling Boy',
+        portfolioItem3Desc: 'Candid portrait photography capturing authentic moments and genuine expressions.',
+        portfolioItem3Tag1: 'Portrait',
+        portfolioItem3Tag2: 'Candid',
+        portfolioItem4Title: 'The Alamo',
+        portfolioItem4Desc: 'Architectural photography highlighting composition and cultural landmark documentation.',
+        portfolioItem4Tag1: 'Architecture',
+        portfolioItem4Tag2: 'Landmark',
+        learnMoreTitle: 'Learn More',
+        quickAboutTitle: 'About Me',
+        quickAboutText: 'Learn about my background, passion for photography, and creative approach to visual storytelling.',
+        quickExperienceTitle: 'Experience',
+        quickExperienceText: 'Explore my professional background, work history, and education in digital cinematography.',
+        quickSkillsTitle: 'Skills',
+        quickSkillsText: 'Discover my technical expertise in photography, videography, editing, and creative software.',
+        quickConnectTitle: 'Connect',
+        quickConnectText: 'Get in touch for collaborations, bookings, or to discuss your next creative project.',
+        ctaTitle: 'Ready to Create Something Amazing?',
+        ctaText: "Let's bring your vision to life with professional photography and cinematography.",
+        ctaButtonText: 'Get in Touch',
+      },
+      about: {
+        heroTitle: 'About Me',
+        heroSubtitle: 'Photographer & Cinematographer | San Antonio, TX',
+        nameHeading: 'Dominic Martinez',
+        paragraph1: "I'm Dominic Martinez, a passionate photographer and cinematographer based in San Antonio, TX.\nWith a background in Digital Cinematography from Full Sail University and extensive experience in\nphotography and video production, I bring stories to life through my lens.",
+        paragraph2: "My work captures emotions and moments, blending artistic vision with technical precision to create\nunforgettable visuals. Whether it's a portrait session, a film project, or an architectural photo,\nI approach every project with dedication and creativity.",
+        paragraph3: "Beyond the technical aspects of photography and cinematography, I'm passionate about visual storytelling.\nEach project is an opportunity to connect with people and preserve memories that will last a lifetime.\nI believe in the power of images to communicate emotions and tell compelling stories.",
+      },
+      experience: {
+        heroTitle: 'Experience',
+        heroSubtitle: 'Professional Background & Education',
+        workHeading: 'Work Experience',
+        educationHeading: 'Education',
+        workItems: [
+          {
+            title: 'Sales Associate',
+            company: 'The Camera Exchange, San Antonio, TX',
+            dates: 'Feb 2022 - 2023',
+            description: 'Provided expert product knowledge and customer service in professional camera equipment sales, assisting photographers and videographers with gear selection and technical support.',
+          },
+          {
+            title: 'Sales Lead',
+            company: 'MarketSource/Target Mobile, San Antonio, TX',
+            dates: 'May 2021 - 2022',
+            description: 'Led sales team initiatives and provided exceptional customer service while managing mobile device sales and client relationships.',
+          },
+          {
+            title: 'Various Roles',
+            company: 'San Antonio, TX',
+            dates: 'Various Periods',
+            description: 'Developed diverse skill sets through positions in security, event coordination, customer service, and culinary industries.',
+          },
+        ],
+        educationItems: [
+          {
+            title: "Bachelor's in Digital Cinematography",
+            company: 'Full Sail University',
+            dates: 'Jul 2020 - 2023',
+            description: 'Comprehensive program covering cinematography, film production, editing, visual effects, and post-production techniques. Developed expertise in industry-standard software and production workflows.',
+          },
+        ],
+      },
+      skills: {
+        heroTitle: 'Skills',
+        heroSubtitle: 'Professional Expertise & Technical Proficiency',
+        ctaTitle: "Let's Create Something Amazing",
+        ctaText: "With my diverse skill set and professional experience, I'm ready to bring your vision to life",
+        listPhotography: [
+          'Photography - 8 years experience',
+          'Filming - 7 years experience',
+          'Video Production - 6 years experience',
+          'Cinematography - Professional expertise',
+          'Lighting & Composition - Advanced techniques',
+          'Visual Storytelling - Creative direction',
+        ],
+        listEditing: [
+          'Video Editing - 6 years experience',
+          'Adobe Premiere Pro - 6 years experience',
+          'Color Grading - Professional-level expertise',
+          'Audio Mixing & Synchronization - Advanced proficiency',
+          'Motion Graphics - Creative compositions',
+          'Post-Production Workflow - Streamlined processes',
+        ],
+        listSoftware: [
+          'Adobe After Effects - 2 years experience',
+          'Adobe Lightroom - 6 years experience',
+          'Adobe Photoshop - 6 years experience',
+          'Digital Asset Management - Organizational expertise',
+          'RAW Image Processing - Advanced techniques',
+          'Batch Operations - Workflow optimization',
+        ],
+        listDesign: [
+          'Graphic Design - 7 years experience',
+          'Branding & Identity - Creative development',
+          'Typography & Layout - Professional standards',
+          'Web Design Elements - Modern aesthetics',
+          'Social Media Graphics - Optimized content',
+          'Visual Communication - Effective design principles',
+        ],
+      },
+    };
+
     const mappingByDoc = {
       home: {
         heroTitle: 'homeHeroTitleInput',
         heroSubtitle: 'homeHeroSubtitleInput',
         heroButtonText: 'homeHeroButtonTextInput',
+        aboutTitle: 'homeAboutTitleInput',
+        aboutP1: 'homeAboutP1Input',
+        aboutP2: 'homeAboutP2Input',
+        experienceTitle: 'homeExperienceTitleInput',
+        experienceWorkSubheading: 'homeExperienceWorkSubheadingInput',
+        experienceEducationSubheading: 'homeExperienceEducationSubheadingInput',
+        skillsTitle: 'homeSkillsTitleInput',
+        portfolioTitle: 'homePortfolioTitleInput',
+        portfolioIntro: 'homePortfolioIntroInput',
+        portfolioViewButtonText: 'homePortfolioViewButtonTextInput',
+        portfolioItem1Title: 'homePortfolioItem1TitleInput',
+        portfolioItem1Desc: 'homePortfolioItem1DescInput',
+        portfolioItem1Tag1: 'homePortfolioItem1Tag1Input',
+        portfolioItem1Tag2: 'homePortfolioItem1Tag2Input',
+        portfolioItem2Title: 'homePortfolioItem2TitleInput',
+        portfolioItem2Desc: 'homePortfolioItem2DescInput',
+        portfolioItem2Tag1: 'homePortfolioItem2Tag1Input',
+        portfolioItem2Tag2: 'homePortfolioItem2Tag2Input',
+        portfolioItem3Title: 'homePortfolioItem3TitleInput',
+        portfolioItem3Desc: 'homePortfolioItem3DescInput',
+        portfolioItem3Tag1: 'homePortfolioItem3Tag1Input',
+        portfolioItem3Tag2: 'homePortfolioItem3Tag2Input',
+        portfolioItem4Title: 'homePortfolioItem4TitleInput',
+        portfolioItem4Desc: 'homePortfolioItem4DescInput',
+        portfolioItem4Tag1: 'homePortfolioItem4Tag1Input',
+        portfolioItem4Tag2: 'homePortfolioItem4Tag2Input',
         learnMoreTitle: 'homeLearnMoreTitleInput',
+        quickAboutTitle: 'homeQuickAboutTitleInput',
+        quickAboutText: 'homeQuickAboutTextInput',
+        quickExperienceTitle: 'homeQuickExperienceTitleInput',
+        quickExperienceText: 'homeQuickExperienceTextInput',
+        quickSkillsTitle: 'homeQuickSkillsTitleInput',
+        quickSkillsText: 'homeQuickSkillsTextInput',
+        quickConnectTitle: 'homeQuickConnectTitleInput',
+        quickConnectText: 'homeQuickConnectTextInput',
         ctaTitle: 'homeCtaTitleInput',
-        ctaText: 'homeCtaTextInput'
+        ctaText: 'homeCtaTextInput',
+        ctaButtonText: 'homeCtaButtonTextInput'
       },
       about: {
         heroTitle: 'aboutHeroTitleInput',
@@ -383,24 +829,316 @@
     async function loadDocIntoInputs(docId, mapping) {
       try {
         const snap = await db.collection('siteContent').doc(docId).get();
-        if (!snap.exists) {
-          publishedContent[docId] = {};
-          renderPreviews(docId);
-          return;
-        }
-        const data = snap.data();
-        publishedContent[docId] = data || {};
-        Object.keys(mapping).forEach(key => {
+        const defaults = DEFAULT_CONTENT[docId] || {};
+        const data = (snap.exists && snap.data()) ? snap.data() : {};
+
+        // Mirror the public pages' behavior: missing fields fall back to hard-coded defaults.
+        const effective = Object.assign({}, defaults, data);
+        publishedContent[docId] = effective;
+
+        Object.keys(mapping).forEach((key) => {
           const inputId = mapping[key];
           const el = document.getElementById(inputId);
-          if (el && data[key] != null) {
+          if (!el) return;
+
+          // Prefer stored value when present; otherwise fall back to default.
+          if (data[key] !== undefined && data[key] !== null) {
             el.value = data[key];
+          } else if (defaults[key] !== undefined && defaults[key] !== null) {
+            el.value = defaults[key];
           }
         });
+
+        if (docId === 'skills') {
+          setTextareaLines('skillsListPhotographyInput', data.listPhotography, defaults.listPhotography);
+          setTextareaLines('skillsListEditingInput', data.listEditing, defaults.listEditing);
+          setTextareaLines('skillsListSoftwareInput', data.listSoftware, defaults.listSoftware);
+          setTextareaLines('skillsListDesignInput', data.listDesign, defaults.listDesign);
+        }
+
+        if (docId === 'experience') {
+          renderExperienceEditor('experienceWorkItemsEditor', data.workItems, defaults.workItems);
+          renderExperienceEditor('experienceEducationItemsEditor', data.educationItems, defaults.educationItems);
+        }
+
+        if (docId === 'home') {
+          setTextareaLines('homeSkillsItemsInput', data.homeSkillsItems, defaults.homeSkillsItems);
+          renderHomeTimelineEditor('homeWorkItemsEditor', data.homeWorkItems, defaults.homeWorkItems);
+          renderHomeTimelineEditor('homeEducationItemsEditor', data.homeEducationItems, defaults.homeEducationItems);
+        }
+
         renderPreviews(docId);
       } catch (err) {
         console.error('Error loading content for', docId, err);
       }
+    }
+
+    function normalizeStringArray(value) {
+      if (!Array.isArray(value)) return [];
+      return value
+        .map(v => (v === undefined || v === null) ? '' : String(v))
+        .map(v => v.trim())
+        .filter(v => v.length > 0);
+    }
+
+    function setTextareaLines(textareaId, fromData, fromDefault) {
+      const el = document.getElementById(textareaId);
+      if (!el) return;
+      const hasDataArray = Array.isArray(fromData);
+      const dataLines = normalizeStringArray(fromData);
+      const defaultLines = normalizeStringArray(fromDefault);
+      el.value = (hasDataArray ? dataLines : defaultLines).join('\n');
+    }
+
+    function splitTextareaLines(text) {
+      return String(text || '')
+        .split(/\r?\n/)
+        .map(s => s.trim())
+        .filter(Boolean);
+    }
+
+    function normalizeExperienceItems(value) {
+      if (!Array.isArray(value)) return [];
+      return value
+        .filter(Boolean)
+        .map((item) => ({
+          title: item.title ? String(item.title) : '',
+          company: item.company ? String(item.company) : '',
+          dates: item.dates ? String(item.dates) : '',
+          description: item.description ? String(item.description) : '',
+        }));
+    }
+
+    function renderExperienceEditor(containerId, fromData, fromDefault) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      const hasDataArray = Array.isArray(fromData);
+      const items = normalizeExperienceItems(fromData);
+      const fallback = normalizeExperienceItems(fromDefault);
+      const finalItems = hasDataArray ? items : fallback;
+
+      if (finalItems.length === 0) {
+        const p = document.createElement('p');
+        p.style.color = '#9ca3af';
+        p.style.fontSize = '0.85rem';
+        p.textContent = 'No items yet.';
+        container.appendChild(p);
+        return;
+      }
+
+      finalItems.forEach((item) => {
+        container.appendChild(createExperienceItemEditor(item));
+      });
+    }
+
+    function normalizeHomeTimelineItems(value) {
+      if (!Array.isArray(value)) return [];
+      return value
+        .filter(Boolean)
+        .map((item) => ({
+          title: item.title ? String(item.title) : '',
+          company: item.company ? String(item.company) : '',
+          dates: item.dates ? String(item.dates) : '',
+        }));
+    }
+
+    function renderHomeTimelineEditor(containerId, fromData, fromDefault) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      const hasDataArray = Array.isArray(fromData);
+      const items = normalizeHomeTimelineItems(fromData);
+      const fallback = normalizeHomeTimelineItems(fromDefault);
+      const finalItems = hasDataArray ? items : fallback;
+
+      if (finalItems.length === 0) {
+        const p = document.createElement('p');
+        p.style.color = '#9ca3af';
+        p.style.fontSize = '0.85rem';
+        p.textContent = 'No items yet.';
+        container.appendChild(p);
+        return;
+      }
+
+      finalItems.forEach((item) => {
+        container.appendChild(createHomeTimelineItemEditor(item));
+      });
+    }
+
+    function createHomeTimelineItemEditor(item) {
+      const wrap = document.createElement('div');
+      wrap.style.border = '1px solid rgba(124,58,237,0.25)';
+      wrap.style.borderRadius = '12px';
+      wrap.style.padding = '12px';
+      wrap.style.marginTop = '10px';
+      wrap.style.background = 'rgba(0,0,0,0.12)';
+
+      const topRow = document.createElement('div');
+      topRow.style.display = 'flex';
+      topRow.style.justifyContent = 'space-between';
+      topRow.style.alignItems = 'center';
+      topRow.style.gap = '10px';
+
+      const title = document.createElement('input');
+      title.type = 'text';
+      title.placeholder = 'Title';
+      title.value = item.title || '';
+      title.setAttribute('data-home-timeline-field', 'title');
+      title.style.flex = '1';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'btn';
+      removeBtn.style.background = 'transparent';
+      removeBtn.style.border = '2px solid #7C3AED';
+      removeBtn.style.color = '#7C3AED';
+      removeBtn.style.padding = '8px 12px';
+      removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+      removeBtn.addEventListener('click', () => {
+        wrap.remove();
+        updateDraftPreview('home');
+      });
+
+      topRow.appendChild(title);
+      topRow.appendChild(removeBtn);
+      wrap.appendChild(topRow);
+
+      const company = document.createElement('input');
+      company.type = 'text';
+      company.placeholder = 'Company / Details';
+      company.value = item.company || '';
+      company.setAttribute('data-home-timeline-field', 'company');
+      company.style.marginTop = '10px';
+      wrap.appendChild(company);
+
+      const dates = document.createElement('input');
+      dates.type = 'text';
+      dates.placeholder = 'Dates';
+      dates.value = item.dates || '';
+      dates.setAttribute('data-home-timeline-field', 'dates');
+      dates.style.marginTop = '10px';
+      wrap.appendChild(dates);
+
+      wrap.querySelectorAll('input').forEach((el) => {
+        el.addEventListener('input', () => updateDraftPreview('home'));
+      });
+
+      return wrap;
+    }
+
+    function readHomeTimelineEditorItems(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return [];
+      const blocks = Array.from(container.children).filter((el) => el && el.querySelectorAll);
+      const items = [];
+      for (const block of blocks) {
+        const get = (field) => {
+          const el = block.querySelector(`[data-home-timeline-field="${field}"]`);
+          return el ? String(el.value || '').trim() : '';
+        };
+        const item = {
+          title: get('title'),
+          company: get('company'),
+          dates: get('dates'),
+        };
+        const hasAny = Object.values(item).some(v => v && v.length > 0);
+        if (hasAny) items.push(item);
+      }
+      return items;
+    }
+
+    function createExperienceItemEditor(item) {
+      const wrap = document.createElement('div');
+      wrap.style.border = '1px solid rgba(124,58,237,0.25)';
+      wrap.style.borderRadius = '12px';
+      wrap.style.padding = '12px';
+      wrap.style.marginTop = '10px';
+      wrap.style.background = 'rgba(0,0,0,0.12)';
+
+      const topRow = document.createElement('div');
+      topRow.style.display = 'flex';
+      topRow.style.justifyContent = 'space-between';
+      topRow.style.alignItems = 'center';
+      topRow.style.gap = '10px';
+
+      const title = document.createElement('input');
+      title.type = 'text';
+      title.placeholder = 'Title (e.g., Sales Associate)';
+      title.value = item.title || '';
+      title.setAttribute('data-exp-field', 'title');
+      title.style.flex = '1';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'btn';
+      removeBtn.style.background = 'transparent';
+      removeBtn.style.border = '2px solid #7C3AED';
+      removeBtn.style.color = '#7C3AED';
+      removeBtn.style.padding = '8px 12px';
+      removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+      removeBtn.addEventListener('click', () => {
+        wrap.remove();
+        updateDraftPreview('experience');
+      });
+
+      topRow.appendChild(title);
+      topRow.appendChild(removeBtn);
+      wrap.appendChild(topRow);
+
+      const company = document.createElement('input');
+      company.type = 'text';
+      company.placeholder = 'Company / Location';
+      company.value = item.company || '';
+      company.setAttribute('data-exp-field', 'company');
+      company.style.marginTop = '10px';
+      wrap.appendChild(company);
+
+      const dates = document.createElement('input');
+      dates.type = 'text';
+      dates.placeholder = 'Dates (e.g., Feb 2022 - 2023)';
+      dates.value = item.dates || '';
+      dates.setAttribute('data-exp-field', 'dates');
+      dates.style.marginTop = '10px';
+      wrap.appendChild(dates);
+
+      const desc = document.createElement('textarea');
+      desc.rows = 3;
+      desc.placeholder = 'Description';
+      desc.value = item.description || '';
+      desc.setAttribute('data-exp-field', 'description');
+      desc.style.marginTop = '10px';
+      wrap.appendChild(desc);
+
+      wrap.querySelectorAll('input, textarea').forEach((el) => {
+        el.addEventListener('input', () => updateDraftPreview('experience'));
+      });
+
+      return wrap;
+    }
+
+    function readExperienceEditorItems(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return [];
+      const blocks = Array.from(container.children).filter((el) => el && el.querySelectorAll);
+      const items = [];
+      for (const block of blocks) {
+        const get = (field) => {
+          const el = block.querySelector(`[data-exp-field="${field}"]`);
+          return el ? String(el.value || '').trim() : '';
+        };
+        const item = {
+          title: get('title'),
+          company: get('company'),
+          dates: get('dates'),
+          description: get('description'),
+        };
+        const hasAny = Object.values(item).some(v => v && v.length > 0);
+        if (hasAny) items.push(item);
+      }
+      return items;
     }
 
     function setupFormHandlers() {
@@ -410,6 +1148,26 @@
         homeForm.querySelectorAll('input, textarea').forEach(el => {
           el.addEventListener('input', () => updateDraftPreview('home'));
         });
+
+        const addWorkBtn = document.getElementById('homeAddWorkItemBtn');
+        if (addWorkBtn) {
+          addWorkBtn.addEventListener('click', () => {
+            const container = document.getElementById('homeWorkItemsEditor');
+            if (!container) return;
+            container.appendChild(createHomeTimelineItemEditor({ title: '', company: '', dates: '' }));
+            updateDraftPreview('home');
+          });
+        }
+
+        const addEduBtn = document.getElementById('homeAddEducationItemBtn');
+        if (addEduBtn) {
+          addEduBtn.addEventListener('click', () => {
+            const container = document.getElementById('homeEducationItemsEditor');
+            if (!container) return;
+            container.appendChild(createHomeTimelineItemEditor({ title: '', company: '', dates: '' }));
+            updateDraftPreview('home');
+          });
+        }
       }
       const aboutForm = document.getElementById('aboutContentForm');
       if (aboutForm) {
@@ -424,6 +1182,26 @@
         expForm.querySelectorAll('input, textarea').forEach(el => {
           el.addEventListener('input', () => updateDraftPreview('experience'));
         });
+
+        const addWorkBtn = document.getElementById('experienceAddWorkItemBtn');
+        if (addWorkBtn) {
+          addWorkBtn.addEventListener('click', () => {
+            const container = document.getElementById('experienceWorkItemsEditor');
+            if (!container) return;
+            container.appendChild(createExperienceItemEditor({ title: '', company: '', dates: '', description: '' }));
+            updateDraftPreview('experience');
+          });
+        }
+
+        const addEduBtn = document.getElementById('experienceAddEducationItemBtn');
+        if (addEduBtn) {
+          addEduBtn.addEventListener('click', () => {
+            const container = document.getElementById('experienceEducationItemsEditor');
+            if (!container) return;
+            container.appendChild(createExperienceItemEditor({ title: '', company: '', dates: '', description: '' }));
+            updateDraftPreview('experience');
+          });
+        }
       }
       const skillsForm = document.getElementById('skillsContentForm');
       if (skillsForm) {
@@ -452,6 +1230,24 @@
         if (el) payload[key] = el.value;
       });
 
+      if (docId === 'skills') {
+        payload.listPhotography = splitTextareaLines(document.getElementById('skillsListPhotographyInput')?.value);
+        payload.listEditing = splitTextareaLines(document.getElementById('skillsListEditingInput')?.value);
+        payload.listSoftware = splitTextareaLines(document.getElementById('skillsListSoftwareInput')?.value);
+        payload.listDesign = splitTextareaLines(document.getElementById('skillsListDesignInput')?.value);
+      }
+
+      if (docId === 'experience') {
+        payload.workItems = readExperienceEditorItems('experienceWorkItemsEditor');
+        payload.educationItems = readExperienceEditorItems('experienceEducationItemsEditor');
+      }
+
+      if (docId === 'home') {
+        payload.homeSkillsItems = splitTextareaLines(document.getElementById('homeSkillsItemsInput')?.value);
+        payload.homeWorkItems = readHomeTimelineEditorItems('homeWorkItemsEditor');
+        payload.homeEducationItems = readHomeTimelineEditorItems('homeEducationItemsEditor');
+      }
+
       try {
         await db.collection('siteContent').doc(docId).set(payload, { merge: true });
         publishedContent[docId] = Object.assign({}, publishedContent[docId] || {}, payload);
@@ -475,7 +1271,84 @@
         }
       });
 
+      if (docId === 'skills') {
+        renderSkillsLists('skillsLive_lists', data);
+      }
+      if (docId === 'experience') {
+        renderExperiencePreviewLists('experienceLive_workItems', 'experienceLive_educationItems', data);
+      }
+
       updateDraftPreview(docId);
+    }
+
+    function renderSkillsLists(containerId, data) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      const groups = [
+        { label: 'Photography & Videography', items: normalizeStringArray(data.listPhotography) },
+        { label: 'Video Editing & Post-Production', items: normalizeStringArray(data.listEditing) },
+        { label: 'Creative Software Suite', items: normalizeStringArray(data.listSoftware) },
+        { label: 'Graphic Design & Visual Content', items: normalizeStringArray(data.listDesign) },
+      ];
+
+      groups.forEach((g) => {
+        if (!g.items.length) return;
+        const title = document.createElement('p');
+        title.style.fontWeight = '600';
+        title.style.color = '#e5e7eb';
+        title.style.margin = '8px 0 6px';
+        title.textContent = g.label;
+        container.appendChild(title);
+
+        const ul = document.createElement('ul');
+        ul.style.margin = '0 0 6px 18px';
+        ul.style.color = '#9ca3af';
+        g.items.forEach((item) => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          ul.appendChild(li);
+        });
+        container.appendChild(ul);
+      });
+    }
+
+    function renderExperiencePreviewLists(workContainerId, eduContainerId, data) {
+      const workContainer = document.getElementById(workContainerId);
+      const eduContainer = document.getElementById(eduContainerId);
+      if (workContainer) workContainer.innerHTML = '';
+      if (eduContainer) eduContainer.innerHTML = '';
+
+      const render = (container, itemsRaw) => {
+        if (!container) return;
+        const items = normalizeExperienceItems(itemsRaw);
+        if (!items.length) {
+          const p = document.createElement('p');
+          p.style.color = '#9ca3af';
+          p.textContent = '—';
+          container.appendChild(p);
+          return;
+        }
+        items.forEach((it) => {
+          const p = document.createElement('p');
+          p.style.margin = '0 0 6px 0';
+          p.innerHTML = `<strong style="color:#e5e7eb;">${escapeHtml(it.title || '')}</strong><br><span style="color:#9ca3af;">${escapeHtml(it.company || '')}${it.dates ? ' • ' + escapeHtml(it.dates) : ''}</span>`;
+          container.appendChild(p);
+        });
+      };
+
+      render(workContainer, data.workItems);
+      render(eduContainer, data.educationItems);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     function updateDraftPreview(docId) {
@@ -489,6 +1362,24 @@
           draftEl.textContent = input.value || '';
         }
       });
+
+      if (docId === 'skills') {
+        const draftData = {
+          listPhotography: splitTextareaLines(document.getElementById('skillsListPhotographyInput')?.value),
+          listEditing: splitTextareaLines(document.getElementById('skillsListEditingInput')?.value),
+          listSoftware: splitTextareaLines(document.getElementById('skillsListSoftwareInput')?.value),
+          listDesign: splitTextareaLines(document.getElementById('skillsListDesignInput')?.value),
+        };
+        renderSkillsLists('skillsDraft_lists', draftData);
+      }
+
+      if (docId === 'experience') {
+        const draftData = {
+          workItems: readExperienceEditorItems('experienceWorkItemsEditor'),
+          educationItems: readExperienceEditorItems('experienceEducationItemsEditor'),
+        };
+        renderExperiencePreviewLists('experienceDraft_workItems', 'experienceDraft_educationItems', draftData);
+      }
     }
 
     function initPageTabs() {

@@ -126,6 +126,31 @@
       transform: translateY(0);
     }
 
+    .return-home-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      color: #7C3AED;
+      border: 2px solid #7C3AED;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      margin-top: 12px;
+    }
+
+    .return-home-btn:hover {
+      background: rgba(124, 58, 237, 0.1);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 30px rgba(123, 58, 237, 0.25);
+    }
+
     .error-message {
       background: rgba(231, 76, 60, 0.2);
       border: 2px solid #e74c3c;
@@ -433,6 +458,10 @@
           <i class="fas fa-sign-in-alt"></i> Login
         </button>
       </form>
+
+      <a class="return-home-btn" href="../index.html">
+        <i class="fas fa-arrow-left"></i> Return Home
+      </a>
 
       <div class="hint">
         Forgot your password? <a href="../reset-password.html" style="color: #999;">Reset it here</a>

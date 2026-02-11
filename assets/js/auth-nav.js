@@ -6,7 +6,7 @@
   if (!authNavBtn) return;
 
   const dropdown = document.getElementById('authDropdown');
-  const dashboardBtn = document.getElementById('authDashboardBtn');
+  const dashboardBtn = document.getElementById('authDashboardBtn') || document.getElementById('authDashboardLink');
   const logoutBtn = document.getElementById('authLogoutBtn');
 
   const auth = firebase.auth();

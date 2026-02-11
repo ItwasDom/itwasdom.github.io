@@ -39,7 +39,7 @@
   <section class="page-hero">
     <div class="page-hero-content">
       <h1 id="skillsHeroTitle">Skills</h1>
-      <p id="skillsHeroSubtitle">Professional Expertise & Technical Proficiency</p>
+      <p id="skillsHeroSubtitle">Professional Expertise &amp; Technical Proficiency</p>
     </div>
   </section>
 
@@ -49,7 +49,7 @@
       <div class="skills-container">
         <div class="skill-section">
           <h2><i class="fas fa-camera"></i> Photography & Videography</h2>
-          <ul class="skills-list">
+          <ul class="skills-list" id="skillsListPhotography">
             <li>Photography - 8 years experience</li>
             <li>Filming - 7 years experience</li>
             <li>Video Production - 6 years experience</li>
@@ -61,7 +61,7 @@
 
         <div class="skill-section">
           <h2><i class="fas fa-film"></i> Video Editing & Post-Production</h2>
-          <ul class="skills-list">
+          <ul class="skills-list" id="skillsListEditing">
             <li>Video Editing - 6 years experience</li>
             <li>Adobe Premiere Pro - 6 years experience</li>
             <li>Color Grading - Professional-level expertise</li>
@@ -73,7 +73,7 @@
 
         <div class="skill-section">
           <h2><i class="fas fa-palette"></i> Creative Software Suite</h2>
-          <ul class="skills-list">
+          <ul class="skills-list" id="skillsListSoftware">
             <li>Adobe After Effects - 2 years experience</li>
             <li>Adobe Lightroom - 6 years experience</li>
             <li>Adobe Photoshop - 6 years experience</li>
@@ -85,7 +85,7 @@
 
         <div class="skill-section">
           <h2><i class="fas fa-paint-brush"></i> Graphic Design & Visual Content</h2>
-          <ul class="skills-list">
+          <ul class="skills-list" id="skillsListDesign">
             <li>Graphic Design - 7 years experience</li>
             <li>Branding & Identity - Creative development</li>
             <li>Typography & Layout - Professional standards</li>
@@ -164,6 +164,28 @@
     (function() {
       const db = firebase.firestore();
 
+      function normalizeStringArray(value) {
+        if (!Array.isArray(value)) return [];
+        return value
+          .map(v => (v === undefined || v === null) ? '' : String(v))
+          .map(v => v.trim())
+          .filter(v => v.length > 0);
+      }
+
+      function renderList(listId, items) {
+        const ul = document.getElementById(listId);
+        if (!ul) return;
+        if (items === undefined || items === null) return; // keep hard-coded fallback
+        const normalized = normalizeStringArray(items);
+
+        ul.innerHTML = '';
+        normalized.forEach((text) => {
+          const li = document.createElement('li');
+          li.textContent = text;
+          ul.appendChild(li);
+        });
+      }
+
       document.addEventListener('DOMContentLoaded', async function() {
         try {
           const snap = await db.collection('siteContent').doc('skills').get();
@@ -171,15 +193,21 @@
           const data = snap.data();
 
           const setText = (id, value) => {
-            if (!value) return;
+            if (value === undefined || value === null) return;
             const el = document.getElementById(id);
-            if (el) el.textContent = value;
+            if (el) el.textContent = String(value);
           };
 
           setText('skillsHeroTitle', data.heroTitle);
           setText('skillsHeroSubtitle', data.heroSubtitle);
           setText('skillsCtaTitle', data.ctaTitle);
           setText('skillsCtaText', data.ctaText);
+
+          // Lists (optional). If missing/empty, static HTML remains.
+          renderList('skillsListPhotography', data.listPhotography);
+          renderList('skillsListEditing', data.listEditing);
+          renderList('skillsListSoftware', data.listSoftware);
+          renderList('skillsListDesign', data.listDesign);
         } catch (err) {
           console.error('Error loading skills page content:', err);
         }
