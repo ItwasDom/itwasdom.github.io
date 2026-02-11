@@ -233,6 +233,11 @@
     </div>
   </footer>
 
+  <!-- Secret Admin Button -->
+  <a id="adminSecretBtn" href="admin/dashboard.html" class="admin-secret-btn" title="Admin Access">
+    <i class="fas fa-lock"></i>
+  </a>
+
   <!-- Structured Data (JSON-LD) -->
   <script type="application/ld+json">
   {
@@ -319,6 +324,51 @@
       flex-grow: 1;
     }
 
+    /* ===== SECRET ADMIN BUTTON ===== */
+    .admin-secret-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1B16A8, #7C3AED);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 1.3rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(123, 58, 237, 0.3);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .admin-secret-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 30px rgba(123, 58, 237, 0.5);
+    }
+
+    .admin-secret-btn.show {
+      opacity: 1;
+      pointer-events: auto;
+      animation: fadeInUp 0.4s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     @media (max-width: 768px) {
       #hero {
         margin-top: 70px;
@@ -359,5 +409,46 @@
       }
     }
   </style>
+
+  <!-- Secret Admin Button Script -->
+  <script>
+    const adminBtn = document.getElementById('adminSecretBtn');
+    let logoClickCount = 0;
+    let clickTimeout;
+
+    // Show admin button on scroll
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        adminBtn.classList.add('show');
+      } else {
+        adminBtn.classList.remove('show');
+      }
+    });
+
+    // Triple-click logo to toggle admin button visibility
+    const logo = document.querySelector('.logo');
+    if (logo) {
+      logo.addEventListener('click', function() {
+        logoClickCount++;
+        clearTimeout(clickTimeout);
+        
+        if (logoClickCount === 3) {
+          adminBtn.classList.toggle('show');
+          logoClickCount = 0;
+        }
+        
+        clickTimeout = setTimeout(() => {
+          logoClickCount = 0;
+        }, 500);
+      });
+    }
+
+    // Keyboard shortcut: Alt+Shift+A to toggle admin button
+    document.addEventListener('keydown', function(e) {
+      if (e.altKey && e.shiftKey && e.key === 'A') {
+        adminBtn.classList.toggle('show');
+      }
+    });
+  </script>
 </body>
 </html>
