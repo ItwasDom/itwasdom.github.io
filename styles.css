@@ -597,6 +597,17 @@ header .logo {
   }
 }
 
+@media (max-width: 600px) {
+  .home-portfolio-preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-portfolio-preview-thumb {
+    width: 80px;
+    height: 80px;
+  }
+}
+
 @media (max-width: 520px) {
   .home-portfolio-preview-grid {
     grid-template-columns: 1fr;

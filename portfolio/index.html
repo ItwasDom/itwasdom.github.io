@@ -63,9 +63,21 @@
         gap: 12px;
       }
 
-      .portfolio-feed-content p,
       .portfolio-feed-tags {
         display: none;
+      }
+
+      /* Show the short caption on mobile (we use the <p> line for captions). */
+      .portfolio-feed-content p {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        font-size: 0.82rem;
+        line-height: 1.35;
       }
     }
 
