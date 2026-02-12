@@ -313,8 +313,16 @@
       box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
       overflow: hidden;
       max-height: 90vh;
+      height: min(90vh, 720px);
       display: grid;
       grid-template-columns: 1.2fr 1fr;
+    }
+
+    .portfolio-modal-left {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
     }
 
     .portfolio-modal-media {
@@ -324,12 +332,13 @@
       justify-content: center;
       min-height: 320px;
       position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
     }
 
     .portfolio-modal-carousel {
       width: 100%;
       height: 100%;
-      max-height: 90vh;
       overflow-x: auto;
       overflow-y: hidden;
       display: flex;
@@ -337,9 +346,14 @@
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      touch-action: pan-x;
+      touch-action: auto;
       overscroll-behavior-x: contain;
-      cursor: grab;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .portfolio-modal-carousel {
+        cursor: grab;
+      }
     }
 
     .portfolio-modal-carousel.dragging {
@@ -365,7 +379,6 @@
     .portfolio-modal-slide img {
       width: 100%;
       height: 100%;
-      max-height: 90vh;
       object-fit: contain;
       display: block;
       user-select: none;
@@ -404,6 +417,7 @@
       border-top: 1px solid rgba(124, 58, 237, 0.18);
       overflow-x: auto;
       background: rgba(0, 0, 0, 0.12);
+      flex: 0 0 auto;
     }
 
     .portfolio-modal-thumb {
@@ -512,10 +526,24 @@
 
     @media (max-width: 860px) {
       .portfolio-modal {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+        height: 90vh;
       }
+
+      .portfolio-modal-left {
+        flex: 0 0 auto;
+        max-height: 58vh;
+      }
+
+      .portfolio-modal-media {
+        min-height: 220px;
+      }
+
       .portfolio-modal-body {
         padding: 18px;
+        flex: 1 1 auto;
+        min-height: 0;
       }
 
       .portfolio-modal-nav {
@@ -576,7 +604,7 @@
   <!-- Portfolio details modal -->
   <div id="portfolioModalOverlay" class="portfolio-modal-overlay" aria-hidden="true">
     <div class="portfolio-modal" role="dialog" aria-modal="true" aria-labelledby="portfolioModalTitle">
-      <div>
+      <div class="portfolio-modal-left">
         <div class="portfolio-modal-media">
           <button id="portfolioModalPrev" class="portfolio-modal-nav prev" type="button" aria-label="Previous image">
             <i class="fas fa-chevron-left" aria-hidden="true"></i>
@@ -954,18 +982,17 @@
         prevBtn.addEventListener('click', () => scrollModalToIndex(modalCarouselIndex - 1));
         nextBtn.addEventListener('click', () => scrollModalToIndex(modalCarouselIndex + 1));
 
-        // Allow mouse wheel to scroll horizontally (common on non-trackpad devices).
+        // Optional: Shift+wheel scrolls the carousel horizontally (keeps normal vertical scrolling intact).
         carouselEl.addEventListener('wheel', (e) => {
           if (!overlay.classList.contains('open')) return;
+          if (!e.shiftKey) return;
           const canScroll = carouselEl.scrollWidth > (carouselEl.clientWidth + 2);
           if (!canScroll) return;
 
-          const dx = Math.abs(Number(e.deltaX) || 0);
-          const dy = Math.abs(Number(e.deltaY) || 0);
-          if (dy > dx) {
-            e.preventDefault();
-            carouselEl.scrollLeft += (Number(e.deltaY) || 0);
-          }
+          const dy = Number(e.deltaY) || 0;
+          if (!dy) return;
+          e.preventDefault();
+          carouselEl.scrollLeft += dy;
         }, { passive: false });
 
         // Pointer-drag swipe (desktop + touch fallback).
@@ -982,6 +1009,8 @@
         carouselEl.addEventListener('pointerdown', (e) => {
           if (!overlay.classList.contains('open')) return;
           if (e.button !== undefined && e.button !== 0) return;
+          // Only enable drag-to-scroll for mouse. Touch should keep native vertical scroll working.
+          if (e.pointerType && e.pointerType !== 'mouse') return;
           const canScroll = carouselEl.scrollWidth > (carouselEl.clientWidth + 2);
           if (!canScroll) return;
 
