@@ -13,6 +13,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
+const crypto = require('crypto');
 
 admin.initializeApp();
 
@@ -26,34 +27,81 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function sha256Hex(value) {
+  return crypto.createHash('sha256').update(String(value), 'utf8').digest('hex');
+}
+
+// Password reset PIN guardrails
+const PIN_TTL_MS = 15 * 60 * 1000;
+const PIN_MIN_RESEND_MS = 60 * 1000;
+const PIN_MAX_SENDS_PER_HOUR = 5;
+const PIN_MAX_ATTEMPTS = 5;
+const PIN_LOCK_MS = 15 * 60 * 1000;
+
 /**
  * Sends a password reset email with a unique 6-digit PIN
  * Stores the PIN in Firestore for verification
  */
 exports.sendPasswordResetPin = functions.https.onCall(async (data, context) => {
-  const { email } = data;
-  if (!email) {
+  const email = typeof data?.email === 'string' ? data.email.trim().toLowerCase() : '';
+  if (!email || email.length > 320) {
     throw new functions.https.HttpsError('invalid-argument', 'Email is required');
   }
 
-  // Generate 6-digit PIN
-  const pin = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = Date.now() + 15 * 60 * 1000; // 15 min expiry
+  // Always respond with the same generic message to reduce user-enumeration.
+  const genericResponse = { success: true, message: 'If an account exists, a PIN has been sent.' };
 
-  // Find user by email
+  // Small jitter to make timing attacks harder.
+  await sleep(200 + Math.floor(Math.random() * 200));
+
+  // Find user by email (if any). Do NOT reveal whether it exists.
   let userRecord;
   try {
     userRecord = await admin.auth().getUserByEmail(email);
   } catch (error) {
-    throw new functions.https.HttpsError('not-found', 'No user found with that email');
+    console.log('Password reset PIN requested for unknown email');
+    return genericResponse;
   }
 
-  // Store PIN in Firestore
-  await admin.firestore().collection('passwordResetPins').doc(userRecord.uid).set({
-    pin,
+  const now = Date.now();
+  const pinRef = admin.firestore().collection('passwordResetPins').doc(userRecord.uid);
+  const pinSnap = await pinRef.get();
+  const existing = pinSnap.exists ? (pinSnap.data() || {}) : {};
+
+  const lastSentAt = Number.isFinite(Number(existing.lastSentAt)) ? Number(existing.lastSentAt) : 0;
+  if (lastSentAt && now - lastSentAt < PIN_MIN_RESEND_MS) {
+    return genericResponse;
+  }
+
+  const windowStart = Number.isFinite(Number(existing.windowStart)) ? Number(existing.windowStart) : now;
+  const withinHour = now - windowStart < 60 * 60 * 1000;
+  const sentCount = Number.isFinite(Number(existing.sentCount)) ? Number(existing.sentCount) : 0;
+
+  if (withinHour && sentCount >= PIN_MAX_SENDS_PER_HOUR) {
+    return genericResponse;
+  }
+
+  // Generate cryptographically secure 6-digit PIN
+  const pin = crypto.randomInt(100000, 1000000).toString();
+  const pinHash = sha256Hex(pin);
+  const expiresAt = now + PIN_TTL_MS;
+
+  await pinRef.set({
+    pinHash,
     expiresAt,
-    used: false
-  });
+    used: false,
+    attempts: 0,
+    lockedUntil: 0,
+    lastSentAt: now,
+    windowStart: withinHour ? windowStart : now,
+    sentCount: withinHour ? (sentCount + 1) : 1,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true });
 
   // Themed email HTML
   const mailOptions = {
@@ -82,47 +130,102 @@ exports.sendPasswordResetPin = functions.https.onCall(async (data, context) => {
   };
 
   await transporter.sendMail(mailOptions);
-  console.log(`Password reset PIN sent to ${email}`);
-  return { success: true, message: 'Password reset PIN sent' };
+  console.log(`Password reset PIN sent (if user exists): ${email}`);
+  return genericResponse;
 });
 
 /**
  * Verifies the PIN and resets the password
  */
 exports.verifyPasswordResetPin = functions.https.onCall(async (data, context) => {
-  const { email, pin, newPassword } = data;
+  const email = typeof data?.email === 'string' ? data.email.trim().toLowerCase() : '';
+  const pin = typeof data?.pin === 'string' ? data.pin.trim() : '';
+  const newPassword = typeof data?.newPassword === 'string' ? data.newPassword : '';
+
   if (!email || !pin || !newPassword) {
     throw new functions.https.HttpsError('invalid-argument', 'Email, PIN, and new password are required');
   }
+  if (!/^\d{6}$/.test(pin)) {
+    throw new functions.https.HttpsError('invalid-argument', 'PIN must be 6 digits');
+  }
+  if (newPassword.length < 8 || newPassword.length > 128) {
+    throw new functions.https.HttpsError('invalid-argument', 'Password must be at least 8 characters');
+  }
 
-  // Find user by email
+  // Reduce user enumeration via timing.
+  await sleep(200 + Math.floor(Math.random() * 200));
+
   let userRecord;
   try {
     userRecord = await admin.auth().getUserByEmail(email);
   } catch (error) {
-    throw new functions.https.HttpsError('not-found', 'No user found with that email');
+    // Generic denial to avoid leaking whether the email exists.
+    throw new functions.https.HttpsError('permission-denied', 'Invalid PIN or expired');
   }
 
-  // Get PIN from Firestore
-  const pinDoc = await admin.firestore().collection('passwordResetPins').doc(userRecord.uid).get();
-  if (!pinDoc.exists) {
-    throw new functions.https.HttpsError('not-found', 'No PIN found for this user');
-  }
-  const pinData = pinDoc.data();
-  if (pinData.used) {
-    throw new functions.https.HttpsError('failed-precondition', 'PIN already used');
-  }
-  if (Date.now() > pinData.expiresAt) {
-    throw new functions.https.HttpsError('deadline-exceeded', 'PIN expired');
-  }
-  if (pinData.pin !== pin) {
-    throw new functions.https.HttpsError('permission-denied', 'Invalid PIN');
-  }
+  const now = Date.now();
+  const db = admin.firestore();
+  const pinRef = db.collection('passwordResetPins').doc(userRecord.uid);
 
-  // Reset password
-  await admin.auth().updateUser(userRecord.uid, { password: newPassword });
-  await admin.firestore().collection('passwordResetPins').doc(userRecord.uid).update({ used: true });
-  return { success: true, message: 'Password reset successful' };
+  try {
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(pinRef);
+      if (!snap.exists) {
+        throw new functions.https.HttpsError('permission-denied', 'Invalid PIN or expired');
+      }
+
+      const pinData = snap.data() || {};
+      const used = pinData.used === true;
+      const expiresAt = Number.isFinite(Number(pinData.expiresAt)) ? Number(pinData.expiresAt) : 0;
+      const lockedUntil = Number.isFinite(Number(pinData.lockedUntil)) ? Number(pinData.lockedUntil) : 0;
+      const attempts = Number.isFinite(Number(pinData.attempts)) ? Number(pinData.attempts) : 0;
+
+      if (used || !expiresAt || now > expiresAt || (lockedUntil && now < lockedUntil)) {
+        throw new functions.https.HttpsError('permission-denied', 'Invalid PIN or expired');
+      }
+
+      const providedHash = sha256Hex(pin);
+      const storedHash = typeof pinData.pinHash === 'string' ? pinData.pinHash : '';
+      const legacyPin = typeof pinData.pin === 'string' ? pinData.pin : '';
+      const isMatch = (storedHash && providedHash === storedHash) || (!!legacyPin && pin === legacyPin);
+
+      if (!isMatch) {
+        const nextAttempts = attempts + 1;
+        const updates = {
+          attempts: nextAttempts,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        };
+        if (nextAttempts >= PIN_MAX_ATTEMPTS) {
+          updates.lockedUntil = now + PIN_LOCK_MS;
+        }
+        tx.set(pinRef, updates, { merge: true });
+        throw new functions.https.HttpsError('permission-denied', 'Invalid PIN or expired');
+      }
+
+      tx.set(pinRef, {
+        used: true,
+        usedAt: admin.firestore.FieldValue.serverTimestamp(),
+        attempts: attempts,
+        lockedUntil: 0,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+    });
+
+    await admin.auth().updateUser(userRecord.uid, { password: newPassword });
+    return { success: true, message: 'Password reset successful' };
+  } catch (error) {
+    // If we consumed the PIN but failed to update password, re-open it.
+    try {
+      if (error && error.code !== 'permission-denied') {
+        await pinRef.set({ used: false, usedAt: admin.firestore.FieldValue.delete() }, { merge: true });
+      }
+    } catch (e) {
+      console.warn('Failed to rollback PIN usage after error');
+    }
+
+    if (error instanceof functions.https.HttpsError) throw error;
+    throw new functions.https.HttpsError('internal', 'Password reset failed');
+  }
 });
 /**
  * Registers a new user and stores profile in Firestore
@@ -147,7 +250,8 @@ exports.registerUser = functions.https.onCall(async (data, context) => {
     });
     return { success: true, uid: userRecord.uid };
   } catch (error) {
-    throw new functions.https.HttpsError('internal', error.message);
+    console.error('registerUser error:', error);
+    throw new functions.https.HttpsError('internal', 'Registration failed');
   }
 });
 
@@ -170,7 +274,8 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
     }
     return { success: true };
   } catch (error) {
-    throw new functions.https.HttpsError('internal', error.message);
+    console.error('updateUserProfile error:', error);
+    throw new functions.https.HttpsError('internal', 'Profile update failed');
   }
 });
 /**

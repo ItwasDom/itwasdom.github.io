@@ -13,6 +13,15 @@ You need `gsutil` (comes with the Google Cloud SDK).
 - Install: https://cloud.google.com/sdk/docs/install
 - Then run: `gcloud init`
 
+Quick sanity check (optional): confirm the bucket actually exists.
+
+```bash
+gcloud storage buckets list --project dominic-martinez-portfolio
+```
+
+If this prints nothing, you likely haven’t enabled Firebase Storage for the project yet (or the default bucket was deleted).
+Go to Firebase Console → Build → Storage → Get started, and confirm the bucket name shown there.
+
 ## 2) Create a CORS JSON file
 
 Create a file named `cors.json` with this content (adjust origins as needed):
@@ -43,18 +52,21 @@ Notes:
 ## 3) Apply it to your bucket
 
 Your bucket is:
-- `dominic-martinez-portfolio.appspot.com`
+- `dominic-martinez-portfolio.firebasestorage.app`
 
 Run:
 
 ```bash
-gsutil cors set cors.json gs://dominic-martinez-portfolio.appspot.com
+gsutil cors set cors.json gs://dominic-martinez-portfolio.firebasestorage.app
 ```
+
+If you see `NotFoundException: 404 The specified bucket does not exist`, double-check the bucket name in Firebase Console → Storage.
+If the bucket name is different, use that in the `gs://...` command and update `storageBucket` in `assets/js/firebase-config.js`.
 
 (Optional) Verify:
 
 ```bash
-gsutil cors get gs://dominic-martinez-portfolio.appspot.com
+gsutil cors get gs://dominic-martinez-portfolio.firebasestorage.app
 ```
 
 ## 4) Reload Safari

@@ -10,7 +10,7 @@ window.__FIREBASE_CONFIG = Object.freeze({
   apiKey: "AIzaSyA4LWCSks_Qi420PQJZDHvw1Y_StL-RKCM",
   authDomain: "dominic-martinez-portfolio.firebaseapp.com",
   projectId: "dominic-martinez-portfolio",
-  storageBucket: "dominic-martinez-portfolio.appspot.com",
+  storageBucket: "dominic-martinez-portfolio.firebasestorage.app",
   messagingSenderId: "339938102474",
   appId: "1:339938102474:web:0b95e7cb6af8b9c559b833",
   measurementId: "G-MSKQYN75ML",

@@ -52,12 +52,8 @@ Fields:
   - followers: 0 (number)
 ```
 
-**Collection: `photos`**
-Create 4 documents:
-- ID: `project-1` → likeCount: 0
-- ID: `project-2` → likeCount: 0  
-- ID: `project-3` → likeCount: 0
-- ID: `project-4` → likeCount: 0
+**Collection: `portfolio`**
+Portfolio items are created/edited from the admin dashboard (no placeholder documents required).
 
 **Collection: `users`** (auto-created on first signup)
 
@@ -227,22 +223,22 @@ One email sent per interaction
   "enableNotifications": true,
   "createdAt": Timestamp,
   "isFollowingDominic": true,
-  "likes": {
-    "project-1": true,
-    "project-2": false,
-    "project-3": true,
-    "project-4": false
-  }
+    "likes": {
+        "<portfolioDocId>": true,
+        "<anotherPortfolioDocId>": false
+    }
 }
 ```
 
-**`photos/{photoId}`**
+**`photos/{photoId}` (legacy)**
 ```json
 {
   "likeCount": 42,
   "createdAt": Timestamp
 }
 ```
+
+Note: the live site uses `portfolio/{photoId}` for items; the `photos` collection is kept only for backwards compatibility.
 
 **`profile/dominic`**
 ```json

@@ -90,6 +90,30 @@
       height: 320px;
     }
 
+    .portfolio-feed-item.is-placeholder {
+      cursor: default;
+    }
+
+    .portfolio-feed-item.is-placeholder:hover {
+      transform: none;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border-color: rgba(124, 58, 237, 0.28);
+    }
+
+    .portfolio-placeholder-hero {
+      width: 100%;
+      height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #f0f0f0;
+      background: linear-gradient(135deg, rgba(27, 22, 168, 0.22) 0%, rgba(124, 58, 237, 0.18) 100%);
+      border-radius: 16px;
+    }
+
     .portfolio-feed-content {
       padding: 18px;
       background: rgba(15, 15, 15, 0.9);
@@ -576,7 +600,16 @@
           ? item.imageUrls
           : (item && item.imageUrl ? [item.imageUrl] : []);
         const imageUrls = imageUrlsRaw.map((u) => normalizeHttpUrl(u)).filter(Boolean).slice(0, 10);
+        const thumbUrlsRaw = Array.isArray(item && item.thumbUrls)
+          ? item.thumbUrls
+          : (item && item.thumbUrl ? [item.thumbUrl] : []);
+        const thumbUrls = thumbUrlsRaw.map((u) => normalizeHttpUrl(u)).filter(Boolean).slice(0, 10);
+        const alignedThumbs = (thumbUrls.length >= imageUrls.length)
+          ? thumbUrls.slice(0, imageUrls.length)
+          : thumbUrls.concat(imageUrls.slice(thumbUrls.length));
+
         const imageUrl = imageUrls.length ? imageUrls[0] : null;
+        const thumbUrl = alignedThumbs.length ? alignedThumbs[0] : imageUrl;
         const title = (item && typeof item.title === 'string' && item.title.trim()) ? item.title.trim() : 'Untitled';
         const description = (item && typeof item.description === 'string' && item.description.trim()) ? item.description.trim() : '';
         const category = (item && typeof item.category === 'string' && item.category.trim()) ? item.category.trim() : '';
@@ -599,6 +632,7 @@
             category,
             imageUrl,
             imageUrls,
+            thumbUrls: alignedThumbs,
             likeCount,
           });
         });
@@ -606,7 +640,7 @@
         const img = document.createElement('img');
         img.loading = 'lazy';
         img.alt = title;
-        if (imageUrl) img.src = imageUrl;
+        if (thumbUrl) img.src = thumbUrl;
         a.appendChild(img);
 
         const content = document.createElement('div');
@@ -685,6 +719,38 @@
         return a;
       }
 
+      function createComingSoonCard() {
+        const wrap = document.createElement('div');
+        wrap.className = 'portfolio-feed-item is-placeholder';
+        wrap.setAttribute('aria-label', 'New work coming soon');
+
+        const hero = document.createElement('div');
+        hero.className = 'portfolio-placeholder-hero';
+        hero.innerHTML = '<i class="fas fa-hourglass-half" aria-hidden="true"></i> New work coming soon';
+        wrap.appendChild(hero);
+
+        const content = document.createElement('div');
+        content.className = 'portfolio-feed-content';
+
+        const h3 = document.createElement('h3');
+        h3.textContent = 'New work coming soon';
+        content.appendChild(h3);
+
+        const p = document.createElement('p');
+        p.textContent = 'I’m actively adding new projects. Check back soon.';
+        content.appendChild(p);
+
+        const tags = document.createElement('div');
+        tags.className = 'portfolio-feed-tags';
+        const span = document.createElement('span');
+        span.textContent = 'Coming Soon';
+        tags.appendChild(span);
+        content.appendChild(tags);
+
+        wrap.appendChild(content);
+        return wrap;
+      }
+
       function ensurePortfolioModal() {
         const overlay = document.getElementById('portfolioModalOverlay');
         const closeBtn = document.getElementById('portfolioModalClose');
@@ -728,9 +794,21 @@
           .filter(Boolean)
           .slice(0, 10);
 
+        const thumbsRaw = Array.isArray(item && item.thumbUrls)
+          ? item.thumbUrls
+          : [];
+        const thumbsNorm = thumbsRaw
+          .map((u) => normalizeHttpUrl(u))
+          .filter(Boolean)
+          .slice(0, 10);
+        const thumbs = (thumbsNorm.length >= urls.length)
+          ? thumbsNorm.slice(0, urls.length)
+          : thumbsNorm.concat(urls.slice(thumbsNorm.length));
+
         thumbsEl.innerHTML = '';
 
-        const selectImage = (url, title) => {
+        const selectImage = (idx, title) => {
+          const url = urls[idx];
           imgEl.src = url;
           imgEl.alt = title || 'Portfolio image';
           openLink.href = url;
@@ -738,7 +816,7 @@
         };
 
         if (urls.length) {
-          selectImage(urls[0], item && item.title ? String(item.title) : 'Portfolio image');
+          selectImage(0, item && item.title ? String(item.title) : 'Portfolio image');
 
           urls.forEach((url, idx) => {
             const btn = document.createElement('button');
@@ -749,13 +827,13 @@
             const timg = document.createElement('img');
             timg.alt = '';
             timg.loading = 'lazy';
-            timg.src = url;
+            timg.src = thumbs[idx] || url;
             btn.appendChild(timg);
 
             btn.addEventListener('click', () => {
               thumbsEl.querySelectorAll('.portfolio-modal-thumb').forEach((el) => el.classList.remove('active'));
               btn.classList.add('active');
-              selectImage(url, item && item.title ? String(item.title) : 'Portfolio image');
+              selectImage(idx, item && item.title ? String(item.title) : 'Portfolio image');
             });
 
             thumbsEl.appendChild(btn);
@@ -805,7 +883,17 @@
         const grid = document.getElementById('portfolioGrid');
         if (!grid) return;
         clearElement(grid);
-        for (const item of portfolioItems) grid.appendChild(createCard(item));
+
+        if (!Array.isArray(portfolioItems) || portfolioItems.length === 0) {
+          // Show a single placeholder card when there are no posts.
+          grid.appendChild(createComingSoonCard());
+          return;
+        }
+
+        for (const item of portfolioItems) {
+          const card = createCard(item);
+          if (card) grid.appendChild(card);
+        }
       }
 
       function wireFollowButton() {
@@ -846,11 +934,9 @@
         db.collection('portfolio').orderBy('createdAt', 'desc').onSnapshot((snap) => {
           portfolioItems = [];
           snap.forEach((doc) => portfolioItems.push({ id: doc.id, ...doc.data() }));
-          if (portfolioItems.length === 0) {
-            setStatus('No portfolio items yet.');
-          } else {
-            setStatus('');
-          }
+
+          if (portfolioItems.length === 0) setStatus('New work coming soon.');
+          else setStatus('');
           renderPortfolio();
         }, (err) => {
           console.error('Portfolio subscription error:', err);

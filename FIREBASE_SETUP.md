@@ -106,9 +106,8 @@ Create these collections in Firestore:
   followers: array,
   isFollowingDominic: boolean,
   likes: {
-    "project-1": boolean,
-    "project-2": boolean,
-    ...
+    "<portfolioDocId>": boolean,
+    "<anotherPortfolioDocId>": boolean
   }
 }
 ```

@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+**/node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Firebase emulators
+firebase-debug.log
+.firestore/
+
+# Local env files
+.env
+.env.*
+
+# Misc
+*.pem
