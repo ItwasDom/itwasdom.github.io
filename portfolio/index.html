@@ -337,6 +337,14 @@
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
+      touch-action: pan-x;
+      overscroll-behavior-x: contain;
+      cursor: grab;
+    }
+
+    .portfolio-modal-carousel.dragging {
+      cursor: grabbing;
+      scroll-behavior: auto;
     }
 
     .portfolio-modal-carousel::-webkit-scrollbar {
@@ -348,6 +356,7 @@
       width: 100%;
       height: 100%;
       scroll-snap-align: center;
+      scroll-snap-stop: always;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -698,8 +707,15 @@
         if (!total) return;
         const idx = clamp(Number(nextIndex) || 0, 0, total - 1);
         modalCarouselIndex = idx;
-        const left = carouselEl.clientWidth * idx;
-        carouselEl.scrollTo({ left, top: 0, behavior });
+
+        const slides = carouselEl.querySelectorAll('.portfolio-modal-slide');
+        const slide = slides && slides[idx] ? slides[idx] : null;
+        if (slide && typeof slide.scrollIntoView === 'function') {
+          slide.scrollIntoView({ behavior, block: 'nearest', inline: 'start' });
+        } else {
+          const left = (carouselEl.clientWidth || 0) * idx;
+          carouselEl.scrollTo({ left, top: 0, behavior });
+        }
         updateModalNavState();
       }
 
@@ -937,6 +953,55 @@
 
         prevBtn.addEventListener('click', () => scrollModalToIndex(modalCarouselIndex - 1));
         nextBtn.addEventListener('click', () => scrollModalToIndex(modalCarouselIndex + 1));
+
+        // Allow mouse wheel to scroll horizontally (common on non-trackpad devices).
+        carouselEl.addEventListener('wheel', (e) => {
+          if (!overlay.classList.contains('open')) return;
+          const canScroll = carouselEl.scrollWidth > (carouselEl.clientWidth + 2);
+          if (!canScroll) return;
+
+          const dx = Math.abs(Number(e.deltaX) || 0);
+          const dy = Math.abs(Number(e.deltaY) || 0);
+          if (dy > dx) {
+            e.preventDefault();
+            carouselEl.scrollLeft += (Number(e.deltaY) || 0);
+          }
+        }, { passive: false });
+
+        // Pointer-drag swipe (desktop + touch fallback).
+        let isDown = false;
+        let startX = 0;
+        let startLeft = 0;
+
+        const endDrag = () => {
+          if (!isDown) return;
+          isDown = false;
+          carouselEl.classList.remove('dragging');
+        };
+
+        carouselEl.addEventListener('pointerdown', (e) => {
+          if (!overlay.classList.contains('open')) return;
+          if (e.button !== undefined && e.button !== 0) return;
+          const canScroll = carouselEl.scrollWidth > (carouselEl.clientWidth + 2);
+          if (!canScroll) return;
+
+          isDown = true;
+          startX = Number(e.clientX) || 0;
+          startLeft = carouselEl.scrollLeft || 0;
+          carouselEl.classList.add('dragging');
+          try { carouselEl.setPointerCapture(e.pointerId); } catch {}
+        });
+
+        carouselEl.addEventListener('pointermove', (e) => {
+          if (!isDown) return;
+          const x = Number(e.clientX) || 0;
+          const dx = x - startX;
+          carouselEl.scrollLeft = startLeft - dx;
+        });
+
+        carouselEl.addEventListener('pointerup', endDrag);
+        carouselEl.addEventListener('pointercancel', endDrag);
+        carouselEl.addEventListener('pointerleave', endDrag);
 
         carouselEl.addEventListener('scroll', () => {
           if (!overlay.classList.contains('open')) return;
