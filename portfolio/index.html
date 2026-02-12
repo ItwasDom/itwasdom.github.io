@@ -796,6 +796,48 @@
       let modalItemId = '';
       let modalCommentsCache = [];
 
+      function likesCacheKey(uid) {
+        const id = (typeof uid === 'string' && uid.trim()) ? uid.trim() : '';
+        return id ? `portfolioUserLikes:${id}` : '';
+      }
+
+      function loadLikesCache(uid) {
+        try {
+          const key = likesCacheKey(uid);
+          if (!key) return {};
+          const raw = window.localStorage ? window.localStorage.getItem(key) : null;
+          if (!raw) return {};
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') return {};
+
+          const out = {};
+          Object.keys(parsed).forEach((k) => {
+            if (parsed[k] === true) out[k] = true;
+          });
+          return out;
+        } catch {
+          return {};
+        }
+      }
+
+      function saveLikesCache(uid, likesMap) {
+        try {
+          const key = likesCacheKey(uid);
+          if (!key) return;
+          if (!window.localStorage) return;
+          const map = (likesMap && typeof likesMap === 'object') ? likesMap : {};
+
+          const out = {};
+          Object.keys(map).forEach((k) => {
+            if (map[k] === true) out[k] = true;
+          });
+
+          window.localStorage.setItem(key, JSON.stringify(out));
+        } catch {
+          // ignore quota / disabled storage
+        }
+      }
+
       function setLikeButtonVisual(btn, liked) {
         if (!btn) return;
         const isLiked = liked === true;
@@ -808,6 +850,7 @@
         if (!id) return;
         if (typeof nextLiked === 'boolean') {
           userLikes = { ...(userLikes || {}), [id]: nextLiked };
+          if (currentUser && currentUser.uid) saveLikesCache(currentUser.uid, userLikes);
         }
 
         if (Number.isFinite(Number(nextLikeCount))) {
@@ -1733,6 +1776,7 @@
         return db.collection('users').doc(uid).onSnapshot((doc) => {
           const data = doc.exists ? doc.data() : {};
           userLikes = (data && typeof data.likes === 'object' && data.likes) ? data.likes : {};
+          saveLikesCache(uid, userLikes);
           isFollowing = data && data.isFollowingDominic === true;
           setFollowButtonState();
           renderPortfolio();
@@ -1747,6 +1791,7 @@
               const data = res && res.data ? res.data : {};
               if (data && typeof data.likes === 'object' && data.likes) {
                 userLikes = data.likes;
+                saveLikesCache(uid, userLikes);
                 renderPortfolio();
               }
             }).catch((e) => {
@@ -1774,6 +1819,11 @@
           }
 
           if (currentUser) {
+            // Hydrate cached likes immediately so the UI shows "Liked" on refresh
+            // even before network calls resolve.
+            userLikes = loadLikesCache(currentUser.uid);
+            renderPortfolio();
+
             unsubscribeUser = subscribeCurrentUserDoc(currentUser.uid);
 
             // Also pull likes via callable once on sign-in to ensure like state
@@ -1782,6 +1832,7 @@
               const data = res && res.data ? res.data : {};
               if (data && typeof data.likes === 'object' && data.likes) {
                 userLikes = data.likes;
+                saveLikesCache(currentUser.uid, userLikes);
                 renderPortfolio();
               }
             }).catch(() => {
