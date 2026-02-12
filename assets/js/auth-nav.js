@@ -2,6 +2,9 @@
 (function () {
   if (!window.firebase || !firebase.auth) return;
 
+  // Keep in sync with admin page gates.
+  const ADMIN_UID = window.__ADMIN_UID || 'RVAvU26oGeYsaJYk0X1OF9h6apb2';
+
   const authNavBtn = document.getElementById('authNavBtn');
   if (!authNavBtn) return;
 
@@ -11,17 +14,47 @@
 
   const auth = firebase.auth();
 
+  function syncAdminDropdownLink(user) {
+    if (!dropdown) return;
+
+    const isAdmin = !!user && user.uid === ADMIN_UID;
+    const existing = document.getElementById('authAdminDashboardLink');
+
+    if (!isAdmin) {
+      if (existing) existing.remove();
+      return;
+    }
+
+    const adminLink = existing || document.createElement('a');
+    adminLink.id = 'authAdminDashboardLink';
+    adminLink.href = '/admin/dashboard.html';
+    adminLink.textContent = 'Admin Dashboard';
+    adminLink.onclick = (e) => {
+      e.preventDefault();
+      window.location.href = '/admin/dashboard.html';
+    };
+
+    if (!existing) {
+      dropdown.insertBefore(adminLink, dropdown.firstChild);
+    }
+  }
+
   function setSignedOut() {
     authNavBtn.textContent = 'Login / Sign Up';
     authNavBtn.href = '/user/login.html';
     authNavBtn.removeAttribute('data-auth-ready');
     if (dropdown) dropdown.classList.remove('show');
+
+    const adminLink = document.getElementById('authAdminDashboardLink');
+    if (adminLink) adminLink.remove();
   }
 
   function setSignedIn(user) {
     authNavBtn.textContent = user.displayName || 'My Profile';
     authNavBtn.href = '#';
     authNavBtn.setAttribute('data-auth-ready', 'true');
+
+    syncAdminDropdownLink(user);
 
     if (dashboardBtn) {
       dashboardBtn.onclick = (e) => {

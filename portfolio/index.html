@@ -249,7 +249,13 @@
     }
 
     .like-btn.liked {
-      background: rgba(124, 58, 237, 0.18);
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.7);
+      color: #ef4444;
+    }
+
+    .like-btn.liked i {
+      color: #ef4444;
     }
 
     @media (max-width: 768px) {
@@ -575,6 +581,27 @@
       margin-top: 8px;
     }
 
+    .portfolio-modal-comments-preview {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(124, 58, 237, 0.18);
+    }
+
+    .portfolio-modal-comments-preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .portfolio-modal-comments-preview-title {
+      color: #f0f0f0;
+      font-weight: 800;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
     .portfolio-modal-open {
       display: inline-flex;
       align-items: center;
@@ -707,6 +734,15 @@
 
         <div id="portfolioModalActionStatus" class="portfolio-modal-comment-status" aria-live="polite"></div>
 
+        <div id="portfolioModalCommentsPreview" class="portfolio-modal-comments-preview" aria-label="Comments preview">
+          <div class="portfolio-modal-comments-preview-header">
+            <p class="portfolio-modal-comments-preview-title">Comments</p>
+            <button id="portfolioModalCommentsPreviewMore" class="portfolio-modal-open" type="button" style="display:none;">… see more</button>
+          </div>
+          <div id="portfolioModalCommentsPreviewStatus" class="portfolio-modal-comment-status"></div>
+          <div id="portfolioModalCommentsPreviewList" class="portfolio-modal-comments-list"></div>
+        </div>
+
         <div id="portfolioModalComments" class="portfolio-modal-comments" aria-label="Comments">
           <div class="portfolio-modal-comments-row">
             <textarea id="portfolioModalCommentInput" placeholder="Write a comment…"></textarea>
@@ -745,6 +781,7 @@
       const sendFollowNotificationCallable = fns.httpsCallable('sendFollowNotification');
       const listCommentsCallable = fns.httpsCallable('listPortfolioComments');
       const addCommentCallable = fns.httpsCallable('addPortfolioComment');
+      const getCurrentUserLikesCallable = fns.httpsCallable('getCurrentUserLikes');
 
       let currentUser = null;
       let userLikes = {};
@@ -757,6 +794,14 @@
       let modalCarouselIndex = 0;
       let modalScrollRaf = 0;
       let modalItemId = '';
+      let modalCommentsCache = [];
+
+      function setLikeButtonVisual(btn, liked) {
+        if (!btn) return;
+        const isLiked = liked === true;
+        btn.classList.toggle('liked', isLiked);
+        btn.innerHTML = `<i class="fas fa-heart" aria-hidden="true"></i> ${isLiked ? 'Liked' : 'Like'}`;
+      }
 
       function applyLocalLikeUpdate(photoId, nextLiked, nextLikeCount) {
         const id = typeof photoId === 'string' ? photoId : '';
@@ -791,6 +836,10 @@
           likeBtn: document.getElementById('portfolioModalLikeBtn'),
           commentBtn: document.getElementById('portfolioModalCommentBtn'),
           actionStatus: document.getElementById('portfolioModalActionStatus'),
+          commentsPreview: document.getElementById('portfolioModalCommentsPreview'),
+          commentsPreviewStatus: document.getElementById('portfolioModalCommentsPreviewStatus'),
+          commentsPreviewList: document.getElementById('portfolioModalCommentsPreviewList'),
+          commentsPreviewMore: document.getElementById('portfolioModalCommentsPreviewMore'),
           commentsPanel: document.getElementById('portfolioModalComments'),
           commentInput: document.getElementById('portfolioModalCommentInput'),
           commentSend: document.getElementById('portfolioModalCommentSend'),
@@ -814,56 +863,115 @@
         }
       }
 
-      async function loadModalComments() {
+      function renderModalCommentsPreview() {
+        const { commentsPreviewStatus, commentsPreviewList, commentsPreviewMore } = getModalEls();
+        if (!commentsPreviewStatus || !commentsPreviewList || !commentsPreviewMore) return;
+
+        const comments = Array.isArray(modalCommentsCache) ? modalCommentsCache : [];
+        commentsPreviewList.innerHTML = '';
+
+        if (comments.length === 0) {
+          commentsPreviewStatus.textContent = 'No comments yet.';
+          commentsPreviewMore.style.display = 'none';
+          return;
+        }
+
+        commentsPreviewStatus.textContent = '';
+        comments.slice(0, 2).forEach((c) => {
+          const wrap = document.createElement('div');
+          wrap.className = 'portfolio-modal-comment';
+
+          const meta = document.createElement('div');
+          meta.className = 'portfolio-modal-comment-meta';
+          const name = (c && typeof c.displayName === 'string' && c.displayName.trim()) ? c.displayName.trim() : 'User';
+          const createdAtMs = Number.isFinite(Number(c && c.createdAt)) ? Number(c.createdAt) : 0;
+          const when = createdAtMs ? formatCommentTime(new Date(createdAtMs)) : '';
+          meta.textContent = when ? `${name} • ${when}` : name;
+
+          const body = document.createElement('div');
+          body.textContent = (c && typeof c.text === 'string') ? c.text : '';
+
+          wrap.appendChild(meta);
+          wrap.appendChild(body);
+          commentsPreviewList.appendChild(wrap);
+        });
+
+        commentsPreviewMore.style.display = comments.length > 2 ? '' : 'none';
+      }
+
+      function renderModalCommentsFull() {
         const { commentStatus, commentList } = getModalEls();
         if (!commentStatus || !commentList) return;
-        commentStatus.textContent = 'Loading comments…';
+
+        const comments = Array.isArray(modalCommentsCache) ? modalCommentsCache : [];
         commentList.innerHTML = '';
+
+        if (comments.length === 0) {
+          commentStatus.textContent = 'No comments yet.';
+          return;
+        }
+
+        commentStatus.textContent = '';
+        comments.forEach((c) => {
+          const wrap = document.createElement('div');
+          wrap.className = 'portfolio-modal-comment';
+
+          const meta = document.createElement('div');
+          meta.className = 'portfolio-modal-comment-meta';
+          const name = (c && typeof c.displayName === 'string' && c.displayName.trim()) ? c.displayName.trim() : 'User';
+          const createdAtMs = Number.isFinite(Number(c && c.createdAt)) ? Number(c.createdAt) : 0;
+          const when = createdAtMs ? formatCommentTime(new Date(createdAtMs)) : '';
+          meta.textContent = when ? `${name} • ${when}` : name;
+
+          const body = document.createElement('div');
+          body.textContent = (c && typeof c.text === 'string') ? c.text : '';
+
+          wrap.appendChild(meta);
+          wrap.appendChild(body);
+          commentList.appendChild(wrap);
+        });
+      }
+
+      async function loadModalComments() {
+        const { commentStatus, commentList, commentsPreviewStatus, commentsPreviewList, commentsPreviewMore, commentsPanel } = getModalEls();
+        if (!commentStatus || !commentList || !commentsPreviewStatus || !commentsPreviewList || !commentsPreviewMore) return;
+        commentsPreviewStatus.textContent = 'Loading comments…';
+        commentsPreviewList.innerHTML = '';
+        commentsPreviewMore.style.display = 'none';
+        if (commentsPanel && commentsPanel.classList.contains('open')) {
+          commentStatus.textContent = 'Loading comments…';
+          commentList.innerHTML = '';
+        } else {
+          commentStatus.textContent = '';
+          commentList.innerHTML = '';
+        }
 
         const id = (typeof modalItemId === 'string') ? modalItemId : '';
         if (!id) {
-          commentStatus.textContent = '';
+          commentsPreviewStatus.textContent = '';
           return;
         }
 
         try {
           const res = await listCommentsCallable({ photoId: id, limit: 20 });
           const data = res && res.data ? res.data : {};
-          const comments = Array.isArray(data.comments) ? data.comments : [];
-
-          if (comments.length === 0) {
-            commentStatus.textContent = 'No comments yet.';
-            return;
+          modalCommentsCache = Array.isArray(data.comments) ? data.comments : [];
+          renderModalCommentsPreview();
+          if (commentsPanel && commentsPanel.classList.contains('open')) {
+            renderModalCommentsFull();
           }
-
-          commentStatus.textContent = '';
-          comments.forEach((c) => {
-            const wrap = document.createElement('div');
-            wrap.className = 'portfolio-modal-comment';
-
-            const meta = document.createElement('div');
-            meta.className = 'portfolio-modal-comment-meta';
-            const name = (c && typeof c.displayName === 'string' && c.displayName.trim()) ? c.displayName.trim() : 'User';
-            const createdAtMs = Number.isFinite(Number(c && c.createdAt)) ? Number(c.createdAt) : 0;
-            const when = createdAtMs ? formatCommentTime(new Date(createdAtMs)) : '';
-            meta.textContent = when ? `${name} • ${when}` : name;
-
-            const body = document.createElement('div');
-            body.textContent = (c && typeof c.text === 'string') ? c.text : '';
-
-            wrap.appendChild(meta);
-            wrap.appendChild(body);
-            commentList.appendChild(wrap);
-          });
         } catch (err) {
           console.warn('Comment load failed:', err);
           const code = (err && typeof err.code === 'string') ? err.code : '';
           if (code.includes('permission-denied')) {
-            commentStatus.textContent = 'Comments are blocked (Cloud Functions permission/App Check).';
+            commentsPreviewStatus.textContent = 'Comments are blocked (Cloud Functions permission/App Check).';
+            if (commentStatus) commentStatus.textContent = 'Comments are blocked (Cloud Functions permission/App Check).';
           } else if (code.includes('not-found')) {
-            commentStatus.textContent = 'Comments service not deployed yet.';
+            commentsPreviewStatus.textContent = 'Comments service not deployed yet.';
+            if (commentStatus) commentStatus.textContent = 'Comments service not deployed yet.';
           } else {
-            commentStatus.textContent = 'Could not load comments right now.';
+            commentsPreviewStatus.textContent = 'Could not load comments right now.';
+            if (commentStatus) commentStatus.textContent = 'Could not load comments right now.';
           }
         }
       }
@@ -1062,13 +1170,33 @@
         count.textContent = `${likeCount.toLocaleString()} like${likeCount === 1 ? '' : 's'}`;
         likeRow.appendChild(count);
 
+        const likeStatus = document.createElement('span');
+        likeStatus.className = 'like-status';
+        likeStatus.setAttribute('aria-live', 'polite');
+        likeStatus.style.marginLeft = '10px';
+        likeStatus.style.color = '#bbb';
+        likeStatus.style.fontSize = '0.9rem';
+        likeStatus.textContent = '';
+        likeRow.appendChild(likeStatus);
+
         const btn = document.createElement('button');
         btn.className = 'like-btn' + (liked ? ' liked' : '');
         btn.type = 'button';
-        btn.innerHTML = '<i class="fas fa-heart"></i> Like';
+        setLikeButtonVisual(btn, liked);
         btn.addEventListener('click', async (e) => {
           e.preventDefault();
           e.stopPropagation();
+
+          likeStatus.textContent = '';
+
+          if (id && userLikes && userLikes[id] === true) {
+            // One-like-only: don't allow toggling/unlike.
+            likeStatus.textContent = 'You already liked this post.';
+            setTimeout(() => {
+              if (likeStatus) likeStatus.textContent = '';
+            }, 2200);
+            return;
+          }
 
           if (!id) return;
           if (!currentUser) {
@@ -1083,7 +1211,7 @@
             const nextLiked = data.liked === true;
             const prevLiked = !!(userLikes && userLikes[id] === true);
             applyLocalLikeUpdate(id, nextLiked, data.likeCount);
-            btn.classList.toggle('liked', nextLiked);
+            setLikeButtonVisual(btn, nextLiked);
             if (Number.isFinite(Number(data.likeCount))) {
               const n = Number(data.likeCount);
               count.textContent = `${n.toLocaleString()} like${n === 1 ? '' : 's'}`;
@@ -1098,6 +1226,13 @@
 
             // Keep the grid consistent immediately.
             renderPortfolio();
+
+            if (data.alreadyLiked === true) {
+              likeStatus.textContent = 'You already liked this post.';
+              setTimeout(() => {
+                if (likeStatus) likeStatus.textContent = '';
+              }, 2200);
+            }
           } catch (err) {
             console.error('Like toggle failed:', err);
           } finally {
@@ -1195,6 +1330,13 @@
               return;
             }
 
+            if (userLikes && userLikes[id] === true) {
+              // One-like-only: don't allow toggling/unlike.
+              setLikeButtonVisual(likeBtn, true);
+              if (actionStatus) actionStatus.textContent = 'You already liked this post.';
+              return;
+            }
+
             likeBtn.disabled = true;
             try {
               const res = await toggleLikeCallable({ photoId: id });
@@ -1202,7 +1344,7 @@
               const nextLiked = data.liked === true;
               const prevLiked = !!(userLikes && userLikes[id] === true);
               applyLocalLikeUpdate(id, nextLiked, data.likeCount);
-              likeBtn.classList.toggle('liked', nextLiked);
+              setLikeButtonVisual(likeBtn, nextLiked);
 
               if (Number.isFinite(Number(data.likeCount))) {
                 const n = Number(data.likeCount);
@@ -1218,6 +1360,10 @@
 
               // Re-render grid so the card button state stays in sync.
               renderPortfolio();
+
+              if (data.alreadyLiked === true && actionStatus) {
+                actionStatus.textContent = 'You already liked this post.';
+              }
             } catch (err) {
               console.error('Modal like failed:', err);
               const code = (err && typeof err.code === 'string') ? err.code : '';
@@ -1242,8 +1388,20 @@
             const open = commentsPanel.classList.toggle('open');
             if (open) {
               await loadModalComments();
+              renderModalCommentsFull();
               try { if (commentInput) commentInput.focus(); } catch {}
             }
+          });
+        }
+
+        const { commentsPreviewMore } = getModalEls();
+        if (commentsPreviewMore && commentsPanel) {
+          commentsPreviewMore.addEventListener('click', async (e) => {
+            e.preventDefault();
+            commentsPanel.classList.add('open');
+            await loadModalComments();
+            renderModalCommentsFull();
+            try { if (commentInput) commentInput.focus(); } catch {}
           });
         }
 
@@ -1271,6 +1429,7 @@
               if (commentInput) commentInput.value = '';
               if (commentStatus) commentStatus.textContent = '';
               await loadModalComments();
+              renderModalCommentsFull();
             } catch (err) {
               console.warn('Comment post failed:', err);
               const code = (err && typeof err.code === 'string') ? err.code : '';
@@ -1361,6 +1520,7 @@
         if (!overlay || !titleEl || !carouselEl || !descEl || !tagsEl || !likeEl || !thumbsEl) return;
 
         modalItemId = (item && typeof item.id === 'string') ? item.id : '';
+        modalCommentsCache = [];
 
         modalCarouselTitle = item && item.title ? String(item.title) : '';
         titleEl.textContent = modalCarouselTitle;
@@ -1459,7 +1619,7 @@
 
         if (likeBtn) {
           const liked = !!(modalItemId && userLikes && userLikes[modalItemId] === true);
-          likeBtn.classList.toggle('liked', liked);
+          setLikeButtonVisual(likeBtn, liked);
         }
 
         if (commentsPanel) commentsPanel.classList.remove('open');
@@ -1467,13 +1627,23 @@
         if (commentList) commentList.innerHTML = '';
         if (actionStatus) actionStatus.textContent = '';
 
+        const { commentsPreviewStatus, commentsPreviewList, commentsPreviewMore } = getModalEls();
+        if (commentsPreviewStatus) commentsPreviewStatus.textContent = '';
+        if (commentsPreviewList) commentsPreviewList.innerHTML = '';
+        if (commentsPreviewMore) commentsPreviewMore.style.display = 'none';
+
         overlay.classList.add('open');
         overlay.setAttribute('aria-hidden', 'false');
         document.documentElement.style.overflow = 'hidden';
 
+        // Load a small preview immediately so users can see comments without tapping Comment.
+        loadModalComments();
+
         if (commentsPanel && item && item.openComments === true) {
           commentsPanel.classList.add('open');
-          loadModalComments();
+          loadModalComments().then(() => {
+            renderModalCommentsFull();
+          });
         }
       }
 
@@ -1484,6 +1654,7 @@
         overlay.setAttribute('aria-hidden', 'true');
         document.documentElement.style.overflow = '';
         modalItemId = '';
+        modalCommentsCache = [];
       }
 
       function renderPortfolio() {
@@ -1567,6 +1738,21 @@
           renderPortfolio();
         }, (err) => {
           console.error('User doc subscription error:', err);
+
+          // If rules block reading the user doc, fall back to a callable so the
+          // UI still knows which posts are already liked.
+          const code = (err && typeof err.code === 'string') ? err.code : '';
+          if (code.includes('permission-denied') || code.includes('PERMISSION_DENIED')) {
+            getCurrentUserLikesCallable({}).then((res) => {
+              const data = res && res.data ? res.data : {};
+              if (data && typeof data.likes === 'object' && data.likes) {
+                userLikes = data.likes;
+                renderPortfolio();
+              }
+            }).catch((e) => {
+              console.warn('getCurrentUserLikes fallback failed:', e);
+            });
+          }
         });
       }
 
@@ -1589,6 +1775,18 @@
 
           if (currentUser) {
             unsubscribeUser = subscribeCurrentUserDoc(currentUser.uid);
+
+            // Also pull likes via callable once on sign-in to ensure like state
+            // is correct even before the Firestore user doc snapshot arrives.
+            getCurrentUserLikesCallable({}).then((res) => {
+              const data = res && res.data ? res.data : {};
+              if (data && typeof data.likes === 'object' && data.likes) {
+                userLikes = data.likes;
+                renderPortfolio();
+              }
+            }).catch(() => {
+              // Silent: Firestore subscription may still provide likes.
+            });
           } else {
             renderPortfolio();
           }

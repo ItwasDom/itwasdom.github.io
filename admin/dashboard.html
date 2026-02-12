@@ -426,53 +426,6 @@
   </style>
 </head>
 <body>
-  <!-- LOGIN SCREEN -->
-  <div id="loginScreen" class="login-container">
-    <div class="login-box" id="loginBox">
-      <div class="login-header">
-        <h1><i class="fas fa-lock"></i></h1>
-        <h1>Admin Access</h1>
-        <p>Sign in with your admin email and password</p>
-      </div>
-
-      <div id="loginError" class="error-message"></div>
-
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="adminEmail">Admin Email</label>
-          <input 
-            type="email" 
-            id="adminEmail" 
-            placeholder="you@example.com" 
-            required
-            autocomplete="email"
-          >
-        </div>
-        <div class="form-group">
-          <label for="adminPassword">Password</label>
-          <input 
-            type="password" 
-            id="adminPassword" 
-            placeholder="Enter password" 
-            required
-            autocomplete="current-password"
-          >
-        </div>
-        <button type="submit" class="login-btn">
-          <i class="fas fa-sign-in-alt"></i> Login
-        </button>
-      </form>
-
-      <a class="return-home-btn" href="../index.html">
-        <i class="fas fa-arrow-left"></i> Return Home
-      </a>
-
-      <div class="hint">
-        Forgot your password? <a href="../reset-password.html" style="color: #999;">Reset it here</a>
-      </div>
-    </div>
-  </div>
-
   <!-- DASHBOARD SCREEN -->
   <div id="dashboardContainer" class="dashboard-container">
     <header>
@@ -523,87 +476,46 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
   <script src="/assets/js/firebase-config.js"></script>
   <script src="/assets/js/firebase-init-compat.js"></script>
+  <script src="/assets/js/admin-config.js"></script>
 
   <script>
     const auth = firebase.auth();
     console.log('🔐 Admin dashboard loading...');
     let dashboardHandlersAttached = false;
 
-    // Check auth state and show appropriate screen
+    const LOGIN_URL = '/user/login.html';
+    const HOME_URL = '/';
+
+    // Require the standard site login; no separate admin login UI.
     window.addEventListener('load', function() {
       auth.onAuthStateChanged(async user => {
-        if (user) {
-          console.log('✓ Authenticated as', user.email);
-          showDashboard();
-        } else {
-          console.log('✗ Not authenticated, showing login');
-          showLogin();
-          attachLoginHandler();
+        if (!user) {
+          console.log('✗ Not authenticated, redirecting to login');
+          window.location.replace(LOGIN_URL);
+          return;
         }
+
+        if (!window.__ADMIN_UID) {
+          console.warn('⚠️ Admin UID not configured. Blocking admin access.');
+          try { await auth.signOut(); } catch {}
+          window.location.replace(HOME_URL);
+          return;
+        }
+
+        if (user.uid !== window.__ADMIN_UID) {
+          console.warn('⛔ Not authorized for admin dashboard:', user.email);
+          try { await auth.signOut(); } catch {}
+          window.location.replace(HOME_URL);
+          return;
+        }
+
+        console.log('✓ Admin authenticated as', user.email);
+        showDashboard();
       });
     });
 
-    function attachLoginHandler() {
-      const loginForm = document.getElementById('loginForm');
-      if (!loginForm) {
-        console.error('❌ Login form not found!');
-        return;
-      }
-      console.log('✓ Attaching login form handler');
-      loginForm.addEventListener('submit', handleLogin);
-    }
-
-    async function handleLogin(e) {
-      e.preventDefault();
-      console.log('🔐 Login button clicked');
-
-      const emailInput = document.getElementById('adminEmail');
-      const passwordInput = document.getElementById('adminPassword');
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-      const loginBox = document.getElementById('loginBox');
-
-      if (!email || !password) {
-        showLoginError('❌ Please enter email and password');
-        shakeElement(loginBox);
-        return;
-      }
-
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-        console.log('✅ Firebase Auth login successful');
-        // onAuthStateChanged will handle showing the dashboard
-        passwordInput.value = '';
-      } catch (error) {
-        console.error('Auth error:', error);
-        showLoginError('❌ Login failed: ' + (error.message || 'Check your credentials.'));
-        shakeElement(loginBox);
-        passwordInput.value = '';
-        passwordInput.focus();
-      }
-    }
-
-    function shakeElement(element) {
-      if (!element) return;
-      element.classList.remove('shake');
-      void element.offsetWidth;
-      element.classList.add('shake');
-    }
-
-    function showLoginError(message) {
-      const errorDiv = document.getElementById('loginError');
-      if (errorDiv) {
-        errorDiv.textContent = message;
-        errorDiv.classList.add('show');
-        setTimeout(() => errorDiv.classList.remove('show'), 4000);
-      }
-    }
-
     function showDashboard() {
-      const loginScreen = document.getElementById('loginScreen');
       const dashboardContainer = document.getElementById('dashboardContainer');
-      
-      if (loginScreen) loginScreen.style.display = 'none';
       if (dashboardContainer) dashboardContainer.style.display = 'block';
       attachDashboardHandlers();
       console.log('Dashboard now visible');
@@ -626,25 +538,9 @@
       });
     }
 
-    function showLogin() {
-      const loginScreen = document.getElementById('loginScreen');
-      const dashboardContainer = document.getElementById('dashboardContainer');
-      
-      if (loginScreen) loginScreen.style.display = 'flex';
-      if (dashboardContainer) dashboardContainer.style.display = 'none';
-      
-      // Focus password field
-      setTimeout(() => {
-        const passwordInput = document.getElementById('adminPassword');
-        if (passwordInput) passwordInput.focus();
-      }, 100);
-      console.log('Login screen now visible');
-    }
-
     function logout() {
       auth.signOut().then(() => {
-        showLogin();
-        console.log('User logged out');
+        window.location.href = HOME_URL;
       });
     }
 

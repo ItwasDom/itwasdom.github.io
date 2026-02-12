@@ -484,10 +484,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
   <script src="/assets/js/firebase-config.js"></script>
   <script src="/assets/js/firebase-init-compat.js"></script>
+  <script src="/assets/js/admin-config.js"></script>
   <script>
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const ADMIN_UID = "RVAvU26oGeYsaJYk0X1OF9h6apb2";
+    const ADMIN_UID = window.__ADMIN_UID;
     const publishedContent = {};
 
     // These defaults match what is hard-coded in the public pages.
@@ -681,7 +682,7 @@
 
     function logout() {
       auth.signOut().then(() => {
-        window.location.href = 'dashboard.html';
+        window.location.href = '/';
       });
     }
 
@@ -699,8 +700,13 @@
     }
 
     auth.onAuthStateChanged(async (user) => {
-      if (!user || user.uid !== ADMIN_UID) {
-        window.location.href = 'dashboard.html';
+      if (!user) {
+        window.location.href = '/user/login.html';
+        return;
+      }
+      if (!ADMIN_UID || user.uid !== ADMIN_UID) {
+        try { await auth.signOut(); } catch {}
+        window.location.href = '/';
         return;
       }
       attachHeaderHandlers();

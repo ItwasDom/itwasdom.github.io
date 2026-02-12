@@ -521,9 +521,11 @@ exports.togglePortfolioLike = functions.https.onCall(async (data, context) => {
   const db = admin.firestore();
   const userRef = db.collection('users').doc(uid);
   const portfolioRef = db.collection('portfolio').doc(photoId);
+  const likeMarkerRef = portfolioRef.collection('likes').doc(uid);
 
   let liked = false;
   let likeCount = 0;
+  let alreadyLiked = false;
 
   await db.runTransaction(async (tx) => {
     const [userSnap, portfolioSnap] = await Promise.all([
@@ -538,24 +540,36 @@ exports.togglePortfolioLike = functions.https.onCall(async (data, context) => {
     const userData = userSnap.exists ? userSnap.data() : {};
     const likes = (userData && typeof userData.likes === 'object' && userData.likes) ? userData.likes : {};
     const currentlyLiked = likes[photoId] === true;
-    liked = !currentlyLiked;
+    const markerSnap = await tx.get(likeMarkerRef);
+
+    liked = true;
+    // Enforce one-like-only via a per-photo marker doc (robust even if a client
+    // can't read their user doc or if their user doc is overwritten elsewhere).
+    alreadyLiked = markerSnap.exists || currentlyLiked;
 
     const currentCountRaw = portfolioSnap.data()?.likeCount;
     const currentCount = Number.isFinite(Number(currentCountRaw)) ? Number(currentCountRaw) : 0;
-    likeCount = Math.max(0, currentCount + (liked ? 1 : -1));
+    likeCount = alreadyLiked ? currentCount : Math.max(0, currentCount + 1);
+
+    // If already liked, do not change any data.
+    if (alreadyLiked) {
+      return;
+    }
 
     const userUpdate = {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
-    // Set or delete the nested like flag without overwriting other likes.
-    if (liked) {
-      userUpdate[`likes.${photoId}`] = true;
-    } else {
-      userUpdate[`likes.${photoId}`] = admin.firestore.FieldValue.delete();
-    }
+    // Like is one-way: once true, never deleted.
+    userUpdate[`likes.${photoId}`] = true;
 
     tx.set(userRef, userUpdate, { merge: true });
+
+    tx.set(likeMarkerRef, {
+      uid,
+      photoId,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
 
     tx.set(portfolioRef, {
       likeCount,
@@ -563,7 +577,7 @@ exports.togglePortfolioLike = functions.https.onCall(async (data, context) => {
     }, { merge: true });
   });
 
-  return { success: true, liked, likeCount, photoId };
+  return { success: true, liked, likeCount, photoId, alreadyLiked };
 });
 
 /**
@@ -648,6 +662,31 @@ exports.addPortfolioComment = functions.https.onCall(async (data, context) => {
   });
 
   return { success: true, photoId, commentId: commentRef.id };
+});
+
+/**
+ * Get the current user's likes map.
+ *
+ * Useful when Firestore rules prevent the client from reading `users/{uid}`.
+ */
+exports.getCurrentUserLikes = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const uid = context.auth.uid;
+  const db = admin.firestore();
+  const userSnap = await db.collection('users').doc(uid).get();
+  const userData = userSnap.exists ? (userSnap.data() || {}) : {};
+  const likes = (userData && typeof userData.likes === 'object' && userData.likes) ? userData.likes : {};
+
+  // Normalize to a boolean map only.
+  const out = {};
+  Object.keys(likes).forEach((k) => {
+    if (likes[k] === true) out[k] = true;
+  });
+
+  return { success: true, uid, likes: out };
 });
 
 /**
