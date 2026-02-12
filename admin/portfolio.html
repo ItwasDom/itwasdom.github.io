@@ -363,11 +363,13 @@
 
     async function optimizeThumbnailForUpload(inputFile) {
       // Thumbnail for grid + modal strip: tiny + fast.
-      const MAX_DIM = 480;
-      const TARGET_BYTES = 80 * 1024;
-      const HARD_CAP_BYTES = 180 * 1024;
-      const MIN_QUALITY = 0.45;
-      const START_QUALITY = 0.78;
+      // Slightly larger + higher quality to avoid “blurry grid” previews,
+      // while still staying cheap in Storage/bandwidth.
+      const MAX_DIM = 768;
+      const TARGET_BYTES = 140 * 1024;
+      const HARD_CAP_BYTES = 260 * 1024;
+      const MIN_QUALITY = 0.6;
+      const START_QUALITY = 0.86;
 
       if (!inputFile) throw new Error('missing-file');
       if (isRawLike(inputFile)) throw new Error('raw-not-supported');
@@ -384,7 +386,7 @@
       if (isHeicLike(inputFile)) {
         const converter = await waitForHeic2any(2000);
         if (!converter) throw new Error('heic-convert-unavailable');
-        sourceBlob = await converter({ blob: inputFile, toType: 'image/jpeg', quality: 0.9 });
+        sourceBlob = await converter({ blob: inputFile, toType: 'image/jpeg', quality: 0.92 });
       }
 
       const img = await loadImageFromBlob(sourceBlob);
@@ -412,7 +414,7 @@
       let quality = START_QUALITY;
       let blob = await canvasToBlob(canvas, outType, quality);
       while (blob.size > TARGET_BYTES && quality > MIN_QUALITY) {
-        quality = Math.max(MIN_QUALITY, quality - 0.1);
+        quality = Math.max(MIN_QUALITY, quality - 0.06);
         blob = await canvasToBlob(canvas, outType, quality);
       }
 
@@ -1169,6 +1171,11 @@
           showMessage(
             'errorMessage',
             `❌ Upload failed${errCode ? ' (' + errCode + ')' : ''}. Your browser blocked a Firebase request due to access control checks. This is usually your Google Cloud API key referrer restrictions. Allow these referrers: http://localhost:5500/* and http://127.0.0.1:5500/* (plus https://itwasdom.github.io/*). Also add localhost + 127.0.0.1 to Firebase Auth Authorized domains. ${errMsg ? 'Details: ' + errMsg : ''}`
+          );
+        } else if (errCode === 'storage/unauthorized') {
+          showMessage(
+            'errorMessage',
+            `❌ Upload failed (storage/unauthorized). This is almost always Firebase Storage Rules blocking writes for your user. Update Firebase Console → Storage → Rules to allow write for the admin UID (${ADMIN_UID}) under the /portfolio/ path. ${errMsg ? 'Details: ' + errMsg : ''}`
           );
         } else if (
           isStorage || isCors
