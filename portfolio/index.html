@@ -655,6 +655,29 @@
         height: 38px;
       }
     }
+
+    @media (max-width: 600px) {
+      .portfolio-modal-actions {
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
+      #portfolioModalLikeBtn,
+      #portfolioModalCommentBtn {
+        padding: 10px 12px;
+        gap: 0;
+      }
+
+      #portfolioModalLikeBtn .btn-text,
+      #portfolioModalCommentBtn .btn-text {
+        display: none;
+      }
+
+      #portfolioModalLikeBtn i,
+      #portfolioModalCommentBtn i {
+        font-size: 16px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -733,11 +756,13 @@
 
         <div class="portfolio-modal-actions">
           <span id="portfolioModalLikeCount" class="like-count"></span>
-          <button id="portfolioModalLikeBtn" class="like-btn" type="button">
-            <i class="fas fa-heart" aria-hidden="true"></i> Like
+          <button id="portfolioModalLikeBtn" class="like-btn" type="button" aria-label="Like">
+            <i class="fas fa-heart" aria-hidden="true"></i>
+            <span class="btn-text">Like</span>
           </button>
-          <button id="portfolioModalCommentBtn" class="portfolio-modal-open" type="button">
-            <i class="fas fa-comment" aria-hidden="true"></i> Comment
+          <button id="portfolioModalCommentBtn" class="portfolio-modal-open" type="button" aria-label="Comment">
+            <i class="fas fa-comment" aria-hidden="true"></i>
+            <span class="btn-text">Comment</span>
           </button>
           <a id="portfolioModalOpenImage" class="portfolio-modal-open" href="#" target="_blank" rel="noopener noreferrer">
             <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> Open Image

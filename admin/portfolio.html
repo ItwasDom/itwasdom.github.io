@@ -88,6 +88,12 @@
     .empty-state { text-align: center; padding: 32px 10px; color: #666; }
 
     /* Mobile/iPhone fixes */
+    /* Some mobile browsers can render a "desktop" viewport width; this targets touch devices directly. */
+    @media (hover: none) and (pointer: coarse) {
+      .grid { grid-template-columns: 1fr; }
+      .photo-grid { max-height: none; overflow-y: visible; }
+    }
+
     @media (max-width: 900px) {
       .grid { grid-template-columns: 1fr; }
       .photo-grid { max-height: none; overflow-y: visible; }
