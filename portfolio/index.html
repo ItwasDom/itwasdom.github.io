@@ -266,7 +266,6 @@
         gap: 12px;
       }
 
-      .portfolio-feed-item {
       .portfolio-feed-item img {
         aspect-ratio: 1 / 1;
         height: auto;
@@ -299,6 +298,8 @@
       justify-content: center;
       padding: 22px;
       z-index: 2000;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .portfolio-modal-overlay.open {
@@ -313,16 +314,18 @@
       box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
       overflow: hidden;
       max-height: 90vh;
-      height: min(90vh, 720px);
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
+      height: 90vh;
+      max-height: 720px;
+      display: flex;
+      flex-direction: row;
     }
 
     .portfolio-modal-left {
-      display: flex;
-      flex-direction: column;
       height: 100%;
       min-height: 0;
+      flex: 1.2 1 0;
+      display: grid;
+      grid-template-rows: 1fr auto;
     }
 
     .portfolio-modal-media {
@@ -332,8 +335,8 @@
       justify-content: center;
       min-height: 320px;
       position: relative;
-      flex: 1 1 auto;
       min-height: 0;
+      overflow: hidden;
     }
 
     .portfolio-modal-carousel {
@@ -379,6 +382,8 @@
     .portfolio-modal-slide img {
       width: 100%;
       height: 100%;
+      max-width: 100%;
+      max-height: 100%;
       object-fit: contain;
       display: block;
       user-select: none;
@@ -448,6 +453,8 @@
     .portfolio-modal-body {
       padding: 22px;
       overflow: auto;
+      min-height: 0;
+      flex: 1 1 0;
     }
 
     .portfolio-modal-top {
@@ -511,6 +518,63 @@
       flex-wrap: wrap;
     }
 
+    .portfolio-modal-comments {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(124, 58, 237, 0.18);
+      display: none;
+    }
+
+    .portfolio-modal-comments.open {
+      display: block;
+    }
+
+    .portfolio-modal-comments-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .portfolio-modal-comments textarea {
+      width: 100%;
+      min-height: 84px;
+      resize: vertical;
+      border-radius: 12px;
+      border: 2px solid rgba(124, 58, 237, 0.35);
+      background: rgba(0, 0, 0, 0.18);
+      color: #f0f0f0;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .portfolio-modal-comments-list {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .portfolio-modal-comment {
+      border: 1px solid rgba(124, 58, 237, 0.22);
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: #ddd;
+      white-space: pre-wrap;
+    }
+
+    .portfolio-modal-comment-meta {
+      color: #aaa;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+    }
+
+    .portfolio-modal-comment-status {
+      color: #aaa;
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+
     .portfolio-modal-open {
       display: inline-flex;
       align-items: center;
@@ -529,6 +593,7 @@
         display: flex;
         flex-direction: column;
         height: 90vh;
+        max-height: 90vh;
       }
 
       .portfolio-modal-left {
@@ -629,9 +694,24 @@
 
         <div class="portfolio-modal-actions">
           <span id="portfolioModalLikeCount" class="like-count"></span>
+          <button id="portfolioModalLikeBtn" class="like-btn" type="button">
+            <i class="fas fa-heart" aria-hidden="true"></i> Like
+          </button>
+          <button id="portfolioModalCommentBtn" class="portfolio-modal-open" type="button">
+            <i class="fas fa-comment" aria-hidden="true"></i> Comment
+          </button>
           <a id="portfolioModalOpenImage" class="portfolio-modal-open" href="#" target="_blank" rel="noopener noreferrer">
-            <i class="fas fa-arrow-up-right-from-square"></i> Open Image
+            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> Open Image
           </a>
+        </div>
+
+        <div id="portfolioModalComments" class="portfolio-modal-comments" aria-label="Comments">
+          <div class="portfolio-modal-comments-row">
+            <textarea id="portfolioModalCommentInput" placeholder="Write a comment…"></textarea>
+            <button id="portfolioModalCommentSend" class="portfolio-modal-open" type="button">Post</button>
+          </div>
+          <div id="portfolioModalCommentStatus" class="portfolio-modal-comment-status"></div>
+          <div id="portfolioModalCommentList" class="portfolio-modal-comments-list"></div>
         </div>
       </div>
     </div>
@@ -672,6 +752,7 @@
       let modalCarouselTitle = '';
       let modalCarouselIndex = 0;
       let modalScrollRaf = 0;
+      let modalItemId = '';
 
       function clamp(n, min, max) {
         return Math.min(max, Math.max(min, n));
@@ -685,12 +766,78 @@
           descEl: document.getElementById('portfolioModalDesc'),
           tagsEl: document.getElementById('portfolioModalTags'),
           likeEl: document.getElementById('portfolioModalLikeCount'),
+          likeBtn: document.getElementById('portfolioModalLikeBtn'),
+          commentBtn: document.getElementById('portfolioModalCommentBtn'),
+          commentsPanel: document.getElementById('portfolioModalComments'),
+          commentInput: document.getElementById('portfolioModalCommentInput'),
+          commentSend: document.getElementById('portfolioModalCommentSend'),
+          commentStatus: document.getElementById('portfolioModalCommentStatus'),
+          commentList: document.getElementById('portfolioModalCommentList'),
           openLink: document.getElementById('portfolioModalOpenImage'),
           thumbsEl: document.getElementById('portfolioModalThumbs'),
           prevBtn: document.getElementById('portfolioModalPrev'),
           nextBtn: document.getElementById('portfolioModalNext'),
           closeBtn: document.getElementById('portfolioModalClose'),
         };
+      }
+
+      function formatCommentTime(ts) {
+        try {
+          const d = ts instanceof Date ? ts : null;
+          if (!d) return '';
+          return d.toLocaleString();
+        } catch {
+          return '';
+        }
+      }
+
+      async function loadModalComments() {
+        const { commentStatus, commentList } = getModalEls();
+        if (!commentStatus || !commentList) return;
+        commentStatus.textContent = 'Loading comments…';
+        commentList.innerHTML = '';
+
+        const id = (typeof modalItemId === 'string') ? modalItemId : '';
+        if (!id) {
+          commentStatus.textContent = '';
+          return;
+        }
+
+        try {
+          const snap = await db.collection('portfolio').doc(id).collection('comments')
+            .orderBy('createdAt', 'desc')
+            .limit(20)
+            .get();
+
+          if (snap.empty) {
+            commentStatus.textContent = 'No comments yet.';
+            return;
+          }
+
+          commentStatus.textContent = '';
+          snap.forEach((doc) => {
+            const data = doc.data() || {};
+            const wrap = document.createElement('div');
+            wrap.className = 'portfolio-modal-comment';
+
+            const meta = document.createElement('div');
+            meta.className = 'portfolio-modal-comment-meta';
+            const name = (data && typeof data.displayName === 'string' && data.displayName.trim()) ? data.displayName.trim() : 'User';
+            const createdAt = data && data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : null;
+            const when = createdAt ? formatCommentTime(createdAt) : '';
+            meta.textContent = when ? `${name} • ${when}` : name;
+
+            const body = document.createElement('div');
+            body.textContent = (data && typeof data.text === 'string') ? data.text : '';
+
+            wrap.appendChild(meta);
+            wrap.appendChild(body);
+            commentList.appendChild(wrap);
+          });
+        } catch (err) {
+          console.warn('Comment load failed:', err);
+          commentStatus.textContent = 'Could not load comments right now.';
+        }
       }
 
       function updateModalThumbActive() {
@@ -953,7 +1100,7 @@
       }
 
       function ensurePortfolioModal() {
-        const { overlay, closeBtn, carouselEl, prevBtn, nextBtn } = getModalEls();
+        const { overlay, closeBtn, carouselEl, prevBtn, nextBtn, likeBtn, commentBtn, commentsPanel, commentSend, commentInput, commentStatus } = getModalEls();
         if (!overlay || !closeBtn || !carouselEl || !prevBtn || !nextBtn) return;
 
         if (overlay.getAttribute('data-wired') === 'true') return;
@@ -981,6 +1128,97 @@
 
         prevBtn.addEventListener('click', () => scrollModalToIndex(modalCarouselIndex - 1));
         nextBtn.addEventListener('click', () => scrollModalToIndex(modalCarouselIndex + 1));
+
+        if (likeBtn) {
+          likeBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const id = (typeof modalItemId === 'string') ? modalItemId : '';
+            if (!id) return;
+            if (!currentUser) {
+              window.location.href = '../user/login.html';
+              return;
+            }
+
+            likeBtn.disabled = true;
+            try {
+              const res = await toggleLikeCallable({ photoId: id });
+              const data = res && res.data ? res.data : {};
+              const nextLiked = data.liked === true;
+              const prevLiked = !!(userLikes && userLikes[id] === true);
+              userLikes = { ...(userLikes || {}), [id]: nextLiked };
+              likeBtn.classList.toggle('liked', nextLiked);
+
+              if (Number.isFinite(Number(data.likeCount))) {
+                const n = Number(data.likeCount);
+                const { likeEl } = getModalEls();
+                if (likeEl) likeEl.textContent = `${n.toLocaleString()} like${n === 1 ? '' : 's'}`;
+              }
+
+              if (!prevLiked && nextLiked) {
+                sendLikeNotificationCallable({ photoId: id }).catch((err) => {
+                  console.warn('Like notification failed:', err);
+                });
+              }
+
+              // Re-render grid so the card button state stays in sync.
+              renderPortfolio();
+            } catch (err) {
+              console.error('Modal like failed:', err);
+            } finally {
+              likeBtn.disabled = false;
+            }
+          });
+        }
+
+        if (commentBtn && commentsPanel) {
+          commentBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const open = commentsPanel.classList.toggle('open');
+            if (open) {
+              await loadModalComments();
+              try { if (commentInput) commentInput.focus(); } catch {}
+            }
+          });
+        }
+
+        if (commentSend) {
+          commentSend.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const id = (typeof modalItemId === 'string') ? modalItemId : '';
+            if (!id) return;
+            if (!currentUser) {
+              window.location.href = '../user/login.html';
+              return;
+            }
+
+            const text = commentInput && typeof commentInput.value === 'string' ? commentInput.value.trim() : '';
+            if (!text) return;
+            if (text.length > 500) {
+              if (commentStatus) commentStatus.textContent = 'Comment is too long (max 500 characters).';
+              return;
+            }
+
+            commentSend.disabled = true;
+            if (commentStatus) commentStatus.textContent = 'Posting…';
+            try {
+              const displayName = currentUser && currentUser.displayName ? String(currentUser.displayName) : '';
+              await db.collection('portfolio').doc(id).collection('comments').add({
+                uid: currentUser.uid,
+                displayName,
+                text,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              });
+              if (commentInput) commentInput.value = '';
+              if (commentStatus) commentStatus.textContent = '';
+              await loadModalComments();
+            } catch (err) {
+              console.warn('Comment post failed:', err);
+              if (commentStatus) commentStatus.textContent = 'Could not post comment (permissions may be blocking it).';
+            } finally {
+              commentSend.disabled = false;
+            }
+          });
+        }
 
         // Optional: Shift+wheel scrolls the carousel horizontally (keeps normal vertical scrolling intact).
         carouselEl.addEventListener('wheel', (e) => {
@@ -1050,8 +1288,10 @@
       function openPortfolioModal(item) {
         ensurePortfolioModal();
 
-        const { overlay, titleEl, carouselEl, descEl, tagsEl, likeEl, thumbsEl } = getModalEls();
+        const { overlay, titleEl, carouselEl, descEl, tagsEl, likeEl, likeBtn, thumbsEl, commentsPanel, commentStatus, commentList } = getModalEls();
         if (!overlay || !titleEl || !carouselEl || !descEl || !tagsEl || !likeEl || !thumbsEl) return;
+
+        modalItemId = (item && typeof item.id === 'string') ? item.id : '';
 
         modalCarouselTitle = item && item.title ? String(item.title) : '';
         titleEl.textContent = modalCarouselTitle;
@@ -1148,6 +1388,15 @@
         const n = Number.isFinite(Number(item && item.likeCount)) ? Number(item.likeCount) : 0;
         likeEl.textContent = `${n.toLocaleString()} like${n === 1 ? '' : 's'}`;
 
+        if (likeBtn) {
+          const liked = !!(modalItemId && userLikes && userLikes[modalItemId] === true);
+          likeBtn.classList.toggle('liked', liked);
+        }
+
+        if (commentsPanel) commentsPanel.classList.remove('open');
+        if (commentStatus) commentStatus.textContent = '';
+        if (commentList) commentList.innerHTML = '';
+
         overlay.classList.add('open');
         overlay.setAttribute('aria-hidden', 'false');
         document.documentElement.style.overflow = 'hidden';
@@ -1159,6 +1408,7 @@
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
         document.documentElement.style.overflow = '';
+        modalItemId = '';
       }
 
       function renderPortfolio() {
