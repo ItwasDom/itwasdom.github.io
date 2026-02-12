@@ -238,8 +238,7 @@
       font-size: 0.9rem;
     }
 
-      padding: 9px 14px;
-      font-size: 0.85rem;
+    .logout-btn {
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -252,6 +251,8 @@
       font-weight: 600;
       transition: all 0.3s ease;
       text-decoration: none;
+      white-space: nowrap;
+      flex: 0 0 auto;
     }
 
     .logout-btn:hover {
@@ -420,6 +421,8 @@
       width: 100%;
       justify-content: center;
       cursor: pointer;
+      padding: 9px 14px;
+      font-size: 0.85rem;
     }
 
     .headshot-filename {
@@ -480,7 +483,13 @@
 
       .header-actions {
         width: 100%;
-        justify-content: space-between;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .header-actions .user-info {
+        width: 100%;
       }
 
       .login-box {
@@ -714,7 +723,17 @@
             } catch {}
           } catch (e) {
             console.error('Headshot upload failed:', e);
-            if (status) status.textContent = 'Upload failed. Check console/CSP and try again.';
+            const code = (e && typeof e.code === 'string') ? e.code : '';
+            const msg = (e && typeof e.message === 'string') ? e.message : '';
+            const detail = [code, msg].filter(Boolean).join(': ');
+            if (status) {
+              if (code === 'storage/unauthorized') {
+                const uid = (window.__ADMIN_UID && typeof window.__ADMIN_UID === 'string') ? window.__ADMIN_UID : '(admin UID not set)';
+                status.textContent = `Upload blocked by Firebase Storage Rules (storage/unauthorized). In Firebase Console → Storage → Rules, allow write for UID ${uid} to /siteAssets/**. ${msg ? 'Details: ' + msg : ''}`;
+              } else {
+                status.textContent = detail ? `Upload failed (${detail}).` : 'Upload failed. Check console/CSP and try again.';
+              }
+            }
           } finally {
             uploadBtn.disabled = false;
           }
@@ -736,12 +755,20 @@
           // heic2any may return a Blob or an Array of Blobs
           srcBlob = Array.isArray(converted) ? converted[0] : converted;
         } catch (e) {
-          console.warn('HEIC convert failed, uploading original:', e);
-          srcBlob = file;
+          console.warn('HEIC convert failed:', e);
+          throw new Error('This image looks like HEIC and could not be converted. Please export/save as JPG/PNG and try again.');
         }
+      } else if (looksHeic && !window.heic2any) {
+        throw new Error('This image looks like HEIC but the converter did not load. Please try again on a stronger connection or upload a JPG/PNG.');
       }
 
-      const img = await blobToImage(srcBlob);
+      let img;
+      try {
+        img = await blobToImage(srcBlob);
+      } catch (e) {
+        console.warn('Image decode failed:', e);
+        throw new Error('Could not read this image file. Try a different photo or upload a JPG/PNG.');
+      }
 
       // Resize for web usage. Keep enough for retina displays.
       const maxDim = 900;
