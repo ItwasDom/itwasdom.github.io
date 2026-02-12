@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://apis.google.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com https://*.cloudfunctions.net; frame-src 'self' https://*.firebaseapp.com https://*.google.com https://accounts.google.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://apis.google.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com https://*.cloudfunctions.net; frame-src 'self' https://*.firebaseapp.com https://*.google.com https://accounts.google.com;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portfolio - Dominic Martinez</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
@@ -1174,6 +1174,7 @@
         const thumbUrl = alignedThumbs.length ? alignedThumbs[0] : imageUrl;
         const title = (item && typeof item.title === 'string' && item.title.trim()) ? item.title.trim() : 'Untitled';
         const description = (item && typeof item.description === 'string' && item.description.trim()) ? item.description.trim() : '';
+        const caption = (item && typeof item.caption === 'string' && item.caption.trim()) ? item.caption.trim() : '';
         const category = (item && typeof item.category === 'string' && item.category.trim()) ? item.category.trim() : '';
         const id = (item && typeof item.id === 'string' && item.id.trim()) ? item.id.trim() : '';
         const likeCountRaw = item && item.likeCount;
@@ -1226,9 +1227,10 @@
         h3.textContent = title;
         content.appendChild(h3);
 
-        if (description) {
+        // On the portfolio feed, show the short caption (not the full description).
+        if (caption) {
           const p = document.createElement('p');
-          p.textContent = description;
+          p.textContent = caption;
           content.appendChild(p);
         }
 

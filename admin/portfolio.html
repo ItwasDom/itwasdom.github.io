@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://apis.google.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com; frame-src 'self' https://*.firebaseapp.com https://*.google.com https://accounts.google.com; worker-src 'self' blob:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://apis.google.com https://cdnjs.cloudflare.com; script-src-attr 'none'; connect-src 'self' https://www.gstatic.com https://firestore.googleapis.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.googleapis.com https://*.firebaseio.com https://www.googleapis.com; frame-src 'self' https://*.firebaseapp.com https://*.google.com https://accounts.google.com; worker-src 'self' blob:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Manage Portfolio</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -153,6 +153,10 @@
           <div class="form-group">
             <label for="photoDescription">Description</label>
             <textarea id="photoDescription"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="photoCaption">Button Caption (Homepage)</label>
+            <input type="text" id="photoCaption" maxlength="140" placeholder="Short caption shown under the project button">
           </div>
           <div class="form-group">
             <label for="photoCategory">Category *</label>
@@ -1112,6 +1116,7 @@
       e.preventDefault();
       const titleEl = document.getElementById('photoTitle');
       const catEl = document.getElementById('photoCategory');
+      const captionEl = document.getElementById('photoCaption');
       if (!titleEl || !titleEl.value) {
         showMessage('errorMessage', '❌ Please enter a photo title.');
         return;
@@ -1133,9 +1138,10 @@
         }
         const title = titleEl.value;
         const description = document.getElementById('photoDescription').value;
+        const caption = (captionEl && typeof captionEl.value === 'string') ? captionEl.value.trim() : '';
         const category = catEl.value;
         if (editingPhotoId) {
-          const updateData = { title, description, category };
+          const updateData = { title, description, category, caption };
 
           const needsImageUpdate =
             (Array.isArray(selectedFiles) && selectedFiles.length > 0) ||
@@ -1248,6 +1254,7 @@
           id: photoId,
           title,
           description,
+          caption,
           category,
           imageUrl,
           imageUrls,
@@ -1417,10 +1424,12 @@
         replaceImages = false;
         const titleInput = document.getElementById('photoTitle');
         const descInput = document.getElementById('photoDescription');
+        const captionInput = document.getElementById('photoCaption');
         const categorySelect = document.getElementById('photoCategory');
         const submitBtn = document.getElementById('submitBtn');
         if (titleInput) titleInput.value = photo.title || '';
         if (descInput) descInput.value = photo.description || '';
+        if (captionInput) captionInput.value = photo.caption || '';
         if (categorySelect) categorySelect.value = photo.category || '';
         if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
 
