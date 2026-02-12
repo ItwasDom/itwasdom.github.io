@@ -262,19 +262,18 @@
       }
 
       .portfolio-feed-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
       }
 
       .portfolio-feed-item {
-      }
-
       .portfolio-feed-item img {
-        height: 200px;
+        aspect-ratio: 1 / 1;
+        height: auto;
       }
 
       .portfolio-feed-item:hover img {
-        height: 240px;
+        transform: scale(1.02);
       }
 
       .portfolio-feed-content {
@@ -327,13 +326,67 @@
       position: relative;
     }
 
-    .portfolio-modal-media img {
+    .portfolio-modal-carousel {
+      width: 100%;
+      height: 100%;
+      max-height: 90vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .portfolio-modal-carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .portfolio-modal-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      scroll-snap-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .portfolio-modal-slide img {
       width: 100%;
       height: 100%;
       max-height: 90vh;
       object-fit: contain;
       display: block;
+      user-select: none;
+      -webkit-user-drag: none;
     }
+
+    .portfolio-modal-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      border: 2px solid rgba(124, 58, 237, 0.55);
+      background: rgba(0, 0, 0, 0.35);
+      color: #7C3AED;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .portfolio-modal-nav:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .portfolio-modal-nav.prev { left: 12px; }
+    .portfolio-modal-nav.next { right: 12px; }
 
     .portfolio-modal-thumbs {
       display: flex;
@@ -455,6 +508,11 @@
       .portfolio-modal-body {
         padding: 18px;
       }
+
+      .portfolio-modal-nav {
+        width: 38px;
+        height: 38px;
+      }
     }
   </style>
 </head>
@@ -511,7 +569,13 @@
     <div class="portfolio-modal" role="dialog" aria-modal="true" aria-labelledby="portfolioModalTitle">
       <div>
         <div class="portfolio-modal-media">
-          <img id="portfolioModalImage" alt="" />
+          <button id="portfolioModalPrev" class="portfolio-modal-nav prev" type="button" aria-label="Previous image">
+            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+          </button>
+          <div id="portfolioModalCarousel" class="portfolio-modal-carousel" aria-label="Project images"></div>
+          <button id="portfolioModalNext" class="portfolio-modal-nav next" type="button" aria-label="Next image">
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+          </button>
         </div>
         <div id="portfolioModalThumbs" class="portfolio-modal-thumbs" aria-label="Project images"></div>
       </div>
@@ -565,6 +629,79 @@
       let userLikes = {};
       let isFollowing = false;
       let portfolioItems = [];
+
+      let modalCarouselUrls = [];
+      let modalCarouselThumbs = [];
+      let modalCarouselTitle = '';
+      let modalCarouselIndex = 0;
+      let modalScrollRaf = 0;
+
+      function clamp(n, min, max) {
+        return Math.min(max, Math.max(min, n));
+      }
+
+      function getModalEls() {
+        return {
+          overlay: document.getElementById('portfolioModalOverlay'),
+          titleEl: document.getElementById('portfolioModalTitle'),
+          carouselEl: document.getElementById('portfolioModalCarousel'),
+          descEl: document.getElementById('portfolioModalDesc'),
+          tagsEl: document.getElementById('portfolioModalTags'),
+          likeEl: document.getElementById('portfolioModalLikeCount'),
+          openLink: document.getElementById('portfolioModalOpenImage'),
+          thumbsEl: document.getElementById('portfolioModalThumbs'),
+          prevBtn: document.getElementById('portfolioModalPrev'),
+          nextBtn: document.getElementById('portfolioModalNext'),
+          closeBtn: document.getElementById('portfolioModalClose'),
+        };
+      }
+
+      function updateModalThumbActive() {
+        const { thumbsEl } = getModalEls();
+        if (!thumbsEl) return;
+        const buttons = Array.from(thumbsEl.querySelectorAll('.portfolio-modal-thumb'));
+        buttons.forEach((btn, idx) => btn.classList.toggle('active', idx === modalCarouselIndex));
+      }
+
+      function updateModalNavState() {
+        const { prevBtn, nextBtn, openLink } = getModalEls();
+        const total = Array.isArray(modalCarouselUrls) ? modalCarouselUrls.length : 0;
+        const hasMany = total > 1;
+
+        if (prevBtn) {
+          prevBtn.style.display = hasMany ? '' : 'none';
+          prevBtn.disabled = !hasMany || modalCarouselIndex <= 0;
+        }
+        if (nextBtn) {
+          nextBtn.style.display = hasMany ? '' : 'none';
+          nextBtn.disabled = !hasMany || modalCarouselIndex >= total - 1;
+        }
+
+        if (openLink) {
+          const url = total ? modalCarouselUrls[modalCarouselIndex] : null;
+          if (url) {
+            openLink.href = url;
+            openLink.style.display = '';
+          } else {
+            openLink.href = '#';
+            openLink.style.display = 'none';
+          }
+        }
+
+        updateModalThumbActive();
+      }
+
+      function scrollModalToIndex(nextIndex, behavior = 'smooth') {
+        const { carouselEl } = getModalEls();
+        if (!carouselEl) return;
+        const total = Array.isArray(modalCarouselUrls) ? modalCarouselUrls.length : 0;
+        if (!total) return;
+        const idx = clamp(Number(nextIndex) || 0, 0, total - 1);
+        modalCarouselIndex = idx;
+        const left = carouselEl.clientWidth * idx;
+        carouselEl.scrollTo({ left, top: 0, behavior });
+        updateModalNavState();
+      }
 
       function normalizeHttpUrl(url) {
         if (typeof url !== 'string') return null;
@@ -772,9 +909,8 @@
       }
 
       function ensurePortfolioModal() {
-        const overlay = document.getElementById('portfolioModalOverlay');
-        const closeBtn = document.getElementById('portfolioModalClose');
-        if (!overlay || !closeBtn) return;
+        const { overlay, closeBtn, carouselEl, prevBtn, nextBtn } = getModalEls();
+        if (!overlay || !closeBtn || !carouselEl || !prevBtn || !nextBtn) return;
 
         if (overlay.getAttribute('data-wired') === 'true') return;
         overlay.setAttribute('data-wired', 'true');
@@ -787,24 +923,44 @@
         });
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') close();
+
+          if (!overlay.classList.contains('open')) return;
+          if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            scrollModalToIndex(modalCarouselIndex - 1);
+          }
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            scrollModalToIndex(modalCarouselIndex + 1);
+          }
         });
+
+        prevBtn.addEventListener('click', () => scrollModalToIndex(modalCarouselIndex - 1));
+        nextBtn.addEventListener('click', () => scrollModalToIndex(modalCarouselIndex + 1));
+
+        carouselEl.addEventListener('scroll', () => {
+          if (!overlay.classList.contains('open')) return;
+          if (modalScrollRaf) cancelAnimationFrame(modalScrollRaf);
+          modalScrollRaf = requestAnimationFrame(() => {
+            modalScrollRaf = 0;
+            const w = carouselEl.clientWidth || 1;
+            const idx = clamp(Math.round((carouselEl.scrollLeft || 0) / w), 0, Math.max(0, modalCarouselUrls.length - 1));
+            if (idx !== modalCarouselIndex) {
+              modalCarouselIndex = idx;
+              updateModalNavState();
+            }
+          });
+        }, { passive: true });
       }
 
       function openPortfolioModal(item) {
         ensurePortfolioModal();
 
-        const overlay = document.getElementById('portfolioModalOverlay');
-        const titleEl = document.getElementById('portfolioModalTitle');
-        const imgEl = document.getElementById('portfolioModalImage');
-        const descEl = document.getElementById('portfolioModalDesc');
-        const tagsEl = document.getElementById('portfolioModalTags');
-        const likeEl = document.getElementById('portfolioModalLikeCount');
-        const openLink = document.getElementById('portfolioModalOpenImage');
-        const thumbsEl = document.getElementById('portfolioModalThumbs');
+        const { overlay, titleEl, carouselEl, descEl, tagsEl, likeEl, thumbsEl } = getModalEls();
+        if (!overlay || !titleEl || !carouselEl || !descEl || !tagsEl || !likeEl || !thumbsEl) return;
 
-        if (!overlay || !titleEl || !imgEl || !descEl || !tagsEl || !likeEl || !openLink || !thumbsEl) return;
-
-        titleEl.textContent = item && item.title ? String(item.title) : '';
+        modalCarouselTitle = item && item.title ? String(item.title) : '';
+        titleEl.textContent = modalCarouselTitle;
 
         const urlsRaw = Array.isArray(item && item.imageUrls)
           ? item.imageUrls
@@ -825,18 +981,27 @@
           ? thumbsNorm.slice(0, urls.length)
           : thumbsNorm.concat(urls.slice(thumbsNorm.length));
 
+        modalCarouselUrls = urls;
+        modalCarouselThumbs = thumbs;
+        modalCarouselIndex = 0;
+
+        carouselEl.innerHTML = '';
         thumbsEl.innerHTML = '';
 
-        const selectImage = (idx, title) => {
-          const url = urls[idx];
-          imgEl.src = url;
-          imgEl.alt = title || 'Portfolio image';
-          openLink.href = url;
-          openLink.style.display = '';
-        };
-
         if (urls.length) {
-          selectImage(0, item && item.title ? String(item.title) : 'Portfolio image');
+          urls.forEach((url, idx) => {
+            const slide = document.createElement('div');
+            slide.className = 'portfolio-modal-slide';
+
+            const img = document.createElement('img');
+            img.alt = modalCarouselTitle || 'Portfolio image';
+            img.decoding = 'async';
+            img.loading = idx === 0 ? 'eager' : 'lazy';
+            img.src = url;
+
+            slide.appendChild(img);
+            carouselEl.appendChild(slide);
+          });
 
           urls.forEach((url, idx) => {
             const btn = document.createElement('button');
@@ -851,22 +1016,25 @@
             btn.appendChild(timg);
 
             btn.addEventListener('click', () => {
-              thumbsEl.querySelectorAll('.portfolio-modal-thumb').forEach((el) => el.classList.remove('active'));
-              btn.classList.add('active');
-              selectImage(idx, item && item.title ? String(item.title) : 'Portfolio image');
+              scrollModalToIndex(idx);
             });
 
             thumbsEl.appendChild(btn);
           });
 
           thumbsEl.style.display = urls.length > 1 ? '' : 'none';
+
+          // Ensure we start at the first image.
+          requestAnimationFrame(() => scrollModalToIndex(0, 'auto'));
         } else {
-          imgEl.removeAttribute('src');
-          imgEl.alt = '';
-          openLink.href = '#';
-          openLink.style.display = 'none';
+          carouselEl.innerHTML = '';
           thumbsEl.style.display = 'none';
+          modalCarouselUrls = [];
+          modalCarouselThumbs = [];
+          modalCarouselIndex = 0;
         }
+
+        updateModalNavState();
 
         const desc = item && item.description ? String(item.description) : '';
         descEl.textContent = desc;

@@ -33,6 +33,34 @@
     .inline-check { display: flex; align-items: center; gap: 10px; color: #bbb; font-weight: 600; font-size: 0.9rem; }
     .inline-check input { width: auto; }
     .existing-images { display: flex; gap: 10px; padding: 10px; border-radius: 12px; border: 1px solid rgba(124,58,237,0.25); background: rgba(0,0,0,0.12); overflow-x: auto; }
+
+    .hscroll-wrap { position: relative; width: 100%; }
+    .hscroll-wrap .existing-images { padding-left: 48px; padding-right: 48px; }
+    .hscroll-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 2px solid rgba(124,58,237,0.55);
+      background: rgba(0, 0, 0, 0.35);
+      color: #7C3AED;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .hscroll-btn.prev { left: 8px; }
+    .hscroll-btn.next { right: 8px; }
+    .hscroll-btn:disabled { opacity: 0.4; cursor: default; }
+    .hscroll-wrap[data-hscroll="off"] .hscroll-btn { display: none; }
+
+    @media (max-width: 520px) {
+      .hscroll-wrap .existing-images { padding-left: 44px; padding-right: 44px; }
+      .hscroll-btn { width: 34px; height: 34px; }
+    }
     .existing-image { position: relative; width: 96px; height: 72px; border-radius: 10px; overflow: hidden; border: 2px solid rgba(124,58,237,0.25); background: #0b0b12; flex: 0 0 auto; }
     .existing-image img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.92); }
     .existing-image.removed { opacity: 0.45; border-color: rgba(244, 67, 54, 0.65); }
@@ -84,13 +112,29 @@
           <p>or <span class="highlight">click to browse</span></p>
         </div>
         <input type="file" id="fileInput" multiple accept="image/*,.heic,.HEIC,.dng,.DNG,.cr2,.CR2,.nef,.NEF,.arw,.ARW,.tif,.tiff,.TIF,.TIFF">
-        <div id="selectedImagesPreview" class="existing-images" style="display:none;"></div>
+        <div id="selectedImagesWrap" class="hscroll-wrap" style="display:none;" data-hscroll="off">
+          <button class="hscroll-btn prev" type="button" aria-label="Scroll left">
+            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+          </button>
+          <div id="selectedImagesPreview" class="existing-images"></div>
+          <button class="hscroll-btn next" type="button" aria-label="Scroll right">
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+          </button>
+        </div>
         <div id="fileInfo" class="file-info"></div>
 
         <div id="existingImagesSection" style="display:none;">
           <div class="form-group">
             <label>Current Images</label>
-            <div id="existingImagesList" class="existing-images"></div>
+            <div id="existingImagesWrap" class="hscroll-wrap" data-hscroll="off">
+              <button class="hscroll-btn prev" type="button" aria-label="Scroll left">
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+              </button>
+              <div id="existingImagesList" class="existing-images"></div>
+              <button class="hscroll-btn next" type="button" aria-label="Scroll right">
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
             <div id="existingImagesInfo" class="file-info"></div>
           </div>
           <div class="form-group">
@@ -485,8 +529,9 @@
     }
 
     function renderSelectedImagesPreview() {
+      const outer = document.getElementById('selectedImagesWrap');
       const wrap = document.getElementById('selectedImagesPreview');
-      if (!wrap) return;
+      if (!outer || !wrap) return;
       const files = Array.isArray(selectedFiles) ? selectedFiles.filter(Boolean) : [];
 
       selectedPreviewRenderToken += 1;
@@ -495,11 +540,13 @@
       clearElement(wrap);
 
       if (files.length === 0) {
-        wrap.style.display = 'none';
+        outer.style.display = 'none';
+        updateHorizontalScroller('selectedImagesWrap');
         return;
       }
 
-      wrap.style.display = '';
+      outer.style.display = '';
+      wrap.scrollLeft = 0;
       files.forEach((file, idx) => {
         const card = document.createElement('div');
         card.className = 'existing-image';
@@ -566,6 +613,8 @@
 
         wrap.appendChild(card);
       });
+
+      updateHorizontalScroller('selectedImagesWrap');
     }
 
     function updateFileInfoText() {
@@ -720,6 +769,8 @@
       const mode = replaceImages ? 'Replace mode: existing images will be replaced on save.' : 'Add mode: selected images will be appended on save.';
       const remainingSlots = replaceImages ? 10 : Math.max(0, 10 - kept);
       infoEl.textContent = `${mode} Current: ${urls.length}. Keeping: ${kept}. Removed: ${replaceImages ? urls.length : removed}. You can add up to ${remainingSlots} more.`;
+
+      updateHorizontalScroller('existingImagesWrap');
     }
 
     function reconcileSelectionLimit() {
@@ -821,6 +872,51 @@
       setTimeout(() => el.classList.remove('show'), 4000);
     }
 
+    function wireHorizontalScroller(wrapId, scrollerId) {
+      const wrap = document.getElementById(wrapId);
+      const scroller = document.getElementById(scrollerId);
+      if (!wrap || !scroller) return;
+      if (wrap.getAttribute('data-wired') === 'true') return;
+      wrap.setAttribute('data-wired', 'true');
+
+      const prevBtn = wrap.querySelector('.hscroll-btn.prev');
+      const nextBtn = wrap.querySelector('.hscroll-btn.next');
+      if (!prevBtn || !nextBtn) return;
+
+      const update = () => {
+        const canScroll = scroller.scrollWidth > (scroller.clientWidth + 6);
+        wrap.setAttribute('data-hscroll', canScroll ? 'on' : 'off');
+        if (!canScroll) {
+          prevBtn.disabled = true;
+          nextBtn.disabled = true;
+          return;
+        }
+        const left = scroller.scrollLeft || 0;
+        const maxLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+        prevBtn.disabled = left <= 1;
+        nextBtn.disabled = left >= (maxLeft - 1);
+      };
+
+      const scrollByAmount = (dir) => {
+        const amount = Math.max(120, Math.floor((scroller.clientWidth || 0) * 0.9));
+        scroller.scrollBy({ left: dir * amount, top: 0, behavior: 'smooth' });
+      };
+
+      prevBtn.addEventListener('click', () => scrollByAmount(-1));
+      nextBtn.addEventListener('click', () => scrollByAmount(1));
+      scroller.addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
+      window.addEventListener('resize', () => requestAnimationFrame(update));
+
+      wrap._hscrollUpdate = update;
+      requestAnimationFrame(update);
+    }
+
+    function updateHorizontalScroller(wrapId) {
+      const wrap = document.getElementById(wrapId);
+      const fn = wrap && wrap._hscrollUpdate;
+      if (typeof fn === 'function') requestAnimationFrame(fn);
+    }
+
     function logout() {
       auth.signOut().then(() => {
         window.location.href = 'dashboard.html';
@@ -844,6 +940,9 @@
       const logoutBtn = document.getElementById('logoutBtn');
       const clearBtn = document.getElementById('clearBtn');
       const replaceCheckbox = document.getElementById('replaceImagesCheckbox');
+
+      wireHorizontalScroller('selectedImagesWrap', 'selectedImagesPreview');
+      wireHorizontalScroller('existingImagesWrap', 'existingImagesList');
 
       if (backBtn) {
         backBtn.addEventListener('click', () => {
