@@ -838,6 +838,41 @@
         }
       }
 
+      function syncModalLikeVisual() {
+        const { overlay, likeBtn } = getModalEls();
+        if (!overlay || !likeBtn) return;
+        if (!overlay.classList.contains('open')) return;
+        if (!modalItemId) return;
+        const liked = !!(modalItemId && userLikes && userLikes[modalItemId] === true);
+        setLikeButtonVisual(likeBtn, liked);
+      }
+
+      function setUserLikes(next, uidForCache) {
+        userLikes = (next && typeof next === 'object') ? next : {};
+        if (uidForCache) saveLikesCache(uidForCache, userLikes);
+        renderPortfolio();
+        syncModalLikeVisual();
+      }
+
+      function hydrateLikesFromCallableWithRetry(uid, attempt = 1) {
+        if (!currentUser || !uid) return;
+        getCurrentUserLikesCallable({}).then((res) => {
+          const data = res && res.data ? res.data : {};
+          if (data && typeof data.likes === 'object' && data.likes) {
+            setUserLikes(data.likes, uid);
+          }
+        }).catch((e) => {
+          const code = (e && typeof e.code === 'string') ? e.code : '';
+          // Sometimes on refresh the auth user exists but the ID token isn't ready yet.
+          // Retry a couple of times so the UI reliably shows liked state.
+          if (attempt < 3 && (code.includes('unauthenticated') || code.includes('auth') || code.includes('internal'))) {
+            setTimeout(() => hydrateLikesFromCallableWithRetry(uid, attempt + 1), 500 * attempt);
+            return;
+          }
+          console.warn('getCurrentUserLikes failed:', e);
+        });
+      }
+
       function setLikeButtonVisual(btn, liked) {
         if (!btn) return;
         const isLiked = liked === true;
@@ -851,6 +886,7 @@
         if (typeof nextLiked === 'boolean') {
           userLikes = { ...(userLikes || {}), [id]: nextLiked };
           if (currentUser && currentUser.uid) saveLikesCache(currentUser.uid, userLikes);
+          syncModalLikeVisual();
         }
 
         if (Number.isFinite(Number(nextLikeCount))) {
@@ -1775,11 +1811,9 @@
       function subscribeCurrentUserDoc(uid) {
         return db.collection('users').doc(uid).onSnapshot((doc) => {
           const data = doc.exists ? doc.data() : {};
-          userLikes = (data && typeof data.likes === 'object' && data.likes) ? data.likes : {};
-          saveLikesCache(uid, userLikes);
+          setUserLikes((data && typeof data.likes === 'object' && data.likes) ? data.likes : {}, uid);
           isFollowing = data && data.isFollowingDominic === true;
           setFollowButtonState();
-          renderPortfolio();
         }, (err) => {
           console.error('User doc subscription error:', err);
 
@@ -1787,16 +1821,7 @@
           // UI still knows which posts are already liked.
           const code = (err && typeof err.code === 'string') ? err.code : '';
           if (code.includes('permission-denied') || code.includes('PERMISSION_DENIED')) {
-            getCurrentUserLikesCallable({}).then((res) => {
-              const data = res && res.data ? res.data : {};
-              if (data && typeof data.likes === 'object' && data.likes) {
-                userLikes = data.likes;
-                saveLikesCache(uid, userLikes);
-                renderPortfolio();
-              }
-            }).catch((e) => {
-              console.warn('getCurrentUserLikes fallback failed:', e);
-            });
+            hydrateLikesFromCallableWithRetry(uid);
           }
         });
       }
@@ -1821,23 +1846,13 @@
           if (currentUser) {
             // Hydrate cached likes immediately so the UI shows "Liked" on refresh
             // even before network calls resolve.
-            userLikes = loadLikesCache(currentUser.uid);
-            renderPortfolio();
+            setUserLikes(loadLikesCache(currentUser.uid), currentUser.uid);
 
             unsubscribeUser = subscribeCurrentUserDoc(currentUser.uid);
 
             // Also pull likes via callable once on sign-in to ensure like state
             // is correct even before the Firestore user doc snapshot arrives.
-            getCurrentUserLikesCallable({}).then((res) => {
-              const data = res && res.data ? res.data : {};
-              if (data && typeof data.likes === 'object' && data.likes) {
-                userLikes = data.likes;
-                saveLikesCache(currentUser.uid, userLikes);
-                renderPortfolio();
-              }
-            }).catch(() => {
-              // Silent: Firestore subscription may still provide likes.
-            });
+            hydrateLikesFromCallableWithRetry(currentUser.uid);
           } else {
             renderPortfolio();
           }
