@@ -656,25 +656,18 @@
       }
     }
 
+    /* Mobile: make feed post action buttons icon-only (modal keeps labels). */
     @media (max-width: 600px) {
-      .portfolio-modal-actions {
-        justify-content: flex-start;
-        gap: 8px;
-      }
-
-      #portfolioModalLikeBtn,
-      #portfolioModalCommentBtn {
-        padding: 10px 12px;
+      .portfolio-feed-content .like-row .like-btn {
+        padding: 8px 10px;
         gap: 0;
       }
 
-      #portfolioModalLikeBtn .btn-text,
-      #portfolioModalCommentBtn .btn-text {
+      .portfolio-feed-content .like-row .like-btn .btn-text {
         display: none;
       }
 
-      #portfolioModalLikeBtn i,
-      #portfolioModalCommentBtn i {
+      .portfolio-feed-content .like-row .like-btn i {
         font-size: 16px;
       }
     }
@@ -914,7 +907,7 @@
         if (!btn) return;
         const isLiked = liked === true;
         btn.classList.toggle('liked', isLiked);
-        btn.innerHTML = `<i class="fas fa-heart" aria-hidden="true"></i> ${isLiked ? 'Liked' : 'Like'}`;
+        btn.innerHTML = `<i class="fas fa-heart" aria-hidden="true"></i> <span class="btn-text">${isLiked ? 'Liked' : 'Like'}</span>`;
       }
 
       function applyLocalLikeUpdate(photoId, nextLiked, nextLikeCount) {
@@ -1362,7 +1355,7 @@
         const commentBtn = document.createElement('button');
         commentBtn.className = 'like-btn';
         commentBtn.type = 'button';
-        commentBtn.innerHTML = '<i class="fas fa-comment"></i> Comment';
+        commentBtn.innerHTML = '<i class="fas fa-comment" aria-hidden="true"></i> <span class="btn-text">Comment</span>';
         commentBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
