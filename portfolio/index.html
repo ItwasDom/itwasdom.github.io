@@ -705,6 +705,8 @@
           </a>
         </div>
 
+        <div id="portfolioModalActionStatus" class="portfolio-modal-comment-status" aria-live="polite"></div>
+
         <div id="portfolioModalComments" class="portfolio-modal-comments" aria-label="Comments">
           <div class="portfolio-modal-comments-row">
             <textarea id="portfolioModalCommentInput" placeholder="Write a comment…"></textarea>
@@ -741,6 +743,8 @@
       const setFollowingCallable = fns.httpsCallable('setFollowingDominic');
       const sendLikeNotificationCallable = fns.httpsCallable('sendLikeNotification');
       const sendFollowNotificationCallable = fns.httpsCallable('sendFollowNotification');
+      const listCommentsCallable = fns.httpsCallable('listPortfolioComments');
+      const addCommentCallable = fns.httpsCallable('addPortfolioComment');
 
       let currentUser = null;
       let userLikes = {};
@@ -753,6 +757,24 @@
       let modalCarouselIndex = 0;
       let modalScrollRaf = 0;
       let modalItemId = '';
+
+      function applyLocalLikeUpdate(photoId, nextLiked, nextLikeCount) {
+        const id = typeof photoId === 'string' ? photoId : '';
+        if (!id) return;
+        if (typeof nextLiked === 'boolean') {
+          userLikes = { ...(userLikes || {}), [id]: nextLiked };
+        }
+
+        if (Number.isFinite(Number(nextLikeCount))) {
+          const n = Number(nextLikeCount);
+          if (Array.isArray(portfolioItems)) {
+            portfolioItems = portfolioItems.map((it) => {
+              if (!it || it.id !== id) return it;
+              return { ...it, likeCount: n };
+            });
+          }
+        }
+      }
 
       function clamp(n, min, max) {
         return Math.min(max, Math.max(min, n));
@@ -768,6 +790,7 @@
           likeEl: document.getElementById('portfolioModalLikeCount'),
           likeBtn: document.getElementById('portfolioModalLikeBtn'),
           commentBtn: document.getElementById('portfolioModalCommentBtn'),
+          actionStatus: document.getElementById('portfolioModalActionStatus'),
           commentsPanel: document.getElementById('portfolioModalComments'),
           commentInput: document.getElementById('portfolioModalCommentInput'),
           commentSend: document.getElementById('portfolioModalCommentSend'),
@@ -804,31 +827,29 @@
         }
 
         try {
-          const snap = await db.collection('portfolio').doc(id).collection('comments')
-            .orderBy('createdAt', 'desc')
-            .limit(20)
-            .get();
+          const res = await listCommentsCallable({ photoId: id, limit: 20 });
+          const data = res && res.data ? res.data : {};
+          const comments = Array.isArray(data.comments) ? data.comments : [];
 
-          if (snap.empty) {
+          if (comments.length === 0) {
             commentStatus.textContent = 'No comments yet.';
             return;
           }
 
           commentStatus.textContent = '';
-          snap.forEach((doc) => {
-            const data = doc.data() || {};
+          comments.forEach((c) => {
             const wrap = document.createElement('div');
             wrap.className = 'portfolio-modal-comment';
 
             const meta = document.createElement('div');
             meta.className = 'portfolio-modal-comment-meta';
-            const name = (data && typeof data.displayName === 'string' && data.displayName.trim()) ? data.displayName.trim() : 'User';
-            const createdAt = data && data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : null;
-            const when = createdAt ? formatCommentTime(createdAt) : '';
+            const name = (c && typeof c.displayName === 'string' && c.displayName.trim()) ? c.displayName.trim() : 'User';
+            const createdAtMs = Number.isFinite(Number(c && c.createdAt)) ? Number(c.createdAt) : 0;
+            const when = createdAtMs ? formatCommentTime(new Date(createdAtMs)) : '';
             meta.textContent = when ? `${name} • ${when}` : name;
 
             const body = document.createElement('div');
-            body.textContent = (data && typeof data.text === 'string') ? data.text : '';
+            body.textContent = (c && typeof c.text === 'string') ? c.text : '';
 
             wrap.appendChild(meta);
             wrap.appendChild(body);
@@ -836,7 +857,14 @@
           });
         } catch (err) {
           console.warn('Comment load failed:', err);
-          commentStatus.textContent = 'Could not load comments right now.';
+          const code = (err && typeof err.code === 'string') ? err.code : '';
+          if (code.includes('permission-denied')) {
+            commentStatus.textContent = 'Comments are blocked (Cloud Functions permission/App Check).';
+          } else if (code.includes('not-found')) {
+            commentStatus.textContent = 'Comments service not deployed yet.';
+          } else {
+            commentStatus.textContent = 'Could not load comments right now.';
+          }
         }
       }
 
@@ -965,13 +993,13 @@
         const likeCount = Number.isFinite(Number(likeCountRaw)) ? Number(likeCountRaw) : 0;
         const liked = !!(id && userLikes && userLikes[id] === true);
 
-        const a = document.createElement('a');
-        a.className = 'portfolio-feed-item';
-        a.setAttribute('aria-label', title);
+        const card = document.createElement('div');
+        card.className = 'portfolio-feed-item';
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-label', title);
 
-        a.href = '#';
-        a.addEventListener('click', (e) => {
-          e.preventDefault();
+        const open = (opts = {}) => {
           openPortfolioModal({
             id,
             title,
@@ -981,7 +1009,20 @@
             imageUrls,
             thumbUrls: alignedThumbs,
             likeCount,
+            openComments: opts.openComments === true,
           });
+        };
+
+        card.addEventListener('click', (e) => {
+          e.preventDefault();
+          open();
+        });
+
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            open();
+          }
         });
 
         const img = document.createElement('img');
@@ -989,7 +1030,7 @@
         img.decoding = 'async';
         img.alt = title;
         if (thumbUrl) img.src = thumbUrl;
-        a.appendChild(img);
+        card.appendChild(img);
 
         const content = document.createElement('div');
         content.className = 'portfolio-feed-content';
@@ -1041,7 +1082,7 @@
             const data = res && res.data ? res.data : {};
             const nextLiked = data.liked === true;
             const prevLiked = !!(userLikes && userLikes[id] === true);
-            userLikes = { ...(userLikes || {}), [id]: nextLiked };
+            applyLocalLikeUpdate(id, nextLiked, data.likeCount);
             btn.classList.toggle('liked', nextLiked);
             if (Number.isFinite(Number(data.likeCount))) {
               const n = Number(data.likeCount);
@@ -1054,6 +1095,9 @@
                 console.warn('Like notification failed:', err);
               });
             }
+
+            // Keep the grid consistent immediately.
+            renderPortfolio();
           } catch (err) {
             console.error('Like toggle failed:', err);
           } finally {
@@ -1061,10 +1105,21 @@
           }
         });
         likeRow.appendChild(btn);
+
+        const commentBtn = document.createElement('button');
+        commentBtn.className = 'like-btn';
+        commentBtn.type = 'button';
+        commentBtn.innerHTML = '<i class="fas fa-comment"></i> Comment';
+        commentBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          open({ openComments: true });
+        });
+        likeRow.appendChild(commentBtn);
         content.appendChild(likeRow);
 
-        a.appendChild(content);
-        return a;
+        card.appendChild(content);
+        return card;
       }
 
       function createComingSoonCard() {
@@ -1100,7 +1155,7 @@
       }
 
       function ensurePortfolioModal() {
-        const { overlay, closeBtn, carouselEl, prevBtn, nextBtn, likeBtn, commentBtn, commentsPanel, commentSend, commentInput, commentStatus } = getModalEls();
+        const { overlay, closeBtn, carouselEl, prevBtn, nextBtn, likeBtn, commentBtn, commentsPanel, commentSend, commentInput, commentStatus, actionStatus } = getModalEls();
         if (!overlay || !closeBtn || !carouselEl || !prevBtn || !nextBtn) return;
 
         if (overlay.getAttribute('data-wired') === 'true') return;
@@ -1132,6 +1187,7 @@
         if (likeBtn) {
           likeBtn.addEventListener('click', async (e) => {
             e.preventDefault();
+            if (actionStatus) actionStatus.textContent = '';
             const id = (typeof modalItemId === 'string') ? modalItemId : '';
             if (!id) return;
             if (!currentUser) {
@@ -1145,7 +1201,7 @@
               const data = res && res.data ? res.data : {};
               const nextLiked = data.liked === true;
               const prevLiked = !!(userLikes && userLikes[id] === true);
-              userLikes = { ...(userLikes || {}), [id]: nextLiked };
+              applyLocalLikeUpdate(id, nextLiked, data.likeCount);
               likeBtn.classList.toggle('liked', nextLiked);
 
               if (Number.isFinite(Number(data.likeCount))) {
@@ -1164,6 +1220,16 @@
               renderPortfolio();
             } catch (err) {
               console.error('Modal like failed:', err);
+              const code = (err && typeof err.code === 'string') ? err.code : '';
+              if (code.includes('unauthenticated')) {
+                if (actionStatus) actionStatus.textContent = 'Please log in again to like.';
+              } else if (code.includes('permission-denied')) {
+                if (actionStatus) actionStatus.textContent = 'Likes are blocked (Cloud Functions permission/App Check).';
+              } else if (code.includes('not-found')) {
+                if (actionStatus) actionStatus.textContent = 'Like service not deployed yet.';
+              } else {
+                if (actionStatus) actionStatus.textContent = 'Could not like right now. Please try again.';
+              }
             } finally {
               likeBtn.disabled = false;
             }
@@ -1201,19 +1267,22 @@
             commentSend.disabled = true;
             if (commentStatus) commentStatus.textContent = 'Posting…';
             try {
-              const displayName = currentUser && currentUser.displayName ? String(currentUser.displayName) : '';
-              await db.collection('portfolio').doc(id).collection('comments').add({
-                uid: currentUser.uid,
-                displayName,
-                text,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-              });
+              await addCommentCallable({ photoId: id, text });
               if (commentInput) commentInput.value = '';
               if (commentStatus) commentStatus.textContent = '';
               await loadModalComments();
             } catch (err) {
               console.warn('Comment post failed:', err);
-              if (commentStatus) commentStatus.textContent = 'Could not post comment (permissions may be blocking it).';
+              const code = (err && typeof err.code === 'string') ? err.code : '';
+              if (code.includes('unauthenticated')) {
+                if (commentStatus) commentStatus.textContent = 'Please log in again to comment.';
+              } else if (code.includes('permission-denied')) {
+                if (commentStatus) commentStatus.textContent = 'Comments are blocked (Cloud Functions permission/App Check).';
+              } else if (code.includes('not-found')) {
+                if (commentStatus) commentStatus.textContent = 'Comments service not deployed yet.';
+              } else {
+                if (commentStatus) commentStatus.textContent = 'Could not post comment right now.';
+              }
             } finally {
               commentSend.disabled = false;
             }
@@ -1288,7 +1357,7 @@
       function openPortfolioModal(item) {
         ensurePortfolioModal();
 
-        const { overlay, titleEl, carouselEl, descEl, tagsEl, likeEl, likeBtn, thumbsEl, commentsPanel, commentStatus, commentList } = getModalEls();
+        const { overlay, titleEl, carouselEl, descEl, tagsEl, likeEl, likeBtn, thumbsEl, commentsPanel, commentStatus, commentList, actionStatus } = getModalEls();
         if (!overlay || !titleEl || !carouselEl || !descEl || !tagsEl || !likeEl || !thumbsEl) return;
 
         modalItemId = (item && typeof item.id === 'string') ? item.id : '';
@@ -1396,10 +1465,16 @@
         if (commentsPanel) commentsPanel.classList.remove('open');
         if (commentStatus) commentStatus.textContent = '';
         if (commentList) commentList.innerHTML = '';
+        if (actionStatus) actionStatus.textContent = '';
 
         overlay.classList.add('open');
         overlay.setAttribute('aria-hidden', 'false');
         document.documentElement.style.overflow = 'hidden';
+
+        if (commentsPanel && item && item.openComments === true) {
+          commentsPanel.classList.add('open');
+          loadModalComments();
+        }
       }
 
       function closePortfolioModal() {

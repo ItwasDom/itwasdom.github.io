@@ -567,6 +567,90 @@ exports.togglePortfolioLike = functions.https.onCall(async (data, context) => {
 });
 
 /**
+ * List recent comments for a portfolio item.
+ *
+ * Uses Admin SDK so clients don't need broad Firestore read rules.
+ * This callable does NOT require auth to read comments.
+ */
+exports.listPortfolioComments = functions.https.onCall(async (data) => {
+  const photoId = typeof data?.photoId === 'string' ? data.photoId.trim() : '';
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(photoId)) {
+    throw new functions.https.HttpsError('invalid-argument', 'Valid photoId is required');
+  }
+
+  const limitRaw = Number(data?.limit);
+  const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(50, Math.floor(limitRaw))) : 20;
+
+  const db = admin.firestore();
+  const portfolioRef = db.collection('portfolio').doc(photoId);
+  const snap = await portfolioRef.get();
+  if (!snap.exists) {
+    throw new functions.https.HttpsError('not-found', 'Portfolio item not found');
+  }
+
+  const commentsSnap = await portfolioRef.collection('comments')
+    .orderBy('createdAt', 'desc')
+    .limit(limit)
+    .get();
+
+  const comments = commentsSnap.docs.map((d) => {
+    const c = d.data() || {};
+    return {
+      id: d.id,
+      uid: typeof c.uid === 'string' ? c.uid : '',
+      displayName: typeof c.displayName === 'string' ? c.displayName : '',
+      text: typeof c.text === 'string' ? c.text : '',
+      createdAt: c.createdAt && typeof c.createdAt.toMillis === 'function' ? c.createdAt.toMillis() : 0,
+    };
+  });
+
+  return { success: true, photoId, comments };
+});
+
+/**
+ * Add a comment to a portfolio item.
+ *
+ * Uses Admin SDK so clients don't need Firestore write rules for comments.
+ */
+exports.addPortfolioComment = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const photoId = typeof data?.photoId === 'string' ? data.photoId.trim() : '';
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(photoId)) {
+    throw new functions.https.HttpsError('invalid-argument', 'Valid photoId is required');
+  }
+
+  const text = typeof data?.text === 'string' ? data.text.trim() : '';
+  if (!text) {
+    throw new functions.https.HttpsError('invalid-argument', 'Comment text is required');
+  }
+  if (text.length > 500) {
+    throw new functions.https.HttpsError('invalid-argument', 'Comment must be 500 characters or fewer');
+  }
+
+  const uid = context.auth.uid;
+  const displayName = typeof context.auth.token?.name === 'string' ? context.auth.token.name : '';
+
+  const db = admin.firestore();
+  const portfolioRef = db.collection('portfolio').doc(photoId);
+  const portfolioSnap = await portfolioRef.get();
+  if (!portfolioSnap.exists) {
+    throw new functions.https.HttpsError('not-found', 'Portfolio item not found');
+  }
+
+  const commentRef = await portfolioRef.collection('comments').add({
+    uid,
+    displayName,
+    text,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return { success: true, photoId, commentId: commentRef.id };
+});
+
+/**
  * Set whether the current user follows Dominic.
  * Updates users/{uid}.isFollowingDominic and profile/dominic.followers.
  */
