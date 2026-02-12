@@ -239,6 +239,9 @@
     }
 
     .logout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       padding: 10px 20px;
       background: transparent;
       color: #7C3AED;
@@ -247,6 +250,7 @@
       cursor: pointer;
       font-weight: 600;
       transition: all 0.3s ease;
+      text-decoration: none;
     }
 
     .logout-btn:hover {
@@ -476,6 +480,9 @@
         <div class="logo">📸 Admin Dashboard</div>
         <div class="header-actions">
           <div class="user-info">Admin User</div>
+          <a class="logout-btn" href="../index.html">
+            <i class="fas fa-home"></i> Home
+          </a>
           <button class="logout-btn" id="logoutBtn" type="button">Logout</button>
         </div>
       </div>

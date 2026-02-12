@@ -1155,15 +1155,27 @@
         loadPhotos();
       } catch (err) {
         console.error('Upload error:', err);
+        const errCode = (err && typeof err.code === 'string') ? err.code : '';
+        const errMsg = (err && typeof err.message === 'string') ? err.message : '';
+        const msgLower = errMsg.toLowerCase();
+        const isAccessControl = msgLower.includes('access control checks');
+        const isCors = /\bcors\b|preflight/i.test(errMsg);
+        const isStorage = (errCode && errCode.startsWith('storage/')) || /firebasestorage\.googleapis\.com|storage\.googleapis\.com/i.test(errMsg);
+
         if (err.code === 'permission-denied') {
           showMessage('errorMessage', '❌ You are not allowed to modify portfolio items.');
+        } else if (isAccessControl) {
+          // This is almost always API key HTTP referrer restrictions (GCP) blocking localhost.
+          showMessage(
+            'errorMessage',
+            `❌ Upload failed${errCode ? ' (' + errCode + ')' : ''}. Your browser blocked a Firebase request due to access control checks. This is usually your Google Cloud API key referrer restrictions. Allow these referrers: http://localhost:5500/* and http://127.0.0.1:5500/* (plus https://itwasdom.github.io/*). Also add localhost + 127.0.0.1 to Firebase Auth Authorized domains. ${errMsg ? 'Details: ' + errMsg : ''}`
+          );
         } else if (
-          (err && typeof err.code === 'string' && err.code.startsWith('storage/')) ||
-          (err && typeof err.message === 'string' && /CORS|preflight|access control checks/i.test(err.message))
+          isStorage || isCors
         ) {
           showMessage(
             'errorMessage',
-            '❌ Upload failed. If you are running locally in Safari, this is often Firebase Storage CORS. See STORAGE_CORS_SETUP.md and make sure your API key + Authorized domains allow 127.0.0.1/localhost.'
+            `❌ Upload failed${errCode ? ' (' + errCode + ')' : ''}. If you are running locally, this is often Firebase Storage CORS or blocked API key referrers. Check STORAGE_CORS_SETUP.md and make sure your API key allowlist includes http://localhost:5500/* and http://127.0.0.1:5500/* and that Firebase Auth Authorized domains include localhost/127.0.0.1. ${errMsg ? 'Details: ' + errMsg : ''}`
           );
         } else {
           showMessage('errorMessage', '❌ Error uploading photo: ' + (err.message || 'Please try again.'));
