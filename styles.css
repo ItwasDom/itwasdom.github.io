@@ -247,7 +247,7 @@ header .logo {
 #hero {
   height: 65vh;
   min-height: 600px;
-  background: linear-gradient(135deg, rgba(2, 2, 18, 0.7) 0%, rgba(15, 10, 26, 0.8) 100%), url("https://source.unsplash.com/1600x900/?landscape") no-repeat center center/cover;
+  background: linear-gradient(135deg, rgba(2, 2, 18, 0.7) 0%, rgba(15, 10, 26, 0.8) 100%);
   display: flex;
   justify-content: center;
   align-items: center;
