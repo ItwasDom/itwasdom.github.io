@@ -124,19 +124,8 @@
     <div class="container">
       <h2 id="homePortfolioTitle">Portfolio</h2>
       <p id="homePortfolioIntro" style="margin-bottom: 40px;">Explore my latest work in photography and cinematography.</p>
-      <div class="portfolio-grid">
-        <a href="portfolio/index.html" class="portfolio-item" aria-label="View full portfolio">
-          <div class="portfolio-content">
-            <h3>New work coming soon</h3>
-            <p>Browse the live portfolio feed to see the latest posts.</p>
-            <div class="portfolio-tags">
-              <span>Portrait</span>
-              <span>Landscape</span>
-              <span>More</span>
-            </div>
-          </div>
-        </a>
-      </div>
+      <div id="homePortfolioPreviewStatus" class="home-portfolio-preview-status">Loading projects…</div>
+      <div id="homePortfolioPreviewGrid" class="home-portfolio-preview-grid" aria-label="Latest portfolio projects"></div>
       <div style="text-align: center; margin-top: 60px;">
         <a href="portfolio/index.html" class="portfolio-view-btn">
           <i class="fas fa-images"></i> <span id="homePortfolioViewButtonText">View Full Portfolio</span>
@@ -332,6 +321,57 @@
           setText('homeCtaButtonText', data.ctaButtonText);
         } catch (err) {
           console.error('Error loading home page content:', err);
+        }
+
+        // Home portfolio preview (latest up to 6)
+        try {
+          const statusEl = document.getElementById('homePortfolioPreviewStatus');
+          const gridEl = document.getElementById('homePortfolioPreviewGrid');
+          if (!statusEl || !gridEl) return;
+
+          statusEl.textContent = 'Loading projects…';
+          gridEl.innerHTML = '';
+
+          db.collection('portfolio')
+            .orderBy('createdAt', 'desc')
+            .limit(6)
+            .onSnapshot((snap) => {
+              const items = [];
+              snap.forEach((doc) => items.push({ id: doc.id, ...(doc.data() || {}) }));
+
+              gridEl.innerHTML = '';
+              if (!items.length) {
+                statusEl.textContent = 'No projects yet. Check back soon.';
+                return;
+              }
+
+              statusEl.textContent = '';
+              items.forEach((it) => {
+                const title = (it && typeof it.title === 'string' && it.title.trim()) ? it.title.trim() : 'Untitled project';
+                const a = document.createElement('a');
+                a.href = `portfolio/index.html?open=${encodeURIComponent(it && it.id ? String(it.id) : '')}`;
+                a.className = 'home-portfolio-preview-btn';
+                a.setAttribute('aria-label', `View portfolio: ${title}`);
+
+                const span = document.createElement('span');
+                span.className = 'home-portfolio-preview-title';
+                span.textContent = title;
+                a.appendChild(span);
+
+                const arrow = document.createElement('span');
+                arrow.className = 'home-portfolio-preview-arrow';
+                arrow.innerHTML = '<i class="fas fa-arrow-right"></i>';
+                a.appendChild(arrow);
+
+                gridEl.appendChild(a);
+              });
+            }, (err) => {
+              console.error('Error loading portfolio preview:', err);
+              statusEl.textContent = 'Could not load projects right now.';
+              gridEl.innerHTML = '';
+            });
+        } catch (err) {
+          console.error('Error wiring portfolio preview:', err);
         }
       });
     })();

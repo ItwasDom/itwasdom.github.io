@@ -1788,6 +1788,17 @@
 
       function subscribePortfolio() {
         setStatus('Loading portfolio…');
+        // Optional deep-link: portfolio/index.html?open=<docId>
+        let deepLinkToOpen = null;
+        let deepLinkOpened = false;
+        try {
+          const params = new URLSearchParams(window.location.search || '');
+          const raw = params.get('open');
+          if (raw && typeof raw === 'string' && raw.trim().length) deepLinkToOpen = raw.trim();
+        } catch {
+          deepLinkToOpen = null;
+        }
+
         db.collection('portfolio').orderBy('createdAt', 'desc').onSnapshot((snap) => {
           portfolioItems = [];
           snap.forEach((doc) => portfolioItems.push({ id: doc.id, ...doc.data() }));
@@ -1795,6 +1806,44 @@
           if (portfolioItems.length === 0) setStatus('New work coming soon.');
           else setStatus('');
           renderPortfolio();
+
+          if (!deepLinkOpened && deepLinkToOpen) {
+            const match = portfolioItems.find((it) => it && String(it.id) === String(deepLinkToOpen));
+            if (match) {
+              deepLinkOpened = true;
+
+              // Mirror the normalization used by createCard() so the modal opens
+              // with the same fields.
+              const imageUrlsRaw = Array.isArray(match && match.imageUrls)
+                ? match.imageUrls
+                : (match && match.imageUrl ? [match.imageUrl] : []);
+              const imageUrls = imageUrlsRaw.map((u) => normalizeHttpUrl(u)).filter(Boolean).slice(0, 10);
+              const thumbUrlsRaw = Array.isArray(match && match.thumbUrls)
+                ? match.thumbUrls
+                : (match && match.thumbUrl ? [match.thumbUrl] : []);
+              const thumbUrls = thumbUrlsRaw.map((u) => normalizeHttpUrl(u)).filter(Boolean).slice(0, 10);
+              const alignedThumbs = (thumbUrls.length >= imageUrls.length)
+                ? thumbUrls.slice(0, imageUrls.length)
+                : thumbUrls.concat(imageUrls.slice(thumbUrls.length));
+
+              const title = (match && typeof match.title === 'string' && match.title.trim()) ? match.title.trim() : 'Untitled';
+              const description = (match && typeof match.description === 'string' && match.description.trim()) ? match.description.trim() : '';
+              const category = (match && typeof match.category === 'string' && match.category.trim()) ? match.category.trim() : '';
+              const likeCountRaw = match && match.likeCount;
+              const likeCount = Number.isFinite(Number(likeCountRaw)) ? Number(likeCountRaw) : 0;
+
+              openPortfolioModal({
+                id: String(match.id),
+                title,
+                description,
+                category,
+                imageUrl: imageUrls.length ? imageUrls[0] : null,
+                imageUrls,
+                thumbUrls: alignedThumbs,
+                likeCount,
+              });
+            }
+          }
         }, (err) => {
           console.error('Portfolio subscription error:', err);
           setStatus('Could not load portfolio right now.');
